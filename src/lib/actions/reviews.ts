@@ -1,6 +1,6 @@
 "use server";
 
-import { auth } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { reviewSchema, type ReviewInput } from "@/lib/validations/review";
 
@@ -15,15 +15,27 @@ export async function createReview(
 
   const supabase = createAdminClient();
 
-  // Resolve Supabase user UUID from Clerk user ID
-  const { data: user, error: userError } = await supabase
+  // Find user in Supabase. If missing (webhook not yet configured), create on the fly.
+  let { data: user } = await supabase
     .from("users")
     .select("id")
     .eq("clerk_id", clerkId)
     .single();
 
-  if (userError || !user)
-    return { error: "User not found. Try signing out and back in." };
+  if (!user) {
+    const clerkUser = await currentUser();
+    if (!clerkUser) return { error: "Not authenticated" };
+
+    const email = clerkUser.emailAddresses[0]?.emailAddress ?? "";
+    const { data: newUser, error: createError } = await supabase
+      .from("users")
+      .insert({ clerk_id: clerkId, email, username: clerkUser.username ?? null })
+      .select("id")
+      .single();
+
+    if (createError || !newUser) return { error: "Failed to create user profile" };
+    user = newUser;
+  }
 
   // Upsert restaurant — insert if new, update metadata if it already exists
   const { data: restaurant, error: restaurantError } = await supabase
