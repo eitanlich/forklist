@@ -31,9 +31,9 @@ ForkList es una app tipo Letterboxd pero para restaurantes. Los usuarios pueden 
 - [x] **Step 2: Design system** — CSS variables con paleta warm, fuentes (Playfair Display + Inter via next/font), componente Header, componente BottomNav
 - [x] **Step 3: Auth con Clerk** — SignIn/SignUp pages, protección de rutas via proxy.ts, UserButton en Header
 - [x] **Step 4: Supabase + webhook** — Cliente anon (server.ts), cliente service role (admin.ts), tipos compartidos (types/index.ts), webhook `/api/webhooks/clerk` que sincroniza usuarios Clerk → Supabase tabla `users`
-- [ ] **Step 5: Restaurant search** — Input con autocomplete usando Google Places API (New), seleccionar restaurante y guardar en tabla `restaurants` de Supabase si no existe
-- [ ] **Step 6: Review form** — Formulario post-búsqueda con ratings (overall, food, service, ambiance, price), comentario, ocasión y fecha. Server Action que guarda en tabla `reviews`
-- [ ] **Step 7: History page** — Lista de todas las reviews del usuario con foto, nombre, rating y fecha. Ruta: `/history`
+- [x] **Step 5: Restaurant search** — Autocomplete con Google Places API (New) via API routes proxy server-side. Wizard `/add`: buscar → seleccionar → form
+- [x] **Step 6: Review form** — Estrellas 1-5 para 5 categorías, ocasión, comentario, fecha. Server Action valida con Zod y guarda restaurant (upsert) + review
+- [x] **Step 7: History page** — Cards con foto, estrellas, sub-ratings, fecha y ocasión. Empty state con CTA
 - [ ] **Step 8: Dashboard** — Stats del usuario (total restaurantes, rating promedio, ocasión favorita, top cuisine). Ruta: `/dashboard`
 - [ ] **Step 9: Polish** — Loading states, error handling, empty states, SEO básico, metadata, favicon, og:image
 
@@ -56,8 +56,8 @@ ForkList es una app tipo Letterboxd pero para restaurantes. Los usuarios pueden 
 
 ## Estado actual
 
-**Completados:** Steps 1, 2, 3, 4
-**Próximo paso:** Step 5 — Restaurant search con Google Places API
+**Completados:** Steps 1, 2, 3, 4, 5, 6, 7
+**Próximo paso:** Step 8 — Dashboard con stats del usuario
 
 ---
 
