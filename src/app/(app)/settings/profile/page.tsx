@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import { getCurrentUserProfile } from "@/lib/actions/profile";
 import { ProfileSettingsContent } from "./ProfileSettingsContent";
+import { ProfilePageHeader } from "./ProfilePageHeader";
 
 export const metadata = {
   title: "Profile Settings - ForkList",
@@ -16,14 +17,7 @@ export default async function ProfileSettingsPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="font-serif text-2xl font-semibold text-foreground">
-          Profile Settings
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Customize your public profile
-        </p>
-      </div>
+      <ProfilePageHeader />
 
       <ProfileSettingsContent
         username={profile?.username ?? null}

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { checkUsernameAvailable, claimUsername } from "@/lib/actions/profile";
 import { Check, X, Loader2 } from "lucide-react";
+import { useT } from "@/lib/i18n";
 
 interface UsernameFormProps {
   currentUsername: string | null;
@@ -11,6 +12,7 @@ interface UsernameFormProps {
 }
 
 export function UsernameForm({ currentUsername, onSuccess }: UsernameFormProps) {
+  const t = useT();
   const [username, setUsername] = useState(currentUsername ?? "");
   const [isChecking, setIsChecking] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -62,7 +64,7 @@ export function UsernameForm({ currentUsername, onSuccess }: UsernameFormProps) 
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
         <label className="text-sm font-medium text-foreground">
-          Username
+          {t("username")}
         </label>
         <div className="relative">
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
@@ -72,7 +74,7 @@ export function UsernameForm({ currentUsername, onSuccess }: UsernameFormProps) 
             type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))}
-            placeholder="yourname"
+            placeholder={t("yournamePlaceholder")}
             maxLength={20}
             className="w-full rounded-lg border border-border bg-secondary/50 py-2.5 pl-8 pr-10 text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
           />
@@ -90,10 +92,10 @@ export function UsernameForm({ currentUsername, onSuccess }: UsernameFormProps) 
           <p className="text-sm text-destructive">{availability.error}</p>
         )}
         {availability?.available && (
-          <p className="text-sm text-green-500">Username is available!</p>
+          <p className="text-sm text-green-500">{t("usernameAvailable")}</p>
         )}
         <p className="text-xs text-muted-foreground">
-          3-20 characters. Lowercase letters, numbers, and underscores only.
+          {t("usernameHint")}
         </p>
       </div>
 
@@ -105,12 +107,12 @@ export function UsernameForm({ currentUsername, onSuccess }: UsernameFormProps) 
         {isSaving ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Saving...
+            {t("saving")}
           </>
         ) : currentUsername ? (
-          "Update Username"
+          t("updateUsername")
         ) : (
-          "Claim Username"
+          t("claimUsername")
         )}
       </Button>
     </form>

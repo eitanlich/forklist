@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { UsernameForm, ProfileForm } from "@/components/profile";
 import { ExternalLink } from "lucide-react";
+import { useT } from "@/lib/i18n";
 
 interface ProfileSettingsContentProps {
   username: string | null;
@@ -19,6 +20,7 @@ export function ProfileSettingsContent({
   isPrivate,
 }: ProfileSettingsContentProps) {
   const router = useRouter();
+  const t = useT();
   const [currentUsername, setCurrentUsername] = useState(username);
 
   const handleUsernameSuccess = () => {
@@ -36,7 +38,7 @@ export function ProfileSettingsContent({
       {/* Username Section */}
       <section className="rounded-xl border border-border bg-card p-6">
         <h2 className="mb-4 font-serif text-lg font-medium text-foreground">
-          Username
+          {t("username")}
         </h2>
         <UsernameForm
           currentUsername={username}
@@ -45,7 +47,7 @@ export function ProfileSettingsContent({
         {username && (
           <div className="mt-4 rounded-lg bg-secondary/50 p-3">
             <p className="text-sm text-muted-foreground">
-              Your public profile:{" "}
+              {t("yourPublicProfile")}:{" "}
               <a
                 href={`/u/${username}`}
                 target="_blank"
@@ -64,7 +66,7 @@ export function ProfileSettingsContent({
       {username && (
         <section className="rounded-xl border border-border bg-card p-6">
           <h2 className="mb-4 font-serif text-lg font-medium text-foreground">
-            Profile
+            {t("profile")}
           </h2>
           <ProfileForm
             currentBio={bio}

@@ -101,8 +101,17 @@ export const translations = {
     startLogging: "Start logging your restaurant visits",
     logFirstVisit: "Log your first visit",
     
-    // Settings
+    // Settings & Profile
     profile: "Profile",
+    profileSettings: "Profile Settings",
+    customizeProfile: "Customize your public profile",
+    username: "Username",
+    yournamePlaceholder: "yourname",
+    usernameAvailable: "Username is available!",
+    usernameHint: "3-20 characters. Lowercase letters, numbers, and underscores only.",
+    claimUsername: "Claim Username",
+    updateUsername: "Update Username",
+    yourPublicProfile: "Your public profile",
     language: "Language",
     settings: "Settings",
     signOut: "Sign out",
@@ -285,8 +294,17 @@ export const translations = {
     startLogging: "Empezá a registrar tus visitas a restaurantes",
     logFirstVisit: "Registrar tu primera visita",
     
-    // Settings
+    // Settings & Profile
     profile: "Perfil",
+    profileSettings: "Configuración del perfil",
+    customizeProfile: "Personalizá tu perfil público",
+    username: "Nombre de usuario",
+    yournamePlaceholder: "tunombre",
+    usernameAvailable: "¡Nombre de usuario disponible!",
+    usernameHint: "3-20 caracteres. Solo letras minúsculas, números y guiones bajos.",
+    claimUsername: "Reclamar nombre",
+    updateUsername: "Actualizar nombre",
+    yourPublicProfile: "Tu perfil público",
     language: "Idioma",
     settings: "Configuración",
     signOut: "Cerrar sesión",
