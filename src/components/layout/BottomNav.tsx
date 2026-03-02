@@ -3,9 +3,11 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, BookOpen, Plus } from "lucide-react";
+import { useT } from "@/lib/i18n";
 
 export default function BottomNav() {
   const pathname = usePathname();
+  const t = useT();
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-background backdrop-blur-none pb-safe md:hidden transform-gpu" style={{ position: 'fixed' }}>
@@ -20,7 +22,7 @@ export default function BottomNav() {
           }`}
         >
           <Home size={20} strokeWidth={pathname === "/" ? 2 : 1.5} />
-          <span className="text-xs">Home</span>
+          <span className="text-xs">{t("home")}</span>
         </Link>
 
         {/* Add — elevated center FAB */}
@@ -42,7 +44,7 @@ export default function BottomNav() {
           }`}
         >
           <BookOpen size={20} strokeWidth={pathname === "/history" ? 2 : 1.5} />
-          <span className="text-xs">History</span>
+          <span className="text-xs">{t("history")}</span>
         </Link>
       </div>
     </nav>

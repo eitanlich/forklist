@@ -1,0 +1,162 @@
+export const translations = {
+  en: {
+    // Navigation
+    home: "Home",
+    history: "History",
+    
+    // Home page
+    welcome: "Welcome to ForkList",
+    yourStats: "Your Stats",
+    placesVisited: "Places visited",
+    avgRating: "Avg rating",
+    topOccasion: "Top occasion",
+    topCuisine: "Top cuisine",
+    noReviewsYet: "No reviews yet",
+    logFirstVisit: "Log your first restaurant visit to start tracking your culinary adventures.",
+    addFirstReview: "Add your first review",
+    
+    // Add page
+    logAVisit: "Log a Visit",
+    searchRestaurants: "Search for the restaurant you visited",
+    searchPlaceholder: "Search restaurants...",
+    startTyping: "Start typing to search for a restaurant",
+    detectingLocation: "Detecting location...",
+    nearMe: "Near me",
+    global: "Global",
+    searchCountries: "Search countries...",
+    popularCountries: "Popular countries:",
+    resultsFor: "Results for",
+    noCountriesFound: "No countries found",
+    orSelectCountry: "Or select country:",
+    changeRestaurant: "Change restaurant",
+    loadingRestaurant: "Loading restaurant...",
+    
+    // Review form
+    overall: "Overall",
+    food: "Food",
+    service: "Service",
+    ambiance: "Ambiance",
+    priceValue: "Price / Value",
+    occasion: "Occasion",
+    dateNight: "Date Night",
+    friends: "Friends",
+    family: "Family",
+    business: "Business",
+    solo: "Solo",
+    other: "Other",
+    notes: "Notes",
+    optional: "optional",
+    notesPlaceholder: "What stood out? Anything you'd recommend?",
+    dateVisited: "Date visited",
+    selectDate: "Select date",
+    saveReview: "Save Review",
+    saving: "Saving...",
+    
+    // History
+    yourReviews: "Your Reviews",
+    reviewCount: "reviews",
+    noReviewsFound: "No reviews found",
+    
+    // Edit/Delete
+    editReview: "Edit Review",
+    deleteReview: "Delete Review",
+    saveChanges: "Save Changes",
+    cancel: "Cancel",
+    back: "Back",
+    areYouSure: "Are you sure?",
+    deleteWarning: "This action cannot be undone. This will permanently delete your review.",
+    deleting: "Deleting...",
+    
+    // Common
+    maps: "Maps",
+    website: "Website",
+    visited: "Visited",
+    
+    // Settings
+    language: "Language",
+    settings: "Settings",
+    signOut: "Sign out",
+  },
+  
+  es: {
+    // Navigation
+    home: "Inicio",
+    history: "Historial",
+    
+    // Home page
+    welcome: "Bienvenido a ForkList",
+    yourStats: "Tus estadísticas",
+    placesVisited: "Lugares visitados",
+    avgRating: "Rating promedio",
+    topOccasion: "Ocasión favorita",
+    topCuisine: "Cocina favorita",
+    noReviewsYet: "Sin reviews todavía",
+    logFirstVisit: "Registrá tu primera visita a un restaurante para empezar a trackear tus aventuras culinarias.",
+    addFirstReview: "Agregar tu primer review",
+    
+    // Add page
+    logAVisit: "Registrar visita",
+    searchRestaurants: "Buscá el restaurante que visitaste",
+    searchPlaceholder: "Buscar restaurantes...",
+    startTyping: "Empezá a escribir para buscar un restaurante",
+    detectingLocation: "Detectando ubicación...",
+    nearMe: "Cerca mío",
+    global: "Global",
+    searchCountries: "Buscar países...",
+    popularCountries: "Países populares:",
+    resultsFor: "Resultados para",
+    noCountriesFound: "No se encontraron países",
+    orSelectCountry: "O seleccioná un país:",
+    changeRestaurant: "Cambiar restaurante",
+    loadingRestaurant: "Cargando restaurante...",
+    
+    // Review form
+    overall: "General",
+    food: "Comida",
+    service: "Servicio",
+    ambiance: "Ambiente",
+    priceValue: "Precio / Valor",
+    occasion: "Ocasión",
+    dateNight: "Cita",
+    friends: "Amigos",
+    family: "Familia",
+    business: "Trabajo",
+    solo: "Solo",
+    other: "Otro",
+    notes: "Notas",
+    optional: "opcional",
+    notesPlaceholder: "¿Qué te llamó la atención? ¿Algo que recomendarías?",
+    dateVisited: "Fecha de visita",
+    selectDate: "Elegir fecha",
+    saveReview: "Guardar review",
+    saving: "Guardando...",
+    
+    // History
+    yourReviews: "Tus reviews",
+    reviewCount: "reviews",
+    noReviewsFound: "No se encontraron reviews",
+    
+    // Edit/Delete
+    editReview: "Editar review",
+    deleteReview: "Eliminar review",
+    saveChanges: "Guardar cambios",
+    cancel: "Cancelar",
+    back: "Volver",
+    areYouSure: "¿Estás seguro?",
+    deleteWarning: "Esta acción no se puede deshacer. Se eliminará permanentemente tu review.",
+    deleting: "Eliminando...",
+    
+    // Common
+    maps: "Mapa",
+    website: "Web",
+    visited: "Visitado",
+    
+    // Settings
+    language: "Idioma",
+    settings: "Configuración",
+    signOut: "Cerrar sesión",
+  },
+} as const;
+
+export type Locale = keyof typeof translations;
+export type TranslationKey = keyof typeof translations.en;
