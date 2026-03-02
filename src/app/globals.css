@@ -180,3 +180,11 @@
 .pb-safe {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
+
+/* Fix iOS Safari fixed positioning issues */
+@supports (-webkit-touch-callout: none) {
+  .fixed {
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+}
