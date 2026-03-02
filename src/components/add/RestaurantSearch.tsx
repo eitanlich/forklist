@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Search, Loader2, MapPin, Star, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, Loader2, MapPin, Star, ChevronLeft, ChevronRight, Bookmark } from "lucide-react";
+import AddToListModal from "@/components/lists/AddToListModal";
 import type { PlaceSuggestion } from "@/types";
 import LocationFilter, { type LocationState } from "./LocationFilter";
 import { useT } from "@/lib/i18n";
@@ -42,6 +43,14 @@ export default function RestaurantSearch({ onSelect }: RestaurantSearchProps) {
     displayName: "Detecting...",
   });
   const inputRef = useRef<HTMLInputElement>(null);
+  
+  // Add to list modal state
+  const [listModalOpen, setListModalOpen] = useState(false);
+  const [selectedForList, setSelectedForList] = useState<{
+    restaurantId: string;
+    restaurantName: string;
+  } | null>(null);
+  const [savingToList, setSavingToList] = useState<string | null>(null);
 
   // Debounced autocomplete with location
   useEffect(() => {
@@ -145,6 +154,46 @@ export default function RestaurantSearch({ onSelect }: RestaurantSearchProps) {
     setSearchResults([]);
     setNextPageToken(null);
     setPrevPageTokens([]);
+  }
+
+  async function handleAddToList(result: SearchResult) {
+    setSavingToList(result.placeId);
+    
+    try {
+      // First get full details
+      const detailsRes = await fetch(`/api/places/details?placeId=${result.placeId}`);
+      const details = await detailsRes.json();
+      
+      // Upsert to get restaurant ID
+      const upsertRes = await fetch("/api/restaurants/upsert", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          google_place_id: details.place_id,
+          name: details.name,
+          address: details.formatted_address,
+          city: details.city,
+          lat: details.lat,
+          lng: details.lng,
+          photo_reference: details.photo_reference,
+          cuisine_type: details.cuisine_type,
+          website: details.website,
+          google_maps_url: details.google_maps_url,
+        }),
+      });
+      
+      const { id: restaurantId } = await upsertRes.json();
+      
+      setSelectedForList({
+        restaurantId,
+        restaurantName: details.name,
+      });
+      setListModalOpen(true);
+    } catch (error) {
+      console.error("Failed to prepare for list:", error);
+    } finally {
+      setSavingToList(null);
+    }
   }
 
   const t = useT();
@@ -253,28 +302,36 @@ export default function RestaurantSearch({ onSelect }: RestaurantSearchProps) {
           ) : (
             <div className="space-y-3">
               {searchResults.map((result) => (
-                <button
+                <div
                   key={result.placeId}
-                  type="button"
-                  onClick={() => handleSelect(result.placeId)}
                   className="group flex w-full gap-4 rounded-2xl border border-border bg-card p-4 text-left transition-all duration-200 hover:border-primary/30 hover:bg-card/80"
                 >
-                  {/* Photo */}
-                  {result.photoReference ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={`/api/places/photo?ref=${encodeURIComponent(result.photoReference)}`}
-                      alt={result.name}
-                      className="h-20 w-20 shrink-0 rounded-xl object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-xl bg-secondary">
-                      <MapPin className="h-6 w-6 text-muted-foreground" />
-                    </div>
-                  )}
+                  {/* Photo - clickable */}
+                  <button
+                    type="button"
+                    onClick={() => handleSelect(result.placeId)}
+                    className="shrink-0"
+                  >
+                    {result.photoReference ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={`/api/places/photo?ref=${encodeURIComponent(result.photoReference)}`}
+                        alt={result.name}
+                        className="h-20 w-20 rounded-xl object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-20 w-20 items-center justify-center rounded-xl bg-secondary">
+                        <MapPin className="h-6 w-6 text-muted-foreground" />
+                      </div>
+                    )}
+                  </button>
 
-                  {/* Info */}
-                  <div className="min-w-0 flex-1">
+                  {/* Info - clickable */}
+                  <button
+                    type="button"
+                    onClick={() => handleSelect(result.placeId)}
+                    className="min-w-0 flex-1 text-left"
+                  >
                     <h3 className="font-serif text-lg font-semibold tracking-tight">
                       {result.name}
                     </h3>
@@ -294,8 +351,26 @@ export default function RestaurantSearch({ onSelect }: RestaurantSearchProps) {
                         )}
                       </div>
                     )}
-                  </div>
-                </button>
+                  </button>
+
+                  {/* Add to list button */}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleAddToList(result);
+                    }}
+                    disabled={savingToList === result.placeId}
+                    className="flex h-10 w-10 shrink-0 items-center justify-center self-center rounded-xl border border-border bg-secondary text-muted-foreground transition-all hover:border-primary/30 hover:text-primary disabled:opacity-50"
+                    title={t("addToList")}
+                  >
+                    {savingToList === result.placeId ? (
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                    ) : (
+                      <Bookmark className="h-5 w-5" />
+                    )}
+                  </button>
+                </div>
               ))}
             </div>
           )}
@@ -321,6 +396,19 @@ export default function RestaurantSearch({ onSelect }: RestaurantSearchProps) {
         <p className="text-center text-sm text-muted-foreground">
           {t("startTyping")}
         </p>
+      )}
+
+      {/* Add to list modal */}
+      {selectedForList && (
+        <AddToListModal
+          isOpen={listModalOpen}
+          onClose={() => {
+            setListModalOpen(false);
+            setSelectedForList(null);
+          }}
+          restaurantId={selectedForList.restaurantId}
+          restaurantName={selectedForList.restaurantName}
+        />
       )}
     </div>
   );
