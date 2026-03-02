@@ -104,22 +104,27 @@ export default function EditReviewForm({ review }: { review: ReviewWithRestauran
     console.log("Submitting with date:", formattedDate);
 
     startTransition(async () => {
-      const result = await updateReview(review.id, {
-        rating_overall: ratings.overall,
-        rating_food: ratings.food,
-        rating_service: ratings.service,
-        rating_ambiance: ratings.ambiance,
-        rating_price: ratings.price,
-        comment: comment.trim() || undefined,
-        occasion,
-        visited_at: formattedDate,
-      });
+      try {
+        const result = await updateReview(review.id, {
+          rating_overall: ratings.overall,
+          rating_food: ratings.food,
+          rating_service: ratings.service,
+          rating_ambiance: ratings.ambiance,
+          rating_price: ratings.price,
+          comment: comment.trim() || undefined,
+          occasion,
+          visited_at: formattedDate,
+        });
 
-      if ("error" in result) {
-        setError(result.error);
-      } else {
-        router.push("/history");
-        router.refresh();
+        if ("error" in result) {
+          setError(result.error);
+        } else {
+          // Use window.location for more reliable redirect
+          window.location.href = "/history";
+        }
+      } catch (err) {
+        console.error("Update error:", err);
+        setError("Something went wrong. Please try again.");
       }
     });
   }
