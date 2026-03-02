@@ -94,7 +94,14 @@ export default function EditReviewForm({ review }: { review: ReviewWithRestauran
 
   function handleSubmit() {
     if (!allRated) return;
+    if (!visitedAt) {
+      setError("Please select a date");
+      return;
+    }
     setError(null);
+
+    const formattedDate = format(visitedAt, "yyyy-MM-dd");
+    console.log("Submitting with date:", formattedDate);
 
     startTransition(async () => {
       const result = await updateReview(review.id, {
@@ -105,7 +112,7 @@ export default function EditReviewForm({ review }: { review: ReviewWithRestauran
         rating_price: ratings.price,
         comment: comment.trim() || undefined,
         occasion,
-        visited_at: visitedAt ? format(visitedAt, "yyyy-MM-dd") : "",
+        visited_at: formattedDate,
       });
 
       if ("error" in result) {

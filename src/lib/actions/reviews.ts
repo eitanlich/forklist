@@ -88,7 +88,10 @@ export async function updateReview(
   if (!clerkId) return { error: "Not authenticated" };
 
   const parsed = updateReviewSchema.safeParse(data);
-  if (!parsed.success) return { error: "Invalid form data" };
+  if (!parsed.success) {
+    console.error("Validation error:", parsed.error.issues);
+    return { error: "Invalid form data: " + parsed.error.issues.map(i => i.message).join(", ") };
+  }
 
   const supabase = createAdminClient();
 
