@@ -137,11 +137,34 @@
 - [ ] Invitar amigos a una reserva
 - [ ] Depende de: Social Features
 
-#### Social Features
-- [ ] Perfiles públicos de usuarios
-- [ ] Seguir amigos
-- [ ] Feed de actividad
-- [ ] Likes/comentarios en reviews
+#### Social Features (FASE 3 - CORE)
+**Modelo: Instagram/Letterboxd (followers asimétricos)**
+
+##### Perfiles
+- [ ] Username único (@usuario)
+- [ ] Página pública `/u/[username]`
+- [ ] Default: público / opción: privado
+- [ ] Bio, foto, stats (reviews, followers, following)
+- [ ] Si privado: necesita aprobar followers
+
+##### Followers (no friends)
+- [ ] Seguir a cualquier usuario sin aprobación (si público)
+- [ ] Ver feed de reviews de gente que sigo
+- [ ] Seguir "foodies famosos" con buen gusto
+- [ ] Notificación cuando alguien te sigue
+
+##### Visibilidad por contenido
+| Contenido | Default | Opciones |
+|-----------|---------|----------|
+| Perfil | público | público / privado |
+| Reviews | público | público / solo followers / privado |
+| Wishlist | privado | privado / solo followers / público |
+
+##### Feed & Discovery
+- [ ] Feed home: reviews de gente que sigo
+- [ ] Explore: reviews populares / cercanas
+- [ ] Likes en reviews
+- [ ] Comentarios en reviews
 
 #### Gamification
 - [ ] Badges por cantidad de reviews
