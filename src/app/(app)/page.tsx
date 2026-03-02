@@ -29,7 +29,7 @@ async function getUserStats(userId: string): Promise<UserStats> {
 
   const { data: reviews } = await supabase
     .from("reviews")
-    .select("rating_overall, occasion, restaurant:restaurants(cuisine_type)")
+    .select("rating_overall, occasion, restaurant_id, restaurant:restaurants(cuisine_type)")
     .eq("user_id", userId);
 
   if (!reviews || reviews.length === 0) {
@@ -43,8 +43,8 @@ async function getUserStats(userId: string): Promise<UserStats> {
   }
 
   const totalReviews = reviews.length;
-  const restaurantIds = new Set(reviews.map((r) => JSON.stringify(r.restaurant)));
-  const uniqueRestaurants = restaurantIds.size;
+  const uniqueRestaurantIds = new Set(reviews.map((r) => r.restaurant_id));
+  const uniqueRestaurants = uniqueRestaurantIds.size;
   const avgRating = reviews.reduce((sum, r) => sum + r.rating_overall, 0) / totalReviews;
 
   const occasionCounts: Record<string, number> = {};
