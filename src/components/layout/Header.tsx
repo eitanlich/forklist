@@ -31,7 +31,7 @@ export default function Header() {
     <header className="sticky top-0 z-50 border-b border-border bg-background/90 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-2xl items-center justify-between px-6 md:px-8">
         <Link
-          href="/"
+          href="/home"
           className="font-serif text-2xl font-semibold tracking-tight text-primary transition-all duration-300 hover:opacity-70"
         >
           ForkList
