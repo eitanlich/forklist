@@ -5,8 +5,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
-      {/* Bottom padding on mobile to account for the fixed BottomNav */}
-      <main className="mx-auto w-full max-w-2xl flex-1 px-4 pb-20 pt-6 md:pb-8">
+      {/* More generous padding for boutique feel */}
+      <main className="mx-auto w-full max-w-2xl flex-1 px-6 pb-24 pt-8 md:px-8 md:pb-10">
         {children}
       </main>
       <BottomNav />
