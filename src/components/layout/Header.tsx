@@ -2,9 +2,10 @@
 
 import { UserButton } from "@clerk/nextjs";
 import Link from "next/link";
-import { Globe } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { Globe, Plus } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
-import { useI18n, type Locale } from "@/lib/i18n";
+import { useI18n, useT, type Locale } from "@/lib/i18n";
 
 const LANGUAGES: { code: Locale; name: string; flag: string }[] = [
   { code: "en", name: "English", flag: "🇺🇸" },
@@ -13,8 +14,16 @@ const LANGUAGES: { code: Locale; name: string; flag: string }[] = [
 
 export default function Header() {
   const { locale, setLocale } = useI18n();
+  const t = useT();
+  const pathname = usePathname();
   const [showLangMenu, setShowLangMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  const navItems = [
+    { href: "/home", label: t("home") },
+    { href: "/history", label: t("history") },
+    { href: "/lists", label: t("lists") },
+  ];
 
   // Close menu on click outside
   useEffect(() => {
@@ -36,6 +45,30 @@ export default function Header() {
         >
           ForkList
         </Link>
+
+        {/* Desktop navigation */}
+        <nav className="hidden md:flex items-center gap-1">
+          {navItems.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                pathname === item.href || pathname.startsWith(item.href + "/")
+                  ? "bg-primary/10 text-primary"
+                  : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+              }`}
+            >
+              {item.label}
+            </Link>
+          ))}
+          <Link
+            href="/add"
+            className="ml-2 flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg bg-primary text-primary-foreground transition-all hover:opacity-90"
+          >
+            <Plus size={16} strokeWidth={2.5} />
+            {t("logAVisit")}
+          </Link>
+        </nav>
 
         <div className="flex items-center gap-3">
           {/* Language selector */}
