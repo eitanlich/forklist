@@ -12,14 +12,14 @@ export default function BottomNav() {
       <div className="mx-auto flex h-16 max-w-2xl items-center justify-around px-8">
         {/* Home */}
         <Link
-          href="/dashboard"
+          href="/"
           className={`flex flex-col items-center gap-1 transition-colors duration-200 ${
-            pathname === "/dashboard"
+            pathname === "/"
               ? "text-primary"
               : "text-muted-foreground hover:text-foreground"
           }`}
         >
-          <Home size={20} strokeWidth={pathname === "/dashboard" ? 2 : 1.5} />
+          <Home size={20} strokeWidth={pathname === "/" ? 2 : 1.5} />
           <span className="text-xs">Home</span>
         </Link>
 

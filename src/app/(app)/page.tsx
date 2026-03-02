@@ -106,7 +106,7 @@ function StatCard({
   );
 }
 
-export default async function DashboardPage() {
+export default async function HomePage() {
   const { userId: clerkId } = await auth();
   const user = await currentUser();
   const firstName = user?.firstName ?? "there";
