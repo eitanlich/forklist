@@ -2,14 +2,15 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-/* Prevent iOS bounce scroll affecting fixed elements */
+/* iOS viewport and scroll fixes */
 html {
-  overscroll-behavior: none;
+  /* Prevent address bar from affecting layout */
+  height: -webkit-fill-available;
 }
 
 body {
-  overscroll-behavior-y: contain;
-  -webkit-overflow-scrolling: touch;
+  min-height: 100dvh;
+  min-height: -webkit-fill-available;
 }
 
 @custom-variant dark (&:is(.dark *));
