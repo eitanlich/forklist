@@ -105,9 +105,9 @@ body {
 
   /* Subtle surfaces */
   --secondary: #1A1816;
-  --secondary-foreground: #D4C4B0;
+  --secondary-foreground: #E5D5C5;
   --muted: #1A1714;
-  --muted-foreground: #9A8A78;
+  --muted-foreground: #B8A898;
 
   /* Accent matches primary gold */
   --accent: #D4A574;

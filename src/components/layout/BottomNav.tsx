@@ -27,7 +27,7 @@ export default function BottomNav() {
         <Link
           href="/add"
           aria-label="Log a visit"
-          className="relative -top-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/25 transition-all duration-200 hover:shadow-xl hover:shadow-primary/40 active:scale-95"
+          className="relative -top-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground ring-2 ring-background shadow-lg shadow-primary/25 transition-all duration-200 hover:shadow-xl hover:shadow-primary/40 active:scale-95"
         >
           <Plus size={26} strokeWidth={2.5} />
         </Link>
