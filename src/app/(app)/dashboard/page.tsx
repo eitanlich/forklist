@@ -64,7 +64,9 @@ async function getUserStats(userId: string): Promise<UserStats> {
   // Top cuisine (most frequent)
   const cuisineCounts: Record<string, number> = {};
   reviews.forEach((r) => {
-    const cuisine = (r.restaurant as { cuisine_type: string | null })?.cuisine_type;
+    // restaurant can come as array or object from supabase join
+    const restaurant = Array.isArray(r.restaurant) ? r.restaurant[0] : r.restaurant;
+    const cuisine = (restaurant as { cuisine_type: string | null } | null)?.cuisine_type;
     if (cuisine) {
       cuisineCounts[cuisine] = (cuisineCounts[cuisine] || 0) + 1;
     }
