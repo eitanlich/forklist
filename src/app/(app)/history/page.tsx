@@ -1,7 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { ReviewWithRestaurant } from "@/types";
-import { BookOpen, MapPin, Calendar, Star, ExternalLink, Globe } from "lucide-react";
+import { BookOpen, MapPin, Calendar, Star, Globe, Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
 
 // Don't cache this page - always fetch fresh data
@@ -58,7 +58,25 @@ function ReviewCard({ review }: { review: ReviewWithRestaurant }) {
 
         {/* Main content */}
         <div className="min-w-0 flex-1">
-          <h2 className="font-serif text-lg font-semibold tracking-tight">{restaurant.name}</h2>
+          <div className="flex items-start justify-between gap-2">
+            <h2 className="font-serif text-lg font-semibold tracking-tight">{restaurant.name}</h2>
+            
+            {/* Edit/Delete buttons */}
+            <div className="flex items-center gap-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+              <Link
+                href={`/review/${review.id}/edit`}
+                className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+              >
+                <Pencil size={14} strokeWidth={1.5} />
+              </Link>
+              <Link
+                href={`/review/${review.id}/delete`}
+                className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+              >
+                <Trash2 size={14} strokeWidth={1.5} />
+              </Link>
+            </div>
+          </div>
 
           {restaurant.city && (
             <div className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">

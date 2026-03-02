@@ -2,7 +2,7 @@
 
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { reviewSchema, type ReviewInput } from "@/lib/validations/review";
+import { reviewSchema, updateReviewSchema, type ReviewInput, type UpdateReviewInput } from "@/lib/validations/review";
 
 export async function createReview(
   data: ReviewInput
@@ -76,6 +76,96 @@ export async function createReview(
   });
 
   if (reviewError) return { error: "Failed to save review" };
+
+  return { success: true };
+}
+
+export async function updateReview(
+  reviewId: string,
+  data: UpdateReviewInput
+): Promise<{ error: string } | { success: true }> {
+  const { userId: clerkId } = await auth();
+  if (!clerkId) return { error: "Not authenticated" };
+
+  const parsed = updateReviewSchema.safeParse(data);
+  if (!parsed.success) return { error: "Invalid form data" };
+
+  const supabase = createAdminClient();
+
+  // Get user
+  const { data: user } = await supabase
+    .from("users")
+    .select("id")
+    .eq("clerk_id", clerkId)
+    .single();
+
+  if (!user) return { error: "User not found" };
+
+  // Verify review belongs to user
+  const { data: review } = await supabase
+    .from("reviews")
+    .select("id, user_id")
+    .eq("id", reviewId)
+    .single();
+
+  if (!review) return { error: "Review not found" };
+  if (review.user_id !== user.id) return { error: "Not authorized" };
+
+  // Update the review
+  const { error: updateError } = await supabase
+    .from("reviews")
+    .update({
+      rating_overall: parsed.data.rating_overall,
+      rating_food: parsed.data.rating_food,
+      rating_service: parsed.data.rating_service,
+      rating_ambiance: parsed.data.rating_ambiance,
+      rating_price: parsed.data.rating_price,
+      comment: parsed.data.comment ?? null,
+      occasion: parsed.data.occasion ?? null,
+      visited_at: parsed.data.visited_at,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", reviewId);
+
+  if (updateError) return { error: "Failed to update review" };
+
+  return { success: true };
+}
+
+export async function deleteReview(
+  reviewId: string
+): Promise<{ error: string } | { success: true }> {
+  const { userId: clerkId } = await auth();
+  if (!clerkId) return { error: "Not authenticated" };
+
+  const supabase = createAdminClient();
+
+  // Get user
+  const { data: user } = await supabase
+    .from("users")
+    .select("id")
+    .eq("clerk_id", clerkId)
+    .single();
+
+  if (!user) return { error: "User not found" };
+
+  // Verify review belongs to user
+  const { data: review } = await supabase
+    .from("reviews")
+    .select("id, user_id")
+    .eq("id", reviewId)
+    .single();
+
+  if (!review) return { error: "Review not found" };
+  if (review.user_id !== user.id) return { error: "Not authorized" };
+
+  // Delete the review
+  const { error: deleteError } = await supabase
+    .from("reviews")
+    .delete()
+    .eq("id", reviewId);
+
+  if (deleteError) return { error: "Failed to delete review" };
 
   return { success: true };
 }

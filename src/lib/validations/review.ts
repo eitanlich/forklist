@@ -27,3 +27,19 @@ export const reviewSchema = z.object({
 });
 
 export type ReviewInput = z.infer<typeof reviewSchema>;
+
+// For updating just the review fields (not restaurant)
+export const updateReviewSchema = z.object({
+  rating_overall: z.number().int().min(1).max(5),
+  rating_food: z.number().int().min(1).max(5),
+  rating_service: z.number().int().min(1).max(5),
+  rating_ambiance: z.number().int().min(1).max(5),
+  rating_price: z.number().int().min(1).max(5),
+  comment: z.string().optional(),
+  occasion: z
+    .enum(["date", "family", "friends", "business", "solo", "other"])
+    .optional(),
+  visited_at: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+});
+
+export type UpdateReviewInput = z.infer<typeof updateReviewSchema>;
