@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Loader2, Star, MapPin } from "lucide-react";
 import type { ReviewWithRestaurant, Occasion } from "@/types";
 import { updateReview } from "@/lib/actions/reviews";
+import { DatePicker } from "@/components/ui/date-picker";
+import { format } from "date-fns";
 
 function StarRating({
   label,
@@ -79,8 +81,10 @@ export default function EditReviewForm({ review }: { review: ReviewWithRestauran
   });
   const [occasion, setOccasion] = useState<Occasion | undefined>(review.occasion ?? undefined);
   const [comment, setComment] = useState(review.comment ?? "");
-  // Ensure date is in YYYY-MM-DD format (might come as full timestamp)
-  const [visitedAt, setVisitedAt] = useState(review.visited_at.split('T')[0]);
+  // Parse date from string to Date object
+  const [visitedAt, setVisitedAt] = useState<Date | undefined>(
+    review.visited_at ? new Date(review.visited_at + 'T00:00:00') : undefined
+  );
 
   const allRated = Object.values(ratings).every((r) => r > 0);
 
@@ -101,7 +105,7 @@ export default function EditReviewForm({ review }: { review: ReviewWithRestauran
         rating_price: ratings.price,
         comment: comment.trim() || undefined,
         occasion,
-        visited_at: visitedAt,
+        visited_at: visitedAt ? format(visitedAt, "yyyy-MM-dd") : "",
       });
 
       if ("error" in result) {
@@ -205,16 +209,12 @@ export default function EditReviewForm({ review }: { review: ReviewWithRestauran
 
       {/* Date */}
       <div className="space-y-2">
-        <label htmlFor="date" className="text-sm text-muted-foreground">
-          Date visited
-        </label>
-        <input
-          id="date"
-          type="date"
+        <p className="text-sm text-muted-foreground">Date visited</p>
+        <DatePicker
           value={visitedAt}
-          max={new Date().toISOString().split("T")[0]}
-          onChange={(e) => setVisitedAt(e.target.value)}
-          className="w-full rounded-xl border border-border bg-secondary px-4 py-3 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          onChange={setVisitedAt}
+          maxDate={new Date()}
+          placeholder="Select date"
         />
       </div>
 

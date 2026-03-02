@@ -6,6 +6,8 @@ import { ArrowLeft, Loader2, Star } from "lucide-react";
 import type { PlaceSuggestion, Occasion } from "@/types";
 import { createReview } from "@/lib/actions/reviews";
 import type { ReviewInput } from "@/lib/validations/review";
+import { DatePicker } from "@/components/ui/date-picker";
+import { format } from "date-fns";
 
 // Star rating — 1-5, with hover preview
 function StarRating({
@@ -95,9 +97,7 @@ export default function ReviewForm({ restaurant, onBack }: ReviewFormProps) {
   });
   const [occasion, setOccasion] = useState<Occasion | undefined>(undefined);
   const [comment, setComment] = useState("");
-  const [visitedAt, setVisitedAt] = useState(
-    new Date().toISOString().split("T")[0]
-  );
+  const [visitedAt, setVisitedAt] = useState<Date | undefined>(new Date());
 
   const allRated = Object.values(ratings).every((r) => r > 0);
 
@@ -127,7 +127,7 @@ export default function ReviewForm({ restaurant, onBack }: ReviewFormProps) {
       rating_price: ratings.price,
       comment: comment.trim() || undefined,
       occasion,
-      visited_at: visitedAt,
+      visited_at: visitedAt ? format(visitedAt, "yyyy-MM-dd") : "",
     };
 
     startTransition(async () => {
@@ -250,16 +250,12 @@ export default function ReviewForm({ restaurant, onBack }: ReviewFormProps) {
 
       {/* Date */}
       <div className="space-y-2">
-        <label htmlFor="date" className="text-sm text-muted-foreground">
-          Date visited
-        </label>
-        <input
-          id="date"
-          type="date"
+        <p className="text-sm text-muted-foreground">Date visited</p>
+        <DatePicker
           value={visitedAt}
-          max={new Date().toISOString().split("T")[0]}
-          onChange={(e) => setVisitedAt(e.target.value)}
-          className="w-full rounded-xl border border-border bg-secondary px-4 py-3 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          onChange={setVisitedAt}
+          maxDate={new Date()}
+          placeholder="Select date"
         />
       </div>
 
