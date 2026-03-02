@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Search, Loader2, MapPin } from "lucide-react";
 import type { PlaceSuggestion } from "@/types";
+import LocationFilter, { type LocationState } from "./LocationFilter";
 
 interface Suggestion {
   placeId: string;
@@ -20,9 +21,13 @@ export default function RestaurantSearch({ onSelect }: RestaurantSearchProps) {
   const [isSearching, setIsSearching] = useState(false);
   const [isLoadingDetails, setIsLoadingDetails] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [location, setLocation] = useState<LocationState>({
+    mode: "nearby",
+    displayName: "Detecting...",
+  });
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Debounced autocomplete
+  // Debounced autocomplete with location
   useEffect(() => {
     if (query.trim().length < 2) {
       setSuggestions([]);
@@ -33,9 +38,18 @@ export default function RestaurantSearch({ onSelect }: RestaurantSearchProps) {
     const timer = setTimeout(async () => {
       setIsSearching(true);
       try {
-        const res = await fetch(
-          `/api/places/search?q=${encodeURIComponent(query)}`
-        );
+        // Build URL with location params
+        const params = new URLSearchParams({ q: query });
+        
+        if (location.mode === "nearby" && location.lat && location.lng) {
+          params.set("lat", location.lat.toString());
+          params.set("lng", location.lng.toString());
+        } else if (location.mode === "country" && location.country) {
+          params.set("country", location.country);
+        }
+        // mode === "global" -> no filters
+
+        const res = await fetch(`/api/places/search?${params.toString()}`);
         const data = await res.json();
         setSuggestions(data.suggestions ?? []);
         setShowDropdown(true);
@@ -47,7 +61,7 @@ export default function RestaurantSearch({ onSelect }: RestaurantSearchProps) {
     }, 400);
 
     return () => clearTimeout(timer);
-  }, [query]);
+  }, [query, location]);
 
   async function handleSelect(placeId: string) {
     setShowDropdown(false);
@@ -71,13 +85,16 @@ export default function RestaurantSearch({ onSelect }: RestaurantSearchProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div>
         <h1 className="font-serif text-2xl font-semibold">Log a Visit</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Search for the restaurant you visited
         </p>
       </div>
+
+      {/* Location filter */}
+      <LocationFilter value={location} onChange={setLocation} />
 
       {/* Search input */}
       <div className="relative">
