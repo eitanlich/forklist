@@ -37,10 +37,5 @@ export default async function DeleteReviewPage({ params }: PageProps) {
   if (!review) notFound();
   if (review.user_id !== user.id) notFound();
 
-  return (
-    <div className="space-y-6">
-      <h1 className="font-serif text-3xl font-semibold tracking-tight">Delete Review</h1>
-      <DeleteReviewForm review={review as ReviewWithRestaurant} />
-    </div>
-  );
+  return <DeleteReviewForm review={review as ReviewWithRestaurant} />;
 }

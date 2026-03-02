@@ -135,6 +135,8 @@ export default function EditReviewForm({ review }: { review: ReviewWithRestauran
 
   return (
     <div className="space-y-6">
+      <h1 className="font-serif text-3xl font-semibold tracking-tight">{t("editReview")}</h1>
+      
       {/* Back + restaurant card */}
       <div>
         <button

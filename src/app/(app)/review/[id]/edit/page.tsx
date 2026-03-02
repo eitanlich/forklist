@@ -37,10 +37,5 @@ export default async function EditReviewPage({ params }: PageProps) {
   if (!review) notFound();
   if (review.user_id !== user.id) notFound();
 
-  return (
-    <div className="space-y-6">
-      <h1 className="font-serif text-3xl font-semibold tracking-tight">Edit Review</h1>
-      <EditReviewForm review={review as ReviewWithRestaurant} />
-    </div>
-  );
+  return <EditReviewForm review={review as ReviewWithRestaurant} />;
 }
