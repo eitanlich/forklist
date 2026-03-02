@@ -143,6 +143,11 @@
     @apply transition-all duration-200 ease-out;
   }
 
+  /* Cursor pointer on interactive elements */
+  a, button, [role="button"], input[type="checkbox"], input[type="radio"], select {
+    @apply cursor-pointer;
+  }
+
   /* Better text rendering */
   h1, h2, h3, h4, h5, h6 {
     @apply font-serif tracking-tight;
