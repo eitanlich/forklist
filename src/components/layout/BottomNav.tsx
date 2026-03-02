@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, BookOpen, Plus } from "lucide-react";
+import { Home, BookOpen, Plus, List } from "lucide-react";
 import { useT } from "@/lib/i18n";
 
 export default function BottomNav() {
@@ -11,7 +11,7 @@ export default function BottomNav() {
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-background backdrop-blur-none pb-safe md:hidden transform-gpu" style={{ position: 'fixed' }}>
-      <div className="mx-auto flex h-16 max-w-2xl items-center justify-around px-8">
+      <div className="mx-auto flex h-16 max-w-2xl items-center justify-around px-4">
         {/* Home */}
         <Link
           href="/home"
@@ -23,6 +23,19 @@ export default function BottomNav() {
         >
           <Home size={20} strokeWidth={pathname === "/home" ? 2 : 1.5} />
           <span className="text-xs">{t("home")}</span>
+        </Link>
+
+        {/* Lists */}
+        <Link
+          href="/lists"
+          className={`flex flex-col items-center gap-1 transition-colors duration-200 ${
+            pathname.startsWith("/lists")
+              ? "text-primary"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <List size={20} strokeWidth={pathname.startsWith("/lists") ? 2 : 1.5} />
+          <span className="text-xs">{t("lists")}</span>
         </Link>
 
         {/* Add — elevated center FAB */}
