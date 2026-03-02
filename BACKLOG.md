@@ -50,6 +50,12 @@
 - [ ] Ordenar por fecha/rating
 - [ ] Paginación (no scroll infinito)
 
+#### Tipo de Comida (NEXT)
+- [ ] Nuevo campo en review: desayuno, almuerzo, merienda, cena, brunch, drinks
+- [ ] Agregar columna en tabla `reviews`
+- [ ] Selector en form de review (similar a ocasión)
+- [ ] Filtro en historial
+
 #### Compartir Review (NEXT)
 - [ ] Botón share en cada review
 - [ ] Generar link/imagen para WhatsApp/Instagram
