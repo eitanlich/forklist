@@ -79,7 +79,8 @@ export default function EditReviewForm({ review }: { review: ReviewWithRestauran
   });
   const [occasion, setOccasion] = useState<Occasion | undefined>(review.occasion ?? undefined);
   const [comment, setComment] = useState(review.comment ?? "");
-  const [visitedAt, setVisitedAt] = useState(review.visited_at);
+  // Ensure date is in YYYY-MM-DD format (might come as full timestamp)
+  const [visitedAt, setVisitedAt] = useState(review.visited_at.split('T')[0]);
 
   const allRated = Object.values(ratings).every((r) => r > 0);
 
