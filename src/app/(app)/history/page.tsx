@@ -1,7 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { ReviewWithRestaurant } from "@/types";
-import { BookOpen, MapPin, Calendar, Star } from "lucide-react";
+import { BookOpen, MapPin, Calendar, Star, ExternalLink, Globe } from "lucide-react";
 import Link from "next/link";
 
 // Don't cache this page - always fetch fresh data
@@ -101,6 +101,34 @@ function ReviewCard({ review }: { review: ReviewWithRestaurant }) {
           <p className="text-sm italic text-muted-foreground leading-relaxed line-clamp-3">
             &ldquo;{review.comment}&rdquo;
           </p>
+        </div>
+      )}
+
+      {/* Links */}
+      {(restaurant.google_maps_url || restaurant.website) && (
+        <div className="flex items-center gap-2 border-t border-border px-5 py-3">
+          {restaurant.google_maps_url && (
+            <a
+              href={restaurant.google_maps_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1.5 text-sm text-muted-foreground transition-all duration-200 hover:bg-primary/10 hover:text-primary"
+            >
+              <MapPin size={14} strokeWidth={1.5} />
+              Maps
+            </a>
+          )}
+          {restaurant.website && (
+            <a
+              href={restaurant.website}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1.5 text-sm text-muted-foreground transition-all duration-200 hover:bg-primary/10 hover:text-primary"
+            >
+              <Globe size={14} strokeWidth={1.5} />
+              Website
+            </a>
+          )}
         </div>
       )}
     </article>
