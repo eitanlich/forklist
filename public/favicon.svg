@@ -1,11 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <!-- Fork F: La F es un tenedor visto de arriba -->
-  <!-- Mango (palo vertical de la F) -->
-  <rect x="7" y="12" width="5" height="16" rx="2" fill="#D4A574"/>
-  <!-- Los 3 dientes del tenedor (parte superior, forman la parte de arriba de la F) -->
-  <rect x="7" y="4" width="3" height="10" rx="1" fill="#D4A574"/>
-  <rect x="12" y="4" width="3" height="10" rx="1" fill="#D4A574"/>
-  <rect x="17" y="4" width="3" height="10" rx="1" fill="#D4A574"/>
-  <!-- Barra conectora de los dientes -->
-  <rect x="7" y="12" width="13" height="3" rx="1" fill="#D4A574"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <!-- Tenedor horizontal v3 - super clean, F obvia -->
+  <g stroke="#D4A574" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Mango redondeado -->
+    <line x1="3" y1="16" x2="10" y2="16"/>
+    <!-- Stem vertical -->
+    <line x1="10" y1="6" x2="10" y2="26"/>
+    <!-- Diente top (barra superior F) -->
+    <line x1="10" y1="6" x2="26" y2="6"/>
+    <!-- Diente mid (barra media F) -->
+    <line x1="10" y1="16" x2="21" y2="16"/>
+  </g>
 </svg>
