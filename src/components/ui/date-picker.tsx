@@ -31,7 +31,7 @@ export function DatePicker({ value, onChange, maxDate, placeholder = "Pick a dat
         <Button
           variant="outline"
           className={cn(
-            "w-full justify-start text-left font-normal rounded-xl border-border bg-secondary px-4 py-6 text-sm hover:bg-secondary/80",
+            "w-full justify-start text-left font-normal rounded-xl border-border bg-secondary px-4 py-6 text-sm hover:bg-secondary/80 hover:text-foreground",
             !value && "text-muted-foreground"
           )}
         >
