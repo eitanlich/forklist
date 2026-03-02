@@ -31,7 +31,7 @@ function StarRating({
         </span>
         {value > 0 && (
           <span className={`font-semibold text-primary ${size === "lg" ? "text-xl" : "text-sm"}`}>
-            {value}.0
+            {value}
           </span>
         )}
       </div>

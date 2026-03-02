@@ -37,7 +37,7 @@ function StarRating({
           <span
             className={`font-semibold text-primary ${size === "lg" ? "text-xl" : "text-sm"}`}
           >
-            {value}.0
+            {value}
           </span>
         )}
       </div>
@@ -51,6 +51,7 @@ function StarRating({
             type="button"
             onClick={() => onChange(star)}
             onMouseEnter={() => setHovered(star)}
+            onTouchStart={() => setHovered(0)}
             className="transition-transform duration-100 hover:scale-110 active:scale-95"
             aria-label={`Rate ${star} out of 5`}
           >
