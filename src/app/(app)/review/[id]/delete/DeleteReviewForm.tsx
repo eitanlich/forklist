@@ -5,9 +5,12 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Loader2, AlertTriangle, MapPin, Star } from "lucide-react";
 import type { ReviewWithRestaurant } from "@/types";
 import { deleteReview } from "@/lib/actions/reviews";
+import { useT, useI18n } from "@/lib/i18n";
 
 export default function DeleteReviewForm({ review }: { review: ReviewWithRestaurant }) {
   const router = useRouter();
+  const t = useT();
+  const { locale } = useI18n();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -37,7 +40,7 @@ export default function DeleteReviewForm({ review }: { review: ReviewWithRestaur
         className="flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
       >
         <ArrowLeft size={14} />
-        Back
+        {t("back")}
       </button>
 
       {/* Warning */}
@@ -46,9 +49,9 @@ export default function DeleteReviewForm({ review }: { review: ReviewWithRestaur
           <AlertTriangle className="h-5 w-5 text-destructive" strokeWidth={1.5} />
         </div>
         <div>
-          <p className="font-medium text-foreground">Are you sure?</p>
+          <p className="font-medium text-foreground">{t("areYouSure")}</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            This action cannot be undone. This will permanently delete your review.
+            {t("deleteWarning")}
           </p>
         </div>
       </div>
@@ -84,7 +87,7 @@ export default function DeleteReviewForm({ review }: { review: ReviewWithRestaur
               ))}
             </div>
             <p className="mt-2 text-xs text-muted-foreground">
-              Visited {new Date(review.visited_at).toLocaleDateString()}
+              {t("visited")} {new Date(review.visited_at).toLocaleDateString(locale === "es" ? "es-ES" : "en-US")}
             </p>
           </div>
         </div>
@@ -104,7 +107,7 @@ export default function DeleteReviewForm({ review }: { review: ReviewWithRestaur
           onClick={() => router.back()}
           className="flex-1 rounded-xl border border-border bg-secondary py-4 text-sm font-medium text-foreground transition-colors hover:bg-secondary/80"
         >
-          Cancel
+          {t("cancel")}
         </button>
         <button
           type="button"
@@ -115,10 +118,10 @@ export default function DeleteReviewForm({ review }: { review: ReviewWithRestaur
           {isPending ? (
             <>
               <Loader2 size={16} className="animate-spin" />
-              Deleting…
+              {t("deleting")}
             </>
           ) : (
-            "Delete Review"
+            t("deleteReview")
           )}
         </button>
       </div>

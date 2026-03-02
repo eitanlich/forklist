@@ -72,6 +72,10 @@ export const translations = {
     maps: "Maps",
     website: "Website",
     visited: "Visited",
+    priceShort: "Price",
+    noReviewsYet: "No reviews yet",
+    startLogging: "Start logging your restaurant visits",
+    logFirstVisit: "Log your first visit",
     
     // Settings
     language: "Language",
@@ -152,6 +156,10 @@ export const translations = {
     maps: "Mapa",
     website: "Web",
     visited: "Visitado",
+    priceShort: "Precio",
+    noReviewsYet: "Sin reviews todavía",
+    startLogging: "Empezá a registrar tus visitas a restaurantes",
+    logFirstVisit: "Registrar tu primera visita",
     
     // Settings
     language: "Idioma",

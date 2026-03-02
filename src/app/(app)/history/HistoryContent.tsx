@@ -1,0 +1,192 @@
+"use client";
+
+import type { ReviewWithRestaurant } from "@/types";
+import { BookOpen, MapPin, Calendar, Star, Globe, Pencil, Trash2 } from "lucide-react";
+import Link from "next/link";
+import { useT, useI18n } from "@/lib/i18n";
+
+function Stars({ rating, size = 14 }: { rating: number; size?: number }) {
+  return (
+    <div className="flex items-center gap-0.5">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <Star
+          key={star}
+          size={size}
+          strokeWidth={1.5}
+          className={rating >= star ? "text-primary" : "text-muted-foreground/25"}
+          fill={rating >= star ? "currentColor" : "none"}
+        />
+      ))}
+    </div>
+  );
+}
+
+function ReviewCard({ review }: { review: ReviewWithRestaurant }) {
+  const t = useT();
+  const { locale } = useI18n();
+  const { restaurant } = review;
+
+  const formatDate = (dateStr: string): string => {
+    return new Date(dateStr).toLocaleDateString(locale === "es" ? "es-ES" : "en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
+
+  const OCCASION_LABELS: Record<string, string> = {
+    date: t("dateNight"),
+    family: t("family"),
+    friends: t("friends"),
+    business: t("business"),
+    solo: t("solo"),
+    other: t("other"),
+  };
+
+  return (
+    <article className="group overflow-hidden rounded-2xl border border-border bg-card transition-all duration-300 hover:border-primary/20 hover:bg-card/80">
+      <div className="flex gap-5 p-5">
+        {/* Photo */}
+        {restaurant.photo_reference && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={`/api/places/photo?ref=${encodeURIComponent(restaurant.photo_reference)}`}
+            alt={restaurant.name}
+            className="h-24 w-24 shrink-0 rounded-xl object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+          />
+        )}
+
+        {/* Main content */}
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start justify-between gap-2">
+            <h2 className="font-serif text-lg font-semibold tracking-tight">{restaurant.name}</h2>
+            
+            {/* Edit/Delete buttons */}
+            <div className="flex items-center gap-1 md:opacity-0 md:transition-opacity md:duration-200 md:group-hover:opacity-100">
+              <Link
+                href={`/review/${review.id}/edit`}
+                className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+              >
+                <Pencil size={14} strokeWidth={1.5} />
+              </Link>
+              <Link
+                href={`/review/${review.id}/delete`}
+                className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+              >
+                <Trash2 size={14} strokeWidth={1.5} />
+              </Link>
+            </div>
+          </div>
+
+          {restaurant.city && (
+            <div className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
+              <MapPin size={13} strokeWidth={1.5} />
+              {restaurant.city}
+            </div>
+          )}
+
+          {/* Overall stars */}
+          <div className="mt-3">
+            <Stars rating={review.rating_overall} size={18} />
+          </div>
+
+          {/* Sub-ratings */}
+          <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-sm text-muted-foreground">
+            <span className="flex items-center gap-1.5">{t("food")} <Stars rating={review.rating_food} size={12} /></span>
+            <span className="flex items-center gap-1.5">{t("service")} <Stars rating={review.rating_service} size={12} /></span>
+            <span className="flex items-center gap-1.5">{t("ambiance")} <Stars rating={review.rating_ambiance} size={12} /></span>
+            <span className="flex items-center gap-1.5">{t("priceShort")} <Stars rating={review.rating_price} size={12} /></span>
+          </div>
+
+          {/* Meta row */}
+          <div className="mt-3 flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+              <Calendar size={13} strokeWidth={1.5} />
+              {formatDate(review.visited_at)}
+            </div>
+            {review.occasion && (
+              <span className="rounded-full bg-secondary px-3 py-1 text-sm text-muted-foreground">
+                {OCCASION_LABELS[review.occasion] ?? review.occasion}
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Comment */}
+      {review.comment && (
+        <div className="border-t border-border px-5 py-4">
+          <p className="text-sm italic text-muted-foreground leading-relaxed line-clamp-3">
+            &ldquo;{review.comment}&rdquo;
+          </p>
+        </div>
+      )}
+
+      {/* Links */}
+      {(restaurant.google_maps_url || restaurant.website) && (
+        <div className="flex items-center gap-2 border-t border-border px-5 py-3">
+          {restaurant.google_maps_url && (
+            <a
+              href={restaurant.google_maps_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1.5 text-sm text-muted-foreground transition-all duration-200 hover:bg-primary/10 hover:text-primary"
+            >
+              <MapPin size={14} strokeWidth={1.5} />
+              {t("maps")}
+            </a>
+          )}
+          {restaurant.website && (
+            <a
+              href={restaurant.website}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1.5 text-sm text-muted-foreground transition-all duration-200 hover:bg-primary/10 hover:text-primary"
+            >
+              <Globe size={14} strokeWidth={1.5} />
+              {t("website")}
+            </a>
+          )}
+        </div>
+      )}
+    </article>
+  );
+}
+
+interface HistoryContentProps {
+  reviews: ReviewWithRestaurant[];
+}
+
+export default function HistoryContent({ reviews }: HistoryContentProps) {
+  const t = useT();
+
+  return (
+    <div className="space-y-6">
+      <h1 className="font-serif text-3xl font-semibold tracking-tight">{t("myHistory")}</h1>
+
+      {reviews.length === 0 ? (
+        <div className="flex flex-col items-center gap-5 py-24 text-center">
+          <BookOpen className="h-12 w-12 text-muted-foreground/30" strokeWidth={1.5} />
+          <div className="space-y-2">
+            <p className="text-lg font-medium">{t("noReviewsYet")}</p>
+            <p className="text-base text-muted-foreground">
+              {t("startLogging")}
+            </p>
+          </div>
+          <Link
+            href="/add"
+            className="mt-2 rounded-2xl bg-primary px-8 py-4 text-base font-semibold text-primary-foreground transition-all duration-300 hover:opacity-90 hover:scale-[1.02]"
+          >
+            {t("logFirstVisit")}
+          </Link>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {reviews.map((review) => (
+            <ReviewCard key={review.id} review={review} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}

@@ -7,6 +7,7 @@ import type { ReviewWithRestaurant, Occasion } from "@/types";
 import { updateReview } from "@/lib/actions/reviews";
 import { DatePicker } from "@/components/ui/date-picker";
 import { format } from "date-fns";
+import { useT } from "@/lib/i18n";
 
 function StarRating({
   label,
@@ -58,19 +59,20 @@ function StarRating({
   );
 }
 
-const OCCASIONS: { value: Occasion; label: string }[] = [
-  { value: "date", label: "Date Night" },
-  { value: "friends", label: "Friends" },
-  { value: "family", label: "Family" },
-  { value: "business", label: "Business" },
-  { value: "solo", label: "Solo" },
-  { value: "other", label: "Other" },
-];
-
 export default function EditReviewForm({ review }: { review: ReviewWithRestaurant }) {
   const router = useRouter();
+  const t = useT();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  
+  const OCCASIONS: { value: Occasion; label: string }[] = [
+    { value: "date", label: t("dateNight") },
+    { value: "friends", label: t("friends") },
+    { value: "family", label: t("family") },
+    { value: "business", label: t("business") },
+    { value: "solo", label: t("solo") },
+    { value: "other", label: t("other") },
+  ];
 
   const [ratings, setRatings] = useState({
     overall: review.rating_overall,
@@ -141,7 +143,7 @@ export default function EditReviewForm({ review }: { review: ReviewWithRestauran
           className="mb-4 flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft size={14} />
-          Back
+          {t("back")}
         </button>
 
         <div className="flex items-start gap-3 rounded-xl border border-border bg-card p-4">
@@ -168,7 +170,7 @@ export default function EditReviewForm({ review }: { review: ReviewWithRestauran
       {/* Overall rating */}
       <div className="rounded-xl border border-border bg-card p-5">
         <StarRating
-          label="Overall"
+          label={t("overall")}
           value={ratings.overall}
           onChange={(v) => setRating("overall", v)}
           size="lg"
@@ -177,15 +179,15 @@ export default function EditReviewForm({ review }: { review: ReviewWithRestauran
 
       {/* Sub-ratings */}
       <div className="rounded-xl border border-border bg-card p-5 space-y-5">
-        <StarRating label="Food" value={ratings.food} onChange={(v) => setRating("food", v)} />
-        <StarRating label="Service" value={ratings.service} onChange={(v) => setRating("service", v)} />
-        <StarRating label="Ambiance" value={ratings.ambiance} onChange={(v) => setRating("ambiance", v)} />
-        <StarRating label="Price / Value" value={ratings.price} onChange={(v) => setRating("price", v)} />
+        <StarRating label={t("food")} value={ratings.food} onChange={(v) => setRating("food", v)} />
+        <StarRating label={t("service")} value={ratings.service} onChange={(v) => setRating("service", v)} />
+        <StarRating label={t("ambiance")} value={ratings.ambiance} onChange={(v) => setRating("ambiance", v)} />
+        <StarRating label={t("priceValue")} value={ratings.price} onChange={(v) => setRating("price", v)} />
       </div>
 
       {/* Occasion */}
       <div className="space-y-2">
-        <p className="text-sm text-muted-foreground">Occasion</p>
+        <p className="text-sm text-muted-foreground">{t("occasion")}</p>
         <div className="flex flex-wrap gap-2">
           {OCCASIONS.map(({ value, label }) => (
             <button
@@ -207,26 +209,26 @@ export default function EditReviewForm({ review }: { review: ReviewWithRestauran
       {/* Comment */}
       <div className="space-y-2">
         <label htmlFor="comment" className="text-sm text-muted-foreground">
-          Notes <span className="text-xs">(optional)</span>
+          {t("notes")} <span className="text-xs">({t("optional")})</span>
         </label>
         <textarea
           id="comment"
           value={comment}
           onChange={(e) => setComment(e.target.value)}
           rows={3}
-          placeholder="What stood out? Anything you'd recommend?"
+          placeholder={t("notesPlaceholder")}
           className="w-full resize-none rounded-xl border border-border bg-secondary px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
         />
       </div>
 
       {/* Date */}
       <div className="space-y-2">
-        <p className="text-sm text-muted-foreground">Date visited</p>
+        <p className="text-sm text-muted-foreground">{t("dateVisited")}</p>
         <DatePicker
           value={visitedAt}
           onChange={setVisitedAt}
           maxDate={new Date()}
-          placeholder="Select date"
+          placeholder={t("selectDate")}
         />
       </div>
 
@@ -247,10 +249,10 @@ export default function EditReviewForm({ review }: { review: ReviewWithRestauran
         {isPending ? (
           <>
             <Loader2 size={16} className="animate-spin" />
-            Saving…
+            {t("saving")}
           </>
         ) : (
-          "Save Changes"
+          t("saveChanges")
         )}
       </button>
     </div>
