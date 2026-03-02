@@ -56,6 +56,14 @@
 - [ ] Selector en form de review (similar a ocasión)
 - [ ] Filtro en historial
 
+#### Discovery / Búsqueda Pública (CORE FEATURE)
+- [ ] Nueva vertical: buscar restaurant NUEVO (no para loggear visita)
+- [ ] Ver reviews públicas de otros usuarios de ForkList
+- [ ] Filtros: ocasión, tipo de comida, rating, precio, ubicación
+- [ ] "Busco lugar para cenar hoy con mi pareja" → resultados relevantes
+- [ ] Integración con reservas (el flywheel completo)
+- [ ] Sponsored results para monetización
+
 #### Compartir Review (NEXT)
 - [ ] Botón share en cada review
 - [ ] Generar link/imagen para WhatsApp/Instagram
@@ -224,12 +232,31 @@
 - Vender trends agregados (no PII) a marcas de F&B
 - Reports de industria gastronómica
 
-### Mi opinión
-- **Corto plazo:** affiliate/referidos (rápido de implementar)
-- **Medio plazo:** freemium + comisión reservas
-- **Largo plazo:** B2B dashboard para restaurants
+### Modelos Priorizados
+
+#### 1. Freemium con límite de reviews
+- **Free:** 3 reviews/mes
+- **Pro:** $2-3/mes → reviews ilimitadas + stats + export
+- Bajo costo = alta conversión, barrera baja
+
+#### 2. Sponsored Results en búsqueda
+- Restaurants pagan por aparecer primero en searchbar
+- "Promoted" tag sutil
+- Modelo Google Ads para gastro
+
+#### 3. Affiliate en reservas
+- Comisión por reserva completada via ForkList
+- Win-win: usuario reserva fácil, restaurant paga por cliente
+
+### El Flywheel 🔄
+```
+Buscar restaurant → Reservar via ForkList → Comer → Review en ForkList
+      ↑                                                      ↓
+      ←←←←←←←← otros usuarios descubren ←←←←←←←←←←←←←←←←←←←←
+```
 
 ### Preguntas abiertas
+- [ ] ¿Reviews públicas vs privadas? (pivot estratégico)
 - [ ] ¿Cuál es el TAM en Argentina/LATAM?
 - [ ] ¿Competencia directa? (TheFork, TripAdvisor, Google Maps)
 - [ ] ¿Diferenciador principal?
