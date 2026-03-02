@@ -43,6 +43,11 @@ export const metadata: Metadata = {
     ],
     apple: "/favicon.svg",
   },
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    viewportFit: "cover",
+  },
 };
 
 export default function RootLayout({
