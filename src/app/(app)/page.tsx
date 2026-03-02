@@ -4,6 +4,9 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import Link from "next/link";
 import { Plus, Search, Utensils, Star, Users, TrendingUp } from "lucide-react";
 
+// Don't cache this page - always fetch fresh data
+export const dynamic = "force-dynamic";
+
 interface UserStats {
   totalReviews: number;
   uniqueRestaurants: number;

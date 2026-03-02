@@ -4,6 +4,9 @@ import type { ReviewWithRestaurant } from "@/types";
 import { BookOpen, MapPin, Calendar, Star } from "lucide-react";
 import Link from "next/link";
 
+// Don't cache this page - always fetch fresh data
+export const dynamic = "force-dynamic";
+
 function Stars({ rating, size = 14 }: { rating: number; size?: number }) {
   return (
     <div className="flex items-center gap-0.5">
