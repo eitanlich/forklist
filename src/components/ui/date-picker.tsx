@@ -40,6 +40,7 @@ export function DatePicker({ value, onChange, maxDate, placeholder = "Pick a dat
           selected={value}
           onSelect={onChange}
           disabled={(date) => maxDate ? date > maxDate : false}
+          fixedWeeks
           initialFocus
         />
       </PopoverContent>
