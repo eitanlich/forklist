@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { Search, Loader2, MapPin } from "lucide-react";
 import type { PlaceSuggestion } from "@/types";
 import LocationFilter, { type LocationState } from "./LocationFilter";
+import { useT } from "@/lib/i18n";
 
 interface Suggestion {
   placeId: string;
@@ -75,11 +76,13 @@ export default function RestaurantSearch({ onSelect }: RestaurantSearchProps) {
     }
   }
 
+  const t = useT();
+
   if (isLoadingDetails) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-24">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p className="text-sm text-muted-foreground">Loading restaurant…</p>
+        <p className="text-sm text-muted-foreground">{t("loadingRestaurant")}</p>
       </div>
     );
   }
@@ -87,9 +90,9 @@ export default function RestaurantSearch({ onSelect }: RestaurantSearchProps) {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="font-serif text-2xl font-semibold">Log a Visit</h1>
+        <h1 className="font-serif text-2xl font-semibold">{t("logAVisit")}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Search for the restaurant you visited
+          {t("searchRestaurants")}
         </p>
       </div>
 
@@ -108,7 +111,7 @@ export default function RestaurantSearch({ onSelect }: RestaurantSearchProps) {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onFocus={() => suggestions.length > 0 && setShowDropdown(true)}
-            placeholder="Search restaurants…"
+            placeholder={t("searchPlaceholder")}
             autoFocus
             className="w-full rounded-xl border border-border bg-secondary py-3 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
           />
@@ -145,7 +148,7 @@ export default function RestaurantSearch({ onSelect }: RestaurantSearchProps) {
       {/* Empty state hint */}
       {query.trim().length === 0 && (
         <p className="text-center text-sm text-muted-foreground">
-          Start typing to search for a restaurant
+          {t("startTyping")}
         </p>
       )}
     </div>

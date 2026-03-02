@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { MapPin, ChevronDown, X, Globe, Navigation } from "lucide-react";
+import { useT } from "@/lib/i18n";
 
 export type LocationMode = "nearby" | "country" | "global";
 
@@ -141,6 +142,7 @@ interface LocationFilterProps {
 }
 
 export default function LocationFilter({ value, onChange }: LocationFilterProps) {
+  const t = useT();
   const [isExpanded, setIsExpanded] = useState(false);
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   const [countrySearch, setCountrySearch] = useState("");
@@ -241,7 +243,7 @@ export default function LocationFilter({ value, onChange }: LocationFilterProps)
       >
         <MapPin size={18} className="shrink-0 text-primary" />
         <span className="flex-1 text-sm font-medium text-primary">
-          {isLoadingLocation ? "Detecting location..." : value.displayName}
+          {isLoadingLocation ? t("detectingLocation") : value.displayName}
         </span>
         {isExpanded ? (
           <X size={16} className="text-muted-foreground" />
@@ -265,7 +267,7 @@ export default function LocationFilter({ value, onChange }: LocationFilterProps)
               }`}
             >
               <Navigation size={14} />
-              Near me
+              {t("nearMe")}
             </button>
             <button
               type="button"
@@ -277,7 +279,7 @@ export default function LocationFilter({ value, onChange }: LocationFilterProps)
               }`}
             >
               <Globe size={14} />
-              Global
+              {t("global")}
             </button>
           </div>
 
@@ -287,14 +289,14 @@ export default function LocationFilter({ value, onChange }: LocationFilterProps)
               type="text"
               value={countrySearch}
               onChange={(e) => setCountrySearch(e.target.value)}
-              placeholder="Search countries..."
+              placeholder={t("searchCountries")}
               className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
             />
           </div>
 
           {/* Country list */}
           <p className="mb-2 text-xs text-muted-foreground">
-            {countrySearch ? `Results for "${countrySearch}"` : "Popular countries:"}
+            {countrySearch ? `${t("resultsFor")} "${countrySearch}"` : t("popularCountries")}
           </p>
           <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto">
             {filteredCountries.map((c) => (
@@ -312,7 +314,7 @@ export default function LocationFilter({ value, onChange }: LocationFilterProps)
               </button>
             ))}
             {filteredCountries.length === 0 && (
-              <p className="text-sm text-muted-foreground">No countries found</p>
+              <p className="text-sm text-muted-foreground">{t("noCountriesFound")}</p>
             )}
           </div>
         </div>

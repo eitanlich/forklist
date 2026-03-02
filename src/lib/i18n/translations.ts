@@ -5,18 +5,18 @@ export const translations = {
     history: "History",
     
     // Home page
-    welcome: "Welcome to ForkList",
-    yourStats: "Your Stats",
-    placesVisited: "Places visited",
-    avgRating: "Avg rating",
-    topOccasion: "Top occasion",
-    topCuisine: "Top cuisine",
-    noReviewsYet: "No reviews yet",
-    logFirstVisit: "Log your first restaurant visit to start tracking your culinary adventures.",
-    addFirstReview: "Add your first review",
+    welcomeBack: "Welcome back",
+    searchForRestaurant: "Search for a restaurant",
+    places: "Places",
+    visits: "visits",
+    rating: "Rating",
+    average: "average",
+    cuisine: "Cuisine",
+    noVisitsYet: "No visits logged yet. Start exploring!",
+    logAVisit: "Log a Visit",
+    myHistory: "My History",
     
     // Add page
-    logAVisit: "Log a Visit",
     searchRestaurants: "Search for the restaurant you visited",
     searchPlaceholder: "Search restaurants...",
     startTyping: "Start typing to search for a restaurant",
@@ -51,6 +51,7 @@ export const translations = {
     selectDate: "Select date",
     saveReview: "Save Review",
     saving: "Saving...",
+    rateAllCategories: "Rate all 5 categories to save",
     
     // History
     yourReviews: "Your Reviews",
@@ -84,18 +85,18 @@ export const translations = {
     history: "Historial",
     
     // Home page
-    welcome: "Bienvenido a ForkList",
-    yourStats: "Tus estadísticas",
-    placesVisited: "Lugares visitados",
-    avgRating: "Rating promedio",
-    topOccasion: "Ocasión favorita",
-    topCuisine: "Cocina favorita",
-    noReviewsYet: "Sin reviews todavía",
-    logFirstVisit: "Registrá tu primera visita a un restaurante para empezar a trackear tus aventuras culinarias.",
-    addFirstReview: "Agregar tu primer review",
+    welcomeBack: "Hola de nuevo",
+    searchForRestaurant: "Buscar un restaurante",
+    places: "Lugares",
+    visits: "visitas",
+    rating: "Rating",
+    average: "promedio",
+    cuisine: "Cocina",
+    noVisitsYet: "No hay visitas registradas. ¡Empezá a explorar!",
+    logAVisit: "Registrar visita",
+    myHistory: "Mi historial",
     
     // Add page
-    logAVisit: "Registrar visita",
     searchRestaurants: "Buscá el restaurante que visitaste",
     searchPlaceholder: "Buscar restaurantes...",
     startTyping: "Empezá a escribir para buscar un restaurante",
@@ -130,6 +131,7 @@ export const translations = {
     selectDate: "Elegir fecha",
     saveReview: "Guardar review",
     saving: "Guardando...",
+    rateAllCategories: "Calificá las 5 categorías para guardar",
     
     // History
     yourReviews: "Tus reviews",

@@ -8,6 +8,7 @@ import { createReview } from "@/lib/actions/reviews";
 import type { ReviewInput } from "@/lib/validations/review";
 import { DatePicker } from "@/components/ui/date-picker";
 import { format } from "date-fns";
+import { useT } from "@/lib/i18n";
 
 // Star rating — 1-5, with hover preview
 function StarRating({
@@ -70,15 +71,6 @@ function StarRating({
   );
 }
 
-const OCCASIONS: { value: Occasion; label: string }[] = [
-  { value: "date", label: "Date Night" },
-  { value: "friends", label: "Friends" },
-  { value: "family", label: "Family" },
-  { value: "business", label: "Business" },
-  { value: "solo", label: "Solo" },
-  { value: "other", label: "Other" },
-];
-
 interface ReviewFormProps {
   restaurant: PlaceSuggestion;
   onBack: () => void;
@@ -86,8 +78,18 @@ interface ReviewFormProps {
 
 export default function ReviewForm({ restaurant, onBack }: ReviewFormProps) {
   const router = useRouter();
+  const t = useT();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+
+  const OCCASIONS: { value: Occasion; label: string }[] = [
+    { value: "date", label: t("dateNight") },
+    { value: "friends", label: t("friends") },
+    { value: "family", label: t("family") },
+    { value: "business", label: t("business") },
+    { value: "solo", label: t("solo") },
+    { value: "other", label: t("other") },
+  ];
 
   const [ratings, setRatings] = useState({
     overall: 0,
@@ -151,7 +153,7 @@ export default function ReviewForm({ restaurant, onBack }: ReviewFormProps) {
           className="mb-4 flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft size={14} />
-          Change restaurant
+          {t("changeRestaurant")}
         </button>
 
         <div className="flex items-start gap-3 rounded-xl border border-border bg-card p-4">
@@ -180,7 +182,7 @@ export default function ReviewForm({ restaurant, onBack }: ReviewFormProps) {
       {/* Overall rating — larger stars */}
       <div className="rounded-xl border border-border bg-card p-5">
         <StarRating
-          label="Overall"
+          label={t("overall")}
           value={ratings.overall}
           onChange={(v) => setRating("overall", v)}
           size="lg"
@@ -190,22 +192,22 @@ export default function ReviewForm({ restaurant, onBack }: ReviewFormProps) {
       {/* Sub-ratings */}
       <div className="rounded-xl border border-border bg-card p-5 space-y-5">
         <StarRating
-          label="Food"
+          label={t("food")}
           value={ratings.food}
           onChange={(v) => setRating("food", v)}
         />
         <StarRating
-          label="Service"
+          label={t("service")}
           value={ratings.service}
           onChange={(v) => setRating("service", v)}
         />
         <StarRating
-          label="Ambiance"
+          label={t("ambiance")}
           value={ratings.ambiance}
           onChange={(v) => setRating("ambiance", v)}
         />
         <StarRating
-          label="Price / Value"
+          label={t("priceValue")}
           value={ratings.price}
           onChange={(v) => setRating("price", v)}
         />
@@ -213,7 +215,7 @@ export default function ReviewForm({ restaurant, onBack }: ReviewFormProps) {
 
       {/* Occasion */}
       <div className="space-y-2">
-        <p className="text-sm text-muted-foreground">Occasion</p>
+        <p className="text-sm text-muted-foreground">{t("occasion")}</p>
         <div className="flex flex-wrap gap-2">
           {OCCASIONS.map(({ value, label }) => (
             <button
@@ -237,26 +239,26 @@ export default function ReviewForm({ restaurant, onBack }: ReviewFormProps) {
       {/* Comment */}
       <div className="space-y-2">
         <label htmlFor="comment" className="text-sm text-muted-foreground">
-          Notes <span className="text-xs">(optional)</span>
+          {t("notes")} <span className="text-xs">({t("optional")})</span>
         </label>
         <textarea
           id="comment"
           value={comment}
           onChange={(e) => setComment(e.target.value)}
           rows={3}
-          placeholder="What stood out? Anything you'd recommend?"
+          placeholder={t("notesPlaceholder")}
           className="w-full resize-none rounded-xl border border-border bg-secondary px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
         />
       </div>
 
       {/* Date */}
       <div className="space-y-2">
-        <p className="text-sm text-muted-foreground">Date visited</p>
+        <p className="text-sm text-muted-foreground">{t("dateVisited")}</p>
         <DatePicker
           value={visitedAt}
           onChange={setVisitedAt}
           maxDate={new Date()}
-          placeholder="Select date"
+          placeholder={t("selectDate")}
         />
       </div>
 
@@ -277,16 +279,16 @@ export default function ReviewForm({ restaurant, onBack }: ReviewFormProps) {
         {isPending ? (
           <>
             <Loader2 size={16} className="animate-spin" />
-            Saving…
+            {t("saving")}
           </>
         ) : (
-          "Save Review"
+          t("saveReview")
         )}
       </button>
 
       {!allRated && (
         <p className="text-center text-xs text-muted-foreground">
-          Rate all 5 categories to save
+          {t("rateAllCategories")}
         </p>
       )}
     </div>
