@@ -60,7 +60,19 @@ export const translations = {
     // History
     yourReviews: "Your Reviews",
     reviewCount: "reviews",
+    reviews: "reviews",
     noReviewsFound: "No reviews found",
+    filters: "Filters",
+    minRating: "Minimum rating",
+    all: "All",
+    sortBy: "Sort by",
+    newestFirst: "Newest first",
+    oldestFirst: "Oldest first",
+    highestRating: "Highest rating",
+    lowestRating: "Lowest rating",
+    clearFilters: "Clear filters",
+    of: "of",
+    noMatchingReviews: "No reviews match the filters",
     
     // Edit/Delete
     editReview: "Edit Review",
@@ -148,7 +160,19 @@ export const translations = {
     // History
     yourReviews: "Tus reviews",
     reviewCount: "reviews",
+    reviews: "reviews",
     noReviewsFound: "No se encontraron reviews",
+    filters: "Filtros",
+    minRating: "Rating mínimo",
+    all: "Todos",
+    sortBy: "Ordenar por",
+    newestFirst: "Más recientes",
+    oldestFirst: "Más antiguos",
+    highestRating: "Mejor rating",
+    lowestRating: "Peor rating",
+    clearFilters: "Limpiar filtros",
+    of: "de",
+    noMatchingReviews: "No hay reviews que coincidan con los filtros",
     
     // Edit/Delete
     editReview: "Editar review",

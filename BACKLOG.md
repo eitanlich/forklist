@@ -44,18 +44,27 @@
 
 ### 🔴 Alta Prioridad
 
-#### Filtros en Historial
+#### Filtros en Historial (EN PROGRESO)
 - [ ] Filtrar por rating (1-5 estrellas)
-- [ ] Filtrar por fecha (rango o último mes/año)
 - [ ] Filtrar por ocasión (date, friends, family, etc.)
-- [ ] Filtrar por país/ciudad
 - [ ] Ordenar por fecha/rating
+- [ ] Paginación (no scroll infinito)
 
-#### PWA (Progressive Web App)
-- [ ] manifest.json para "Add to Home Screen"
-- [ ] Service worker básico
-- [ ] Splash screen
-- [ ] Iconos para iOS/Android
+#### Compartir Review (NEXT)
+- [ ] Botón share en cada review
+- [ ] Generar link/imagen para WhatsApp/Instagram
+- [ ] Potencial viral
+
+#### Wishlists (NEXT)
+- [ ] Nueva tabla en Supabase
+- [ ] Agregar restaurante desde búsqueda
+- [ ] Página /wishlist
+- [ ] Marcar como visitado → crear review
+
+#### PWA (Progressive Web App) ✅
+- [x] manifest.json para "Add to Home Screen"
+- [x] Iconos para iOS/Android
+- [x] Fix middleware para archivos estáticos
 
 ### 🟡 Media Prioridad
 

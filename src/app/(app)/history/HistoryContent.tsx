@@ -1,9 +1,12 @@
 "use client";
 
-import type { ReviewWithRestaurant } from "@/types";
-import { BookOpen, MapPin, Calendar, Star, Globe, Pencil, Trash2 } from "lucide-react";
+import { useState, useMemo } from "react";
+import type { ReviewWithRestaurant, Occasion } from "@/types";
+import { BookOpen, MapPin, Calendar, Star, Globe, Pencil, Trash2, Filter, ChevronLeft, ChevronRight, ArrowUpDown } from "lucide-react";
 import Link from "next/link";
 import { useT, useI18n } from "@/lib/i18n";
+
+const ITEMS_PER_PAGE = 5;
 
 function Stars({ rating, size = 14 }: { rating: number; size?: number }) {
   return (
@@ -153,17 +156,234 @@ function ReviewCard({ review }: { review: ReviewWithRestaurant }) {
   );
 }
 
+type SortOption = "date-desc" | "date-asc" | "rating-desc" | "rating-asc";
+
 interface HistoryContentProps {
   reviews: ReviewWithRestaurant[];
 }
 
 export default function HistoryContent({ reviews }: HistoryContentProps) {
   const t = useT();
+  const [showFilters, setShowFilters] = useState(false);
+  const [ratingFilter, setRatingFilter] = useState<number | null>(null);
+  const [occasionFilter, setOccasionFilter] = useState<Occasion | null>(null);
+  const [sortBy, setSortBy] = useState<SortOption>("date-desc");
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const OCCASIONS: { value: Occasion; label: string }[] = [
+    { value: "date", label: t("dateNight") },
+    { value: "friends", label: t("friends") },
+    { value: "family", label: t("family") },
+    { value: "business", label: t("business") },
+    { value: "solo", label: t("solo") },
+    { value: "other", label: t("other") },
+  ];
+
+  // Filter and sort reviews
+  const filteredReviews = useMemo(() => {
+    let result = [...reviews];
+
+    // Filter by rating
+    if (ratingFilter !== null) {
+      result = result.filter((r) => r.rating_overall >= ratingFilter);
+    }
+
+    // Filter by occasion
+    if (occasionFilter !== null) {
+      result = result.filter((r) => r.occasion === occasionFilter);
+    }
+
+    // Sort
+    result.sort((a, b) => {
+      switch (sortBy) {
+        case "date-desc":
+          return new Date(b.visited_at).getTime() - new Date(a.visited_at).getTime();
+        case "date-asc":
+          return new Date(a.visited_at).getTime() - new Date(b.visited_at).getTime();
+        case "rating-desc":
+          return b.rating_overall - a.rating_overall;
+        case "rating-asc":
+          return a.rating_overall - b.rating_overall;
+        default:
+          return 0;
+      }
+    });
+
+    return result;
+  }, [reviews, ratingFilter, occasionFilter, sortBy]);
+
+  // Pagination
+  const totalPages = Math.ceil(filteredReviews.length / ITEMS_PER_PAGE);
+  const paginatedReviews = filteredReviews.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  // Reset page when filters change
+  const handleFilterChange = () => {
+    setCurrentPage(1);
+  };
+
+  const clearFilters = () => {
+    setRatingFilter(null);
+    setOccasionFilter(null);
+    setSortBy("date-desc");
+    setCurrentPage(1);
+  };
+
+  const hasActiveFilters = ratingFilter !== null || occasionFilter !== null || sortBy !== "date-desc";
 
   return (
     <div className="space-y-6">
-      <h1 className="font-serif text-3xl font-semibold tracking-tight">{t("myHistory")}</h1>
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <h1 className="font-serif text-3xl font-semibold tracking-tight">{t("myHistory")}</h1>
+        {reviews.length > 0 && (
+          <button
+            type="button"
+            onClick={() => setShowFilters(!showFilters)}
+            className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm transition-colors ${
+              showFilters || hasActiveFilters
+                ? "bg-primary/10 text-primary"
+                : "bg-secondary text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Filter size={16} />
+            {t("filters")}
+            {hasActiveFilters && (
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
+                !
+              </span>
+            )}
+          </button>
+        )}
+      </div>
 
+      {/* Filters panel */}
+      {showFilters && reviews.length > 0 && (
+        <div className="space-y-4 rounded-2xl border border-border bg-card p-5">
+          {/* Rating filter */}
+          <div className="space-y-2">
+            <p className="text-sm text-muted-foreground">{t("minRating")}</p>
+            <div className="flex gap-2">
+              {[null, 3, 4, 5].map((rating) => (
+                <button
+                  key={rating ?? "all"}
+                  type="button"
+                  onClick={() => {
+                    setRatingFilter(rating);
+                    handleFilterChange();
+                  }}
+                  className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors ${
+                    ratingFilter === rating
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border text-muted-foreground hover:border-foreground/30"
+                  }`}
+                >
+                  {rating === null ? (
+                    t("all")
+                  ) : (
+                    <>
+                      <Star size={14} className="text-primary" fill="currentColor" />
+                      {rating}+
+                    </>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Occasion filter */}
+          <div className="space-y-2">
+            <p className="text-sm text-muted-foreground">{t("occasion")}</p>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setOccasionFilter(null);
+                  handleFilterChange();
+                }}
+                className={`rounded-full border px-3 py-1.5 text-sm transition-colors ${
+                  occasionFilter === null
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border text-muted-foreground hover:border-foreground/30"
+                }`}
+              >
+                {t("all")}
+              </button>
+              {OCCASIONS.map(({ value, label }) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => {
+                    setOccasionFilter(value);
+                    handleFilterChange();
+                  }}
+                  className={`rounded-full border px-3 py-1.5 text-sm transition-colors ${
+                    occasionFilter === value
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border text-muted-foreground hover:border-foreground/30"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Sort */}
+          <div className="space-y-2">
+            <p className="text-sm text-muted-foreground">{t("sortBy")}</p>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { value: "date-desc" as SortOption, label: t("newestFirst") },
+                { value: "date-asc" as SortOption, label: t("oldestFirst") },
+                { value: "rating-desc" as SortOption, label: t("highestRating") },
+                { value: "rating-asc" as SortOption, label: t("lowestRating") },
+              ].map(({ value, label }) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => {
+                    setSortBy(value);
+                    handleFilterChange();
+                  }}
+                  className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors ${
+                    sortBy === value
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border text-muted-foreground hover:border-foreground/30"
+                  }`}
+                >
+                  <ArrowUpDown size={12} />
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Clear filters */}
+          {hasActiveFilters && (
+            <button
+              type="button"
+              onClick={clearFilters}
+              className="text-sm text-primary hover:underline"
+            >
+              {t("clearFilters")}
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Results count */}
+      {reviews.length > 0 && (
+        <p className="text-sm text-muted-foreground">
+          {filteredReviews.length === reviews.length
+            ? `${reviews.length} ${t("reviews")}`
+            : `${filteredReviews.length} ${t("of")} ${reviews.length} ${t("reviews")}`}
+        </p>
+      )}
+
+      {/* Content */}
       {reviews.length === 0 ? (
         <div className="flex flex-col items-center gap-5 py-24 text-center">
           <BookOpen className="h-12 w-12 text-muted-foreground/30" strokeWidth={1.5} />
@@ -180,12 +400,51 @@ export default function HistoryContent({ reviews }: HistoryContentProps) {
             {t("logFirstVisit")}
           </Link>
         </div>
-      ) : (
-        <div className="space-y-4">
-          {reviews.map((review) => (
-            <ReviewCard key={review.id} review={review} />
-          ))}
+      ) : filteredReviews.length === 0 ? (
+        <div className="flex flex-col items-center gap-4 py-16 text-center">
+          <Filter className="h-10 w-10 text-muted-foreground/30" strokeWidth={1.5} />
+          <p className="text-muted-foreground">{t("noMatchingReviews")}</p>
+          <button
+            type="button"
+            onClick={clearFilters}
+            className="text-sm text-primary hover:underline"
+          >
+            {t("clearFilters")}
+          </button>
         </div>
+      ) : (
+        <>
+          <div className="space-y-4">
+            {paginatedReviews.map((review) => (
+              <ReviewCard key={review.id} review={review} />
+            ))}
+          </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-4 pt-4">
+              <button
+                type="button"
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary text-foreground transition-colors hover:bg-secondary/80 disabled:opacity-40"
+              >
+                <ChevronLeft size={18} />
+              </button>
+              <span className="text-sm text-muted-foreground">
+                {currentPage} / {totalPages}
+              </span>
+              <button
+                type="button"
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary text-foreground transition-colors hover:bg-secondary/80 disabled:opacity-40"
+              >
+                <ChevronRight size={18} />
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
