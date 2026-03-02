@@ -50,6 +50,13 @@
 - [ ] Ordenar por fecha/rating
 - [ ] Paginación (no scroll infinito)
 
+#### Landing Page & Dominio (NEXT)
+- [ ] Landing page atractiva (hero, features, CTA)
+- [ ] Dominio propio (forklist.app? forklist.io? getforklist.com?)
+- [ ] Verificar disponibilidad de dominios
+- [ ] Conectar dominio a Vercel
+- [ ] SEO básico para landing
+
 #### Tipo de Comida (NEXT)
 - [ ] Nuevo campo en review: desayuno, almuerzo, merienda, cena, brunch, drinks
 - [ ] Agregar columna en tabla `reviews`
