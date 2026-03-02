@@ -2,9 +2,10 @@
 
 import { useState, useMemo } from "react";
 import type { ReviewWithRestaurant, Occasion, MealType } from "@/types";
-import { BookOpen, MapPin, Calendar, Star, Globe, Pencil, Trash2, Filter, ChevronLeft, ChevronRight, ArrowUpDown } from "lucide-react";
+import { BookOpen, MapPin, Calendar, Star, Globe, Pencil, Trash2, Filter, ChevronLeft, ChevronRight, ArrowUpDown, Share2 } from "lucide-react";
 import Link from "next/link";
 import { useT, useI18n } from "@/lib/i18n";
+import { ShareModal } from "@/components/share";
 
 const ITEMS_PER_PAGE = 5;
 
@@ -24,7 +25,7 @@ function Stars({ rating, size = 14 }: { rating: number; size?: number }) {
   );
 }
 
-function ReviewCard({ review }: { review: ReviewWithRestaurant }) {
+function ReviewCard({ review, onShare }: { review: ReviewWithRestaurant; onShare: (reviewId: string, restaurantName: string) => void }) {
   const t = useT();
   const { locale } = useI18n();
   const { restaurant } = review;
@@ -72,6 +73,14 @@ function ReviewCard({ review }: { review: ReviewWithRestaurant }) {
             <h2 className="font-serif text-lg font-semibold tracking-tight">{restaurant.name}</h2>
             
             <div className="flex items-center gap-1 md:opacity-0 md:transition-opacity md:duration-200 md:group-hover:opacity-100">
+              <button
+                type="button"
+                onClick={() => onShare(review.id, restaurant.name)}
+                className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+                aria-label={t("share")}
+              >
+                <Share2 size={14} strokeWidth={1.5} />
+              </button>
               <Link
                 href={`/review/${review.id}/edit`}
                 className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
@@ -274,6 +283,11 @@ export default function HistoryContent({ reviews }: HistoryContentProps) {
   const [mealTypeFilter, setMealTypeFilter] = useState<MealType | null>(null);
   const [sortBy, setSortBy] = useState<SortOption>("date-desc");
   const [currentPage, setCurrentPage] = useState(1);
+  const [shareModal, setShareModal] = useState<{ reviewId: string; restaurantName: string } | null>(null);
+
+  const handleShare = (reviewId: string, restaurantName: string) => {
+    setShareModal({ reviewId, restaurantName });
+  };
 
   const OCCASIONS: { value: Occasion; label: string }[] = [
     { value: "date", label: t("dateNight") },
@@ -593,7 +607,7 @@ export default function HistoryContent({ reviews }: HistoryContentProps) {
         <>
           <div className="space-y-4">
             {paginatedReviews.map((review) => (
-              <ReviewCard key={review.id} review={review} />
+              <ReviewCard key={review.id} review={review} onShare={handleShare} />
             ))}
           </div>
 
@@ -604,6 +618,16 @@ export default function HistoryContent({ reviews }: HistoryContentProps) {
             onPageChange={setCurrentPage}
           />
         </>
+      )}
+
+      {/* Share Modal */}
+      {shareModal && (
+        <ShareModal
+          isOpen={true}
+          onClose={() => setShareModal(null)}
+          reviewId={shareModal.reviewId}
+          restaurantName={shareModal.restaurantName}
+        />
       )}
     </div>
   );

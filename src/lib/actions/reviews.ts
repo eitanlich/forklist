@@ -174,3 +174,46 @@ export async function deleteReview(
 
   return { success: true };
 }
+
+export async function getPublicReview(reviewId: string) {
+  const supabase = createAdminClient();
+
+  const { data: review } = await supabase
+    .from("reviews")
+    .select(`
+      id,
+      rating_overall,
+      rating_food,
+      rating_service,
+      rating_ambiance,
+      rating_price,
+      comment,
+      occasion,
+      meal_type,
+      visited_at,
+      created_at,
+      user:users (
+        id,
+        username,
+        avatar_url,
+        is_private
+      ),
+      restaurant:restaurants (
+        id,
+        name,
+        address,
+        city,
+        photo_reference,
+        cuisine_type,
+        google_maps_url,
+        website
+      )
+    `)
+    .eq("id", reviewId)
+    .single();
+
+  // Don't return reviews from private users
+  if (!review || (review.user as any)?.is_private) return null;
+
+  return review;
+}

@@ -106,6 +106,18 @@ export const translations = {
     settings: "Settings",
     signOut: "Sign out",
     
+    // Share
+    share: "Share",
+    shareReview: "Share Review",
+    copyLink: "Copy link",
+    linkCopied: "Link copied!",
+    shareWhatsApp: "WhatsApp",
+    shareWhatsAppDesc: "Send to a chat",
+    shareMore: "More options",
+    shareMoreDesc: "Share via other apps",
+    shareTextPrefix: "Check out my review of",
+    shareTextSuffix: "on ForkList",
+    
     // Landing page
     landingBadge: "Your personal food diary",
     landingHeadline: "Remember every meal",
@@ -146,6 +158,28 @@ export const translations = {
     landingFooterRights: "All rights reserved.",
     landingFooterMadeWith: "Made with",
     landingFooterForFoodies: "for foodies",
+    
+    // Lists
+    myLists: "My Lists",
+    lists: "Lists",
+    newList: "New List",
+    createList: "Create List",
+    noListsYet: "No lists yet",
+    createFirstList: "Create your first list to save restaurants",
+    listName: "List name",
+    listNamePlaceholder: "e.g. Want to try, Date spots...",
+    description: "Description",
+    listDescriptionPlaceholder: "What's this list for?",
+    place: "place",
+    placesCount: "places",
+    emptyList: "This list is empty",
+    emptyListHint: "Add restaurants from search to get started",
+    removeFromList: "Remove from list",
+    addToList: "Add to list",
+    createNewList: "Create new list",
+    createAndAdd: "Create & add",
+    done: "Done",
+    searchAndAddToList: "Find restaurants to add to your lists",
   },
   
   es: {
@@ -255,6 +289,18 @@ export const translations = {
     settings: "Configuración",
     signOut: "Cerrar sesión",
     
+    // Share
+    share: "Compartir",
+    shareReview: "Compartir review",
+    copyLink: "Copiar link",
+    linkCopied: "Link copiado!",
+    shareWhatsApp: "WhatsApp",
+    shareWhatsAppDesc: "Enviar a un chat",
+    shareMore: "Mas opciones",
+    shareMoreDesc: "Compartir con otras apps",
+    shareTextPrefix: "Mira mi review de",
+    shareTextSuffix: "en ForkList",
+    
     // Landing page
     landingBadge: "Tu diario gastronómico personal",
     landingHeadline: "Recordá cada comida",
@@ -295,6 +341,28 @@ export const translations = {
     landingFooterRights: "Todos los derechos reservados.",
     landingFooterMadeWith: "Hecho con",
     landingFooterForFoodies: "para foodies",
+    
+    // Lists
+    myLists: "Mis Listas",
+    lists: "Listas",
+    newList: "Nueva Lista",
+    createList: "Crear Lista",
+    noListsYet: "No hay listas todavia",
+    createFirstList: "Crea tu primera lista para guardar restaurantes",
+    listName: "Nombre de la lista",
+    listNamePlaceholder: "ej. Quiero probar, Lugares de cita...",
+    description: "Descripcion",
+    listDescriptionPlaceholder: "Para que es esta lista?",
+    place: "lugar",
+    placesCount: "lugares",
+    emptyList: "Esta lista esta vacia",
+    emptyListHint: "Agrega restaurantes desde la busqueda para empezar",
+    removeFromList: "Quitar de la lista",
+    addToList: "Agregar a lista",
+    createNewList: "Crear nueva lista",
+    createAndAdd: "Crear y agregar",
+    done: "Listo",
+    searchAndAddToList: "Busca restaurantes para agregar a tus listas",
   },
 } as const;
 
