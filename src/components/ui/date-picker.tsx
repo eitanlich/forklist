@@ -34,13 +34,12 @@ export function DatePicker({ value, onChange, maxDate, placeholder = "Pick a dat
           {value ? format(value, "PPP") : <span>{placeholder}</span>}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
+      <PopoverContent className="w-auto p-0 min-h-[350px]" align="start">
         <Calendar
           mode="single"
           selected={value}
           onSelect={onChange}
           disabled={(date) => maxDate ? date > maxDate : false}
-          fixedWeeks
           initialFocus
         />
       </PopoverContent>
