@@ -61,8 +61,8 @@ function ReviewCard({ review }: { review: ReviewWithRestaurant }) {
           <div className="flex items-start justify-between gap-2">
             <h2 className="font-serif text-lg font-semibold tracking-tight">{restaurant.name}</h2>
             
-            {/* Edit/Delete buttons */}
-            <div className="flex items-center gap-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+            {/* Edit/Delete buttons - always visible on mobile, hover on desktop */}
+            <div className="flex items-center gap-1 md:opacity-0 md:transition-opacity md:duration-200 md:group-hover:opacity-100">
               <Link
                 href={`/review/${review.id}/edit`}
                 className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
