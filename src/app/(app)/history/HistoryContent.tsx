@@ -49,7 +49,6 @@ function ReviewCard({ review }: { review: ReviewWithRestaurant }) {
   return (
     <article className="group overflow-hidden rounded-2xl border border-border bg-card transition-all duration-300 hover:border-primary/20 hover:bg-card/80">
       <div className="flex gap-5 p-5">
-        {/* Photo */}
         {restaurant.photo_reference && (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -59,12 +58,10 @@ function ReviewCard({ review }: { review: ReviewWithRestaurant }) {
           />
         )}
 
-        {/* Main content */}
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
             <h2 className="font-serif text-lg font-semibold tracking-tight">{restaurant.name}</h2>
             
-            {/* Edit/Delete buttons */}
             <div className="flex items-center gap-1 md:opacity-0 md:transition-opacity md:duration-200 md:group-hover:opacity-100">
               <Link
                 href={`/review/${review.id}/edit`}
@@ -88,12 +85,10 @@ function ReviewCard({ review }: { review: ReviewWithRestaurant }) {
             </div>
           )}
 
-          {/* Overall stars */}
           <div className="mt-3">
             <Stars rating={review.rating_overall} size={18} />
           </div>
 
-          {/* Sub-ratings */}
           <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-sm text-muted-foreground">
             <span className="flex items-center gap-1.5">{t("food")} <Stars rating={review.rating_food} size={12} /></span>
             <span className="flex items-center gap-1.5">{t("service")} <Stars rating={review.rating_service} size={12} /></span>
@@ -101,7 +96,6 @@ function ReviewCard({ review }: { review: ReviewWithRestaurant }) {
             <span className="flex items-center gap-1.5">{t("priceShort")} <Stars rating={review.rating_price} size={12} /></span>
           </div>
 
-          {/* Meta row */}
           <div className="mt-3 flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
               <Calendar size={13} strokeWidth={1.5} />
@@ -116,7 +110,6 @@ function ReviewCard({ review }: { review: ReviewWithRestaurant }) {
         </div>
       </div>
 
-      {/* Comment */}
       {review.comment && (
         <div className="border-t border-border px-5 py-4">
           <p className="text-sm italic text-muted-foreground leading-relaxed line-clamp-3">
@@ -125,7 +118,6 @@ function ReviewCard({ review }: { review: ReviewWithRestaurant }) {
         </div>
       )}
 
-      {/* Links */}
       {(restaurant.google_maps_url || restaurant.website) && (
         <div className="flex items-center gap-2 border-t border-border px-5 py-3">
           {restaurant.google_maps_url && (
@@ -156,6 +148,103 @@ function ReviewCard({ review }: { review: ReviewWithRestaurant }) {
   );
 }
 
+// Pagination component - Amazon/Booking style
+function Pagination({
+  currentPage,
+  totalPages,
+  onPageChange,
+}: {
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+}) {
+  if (totalPages <= 1) return null;
+
+  // Generate page numbers to show
+  const getPageNumbers = () => {
+    const pages: (number | "ellipsis")[] = [];
+    
+    if (totalPages <= 7) {
+      // Show all pages if 7 or less
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      // Always show first page
+      pages.push(1);
+      
+      if (currentPage > 3) {
+        pages.push("ellipsis");
+      }
+      
+      // Pages around current
+      const start = Math.max(2, currentPage - 1);
+      const end = Math.min(totalPages - 1, currentPage + 1);
+      
+      for (let i = start; i <= end; i++) {
+        if (!pages.includes(i)) pages.push(i);
+      }
+      
+      if (currentPage < totalPages - 2) {
+        pages.push("ellipsis");
+      }
+      
+      // Always show last page
+      if (!pages.includes(totalPages)) pages.push(totalPages);
+    }
+    
+    return pages;
+  };
+
+  const pages = getPageNumbers();
+
+  return (
+    <div className="flex items-center justify-center gap-1 pt-6">
+      {/* Previous */}
+      <button
+        type="button"
+        onClick={() => onPageChange(currentPage - 1)}
+        disabled={currentPage === 1}
+        className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary text-foreground transition-colors hover:bg-secondary/80 disabled:opacity-40 disabled:cursor-not-allowed"
+        aria-label="Previous page"
+      >
+        <ChevronLeft size={18} />
+      </button>
+
+      {/* Page numbers */}
+      {pages.map((page, idx) =>
+        page === "ellipsis" ? (
+          <span key={`ellipsis-${idx}`} className="px-2 text-muted-foreground">
+            ...
+          </span>
+        ) : (
+          <button
+            key={page}
+            type="button"
+            onClick={() => onPageChange(page)}
+            className={`flex h-10 min-w-10 items-center justify-center rounded-xl px-3 text-sm font-medium transition-colors ${
+              currentPage === page
+                ? "bg-primary text-primary-foreground"
+                : "bg-secondary text-foreground hover:bg-secondary/80"
+            }`}
+          >
+            {page}
+          </button>
+        )
+      )}
+
+      {/* Next */}
+      <button
+        type="button"
+        onClick={() => onPageChange(currentPage + 1)}
+        disabled={currentPage === totalPages}
+        className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary text-foreground transition-colors hover:bg-secondary/80 disabled:opacity-40 disabled:cursor-not-allowed"
+        aria-label="Next page"
+      >
+        <ChevronRight size={18} />
+      </button>
+    </div>
+  );
+}
+
 type SortOption = "date-desc" | "date-asc" | "rating-desc" | "rating-asc";
 
 interface HistoryContentProps {
@@ -165,7 +254,7 @@ interface HistoryContentProps {
 export default function HistoryContent({ reviews }: HistoryContentProps) {
   const t = useT();
   const [showFilters, setShowFilters] = useState(false);
-  const [ratingFilter, setRatingFilter] = useState<number | null>(null);
+  const [ratingFilters, setRatingFilters] = useState<number[]>([]); // Multi-select
   const [occasionFilter, setOccasionFilter] = useState<Occasion | null>(null);
   const [sortBy, setSortBy] = useState<SortOption>("date-desc");
   const [currentPage, setCurrentPage] = useState(1);
@@ -179,13 +268,21 @@ export default function HistoryContent({ reviews }: HistoryContentProps) {
     { value: "other", label: t("other") },
   ];
 
+  // Toggle rating in multi-select
+  const toggleRating = (rating: number) => {
+    setRatingFilters((prev) =>
+      prev.includes(rating) ? prev.filter((r) => r !== rating) : [...prev, rating]
+    );
+    setCurrentPage(1);
+  };
+
   // Filter and sort reviews
   const filteredReviews = useMemo(() => {
     let result = [...reviews];
 
-    // Filter by rating
-    if (ratingFilter !== null) {
-      result = result.filter((r) => r.rating_overall >= ratingFilter);
+    // Filter by rating (multi-select: show if matches ANY selected rating)
+    if (ratingFilters.length > 0) {
+      result = result.filter((r) => ratingFilters.includes(r.rating_overall));
     }
 
     // Filter by occasion
@@ -210,7 +307,7 @@ export default function HistoryContent({ reviews }: HistoryContentProps) {
     });
 
     return result;
-  }, [reviews, ratingFilter, occasionFilter, sortBy]);
+  }, [reviews, ratingFilters, occasionFilter, sortBy]);
 
   // Pagination
   const totalPages = Math.ceil(filteredReviews.length / ITEMS_PER_PAGE);
@@ -219,19 +316,14 @@ export default function HistoryContent({ reviews }: HistoryContentProps) {
     currentPage * ITEMS_PER_PAGE
   );
 
-  // Reset page when filters change
-  const handleFilterChange = () => {
-    setCurrentPage(1);
-  };
-
   const clearFilters = () => {
-    setRatingFilter(null);
+    setRatingFilters([]);
     setOccasionFilter(null);
     setSortBy("date-desc");
     setCurrentPage(1);
   };
 
-  const hasActiveFilters = ratingFilter !== null || occasionFilter !== null || sortBy !== "date-desc";
+  const hasActiveFilters = ratingFilters.length > 0 || occasionFilter !== null || sortBy !== "date-desc";
 
   return (
     <div className="space-y-6">
@@ -261,79 +353,82 @@ export default function HistoryContent({ reviews }: HistoryContentProps) {
 
       {/* Filters panel */}
       {showFilters && reviews.length > 0 && (
-        <div className="space-y-4 rounded-2xl border border-border bg-card p-5">
-          {/* Rating filter */}
-          <div className="space-y-2">
-            <p className="text-sm text-muted-foreground">{t("minRating")}</p>
-            <div className="flex gap-2">
-              {[null, 3, 4, 5].map((rating) => (
-                <button
-                  key={rating ?? "all"}
-                  type="button"
-                  onClick={() => {
-                    setRatingFilter(rating);
-                    handleFilterChange();
-                  }}
-                  className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors ${
-                    ratingFilter === rating
-                      ? "border-primary bg-primary/10 text-primary"
-                      : "border-border text-muted-foreground hover:border-foreground/30"
-                  }`}
-                >
-                  {rating === null ? (
-                    t("all")
-                  ) : (
-                    <>
-                      <Star size={14} className="text-primary" fill="currentColor" />
-                      {rating}+
-                    </>
-                  )}
-                </button>
-              ))}
-            </div>
-          </div>
+        <div className="space-y-5 rounded-2xl border border-border bg-card p-5">
+          {/* FILTERS SECTION */}
+          <div className="space-y-4">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              {t("filters")}
+            </p>
 
-          {/* Occasion filter */}
-          <div className="space-y-2">
-            <p className="text-sm text-muted-foreground">{t("occasion")}</p>
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setOccasionFilter(null);
-                  handleFilterChange();
-                }}
-                className={`rounded-full border px-3 py-1.5 text-sm transition-colors ${
-                  occasionFilter === null
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-border text-muted-foreground hover:border-foreground/30"
-                }`}
-              >
-                {t("all")}
-              </button>
-              {OCCASIONS.map(({ value, label }) => (
+            {/* Rating filter - multi-select exact values */}
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">{t("rating")}</p>
+              <div className="flex gap-2">
+                {[5, 4, 3, 2, 1].map((rating) => (
+                  <button
+                    key={rating}
+                    type="button"
+                    onClick={() => toggleRating(rating)}
+                    className={`flex items-center gap-1 rounded-full border px-3 py-1.5 text-sm transition-colors ${
+                      ratingFilters.includes(rating)
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border text-muted-foreground hover:border-foreground/30"
+                    }`}
+                  >
+                    <Star size={14} className="text-primary" fill="currentColor" />
+                    {rating}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Occasion filter */}
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">{t("occasion")}</p>
+              <div className="flex flex-wrap gap-2">
                 <button
-                  key={value}
                   type="button"
                   onClick={() => {
-                    setOccasionFilter(value);
-                    handleFilterChange();
+                    setOccasionFilter(null);
+                    setCurrentPage(1);
                   }}
                   className={`rounded-full border px-3 py-1.5 text-sm transition-colors ${
-                    occasionFilter === value
+                    occasionFilter === null
                       ? "border-primary bg-primary/10 text-primary"
                       : "border-border text-muted-foreground hover:border-foreground/30"
                   }`}
                 >
-                  {label}
+                  {t("all")}
                 </button>
-              ))}
+                {OCCASIONS.map(({ value, label }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => {
+                      setOccasionFilter(value);
+                      setCurrentPage(1);
+                    }}
+                    className={`rounded-full border px-3 py-1.5 text-sm transition-colors ${
+                      occasionFilter === value
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border text-muted-foreground hover:border-foreground/30"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
-          {/* Sort */}
-          <div className="space-y-2">
-            <p className="text-sm text-muted-foreground">{t("sortBy")}</p>
+          {/* Divider */}
+          <div className="border-t border-border" />
+
+          {/* SORT SECTION */}
+          <div className="space-y-4">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              {t("sortBy")}
+            </p>
             <div className="flex flex-wrap gap-2">
               {[
                 { value: "date-desc" as SortOption, label: t("newestFirst") },
@@ -346,7 +441,7 @@ export default function HistoryContent({ reviews }: HistoryContentProps) {
                   type="button"
                   onClick={() => {
                     setSortBy(value);
-                    handleFilterChange();
+                    setCurrentPage(1);
                   }}
                   className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors ${
                     sortBy === value
@@ -363,13 +458,16 @@ export default function HistoryContent({ reviews }: HistoryContentProps) {
 
           {/* Clear filters */}
           {hasActiveFilters && (
-            <button
-              type="button"
-              onClick={clearFilters}
-              className="text-sm text-primary hover:underline"
-            >
-              {t("clearFilters")}
-            </button>
+            <>
+              <div className="border-t border-border" />
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="text-sm text-primary hover:underline"
+              >
+                {t("clearFilters")}
+              </button>
+            </>
           )}
         </div>
       )}
@@ -420,30 +518,12 @@ export default function HistoryContent({ reviews }: HistoryContentProps) {
             ))}
           </div>
 
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-4 pt-4">
-              <button
-                type="button"
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                disabled={currentPage === 1}
-                className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary text-foreground transition-colors hover:bg-secondary/80 disabled:opacity-40"
-              >
-                <ChevronLeft size={18} />
-              </button>
-              <span className="text-sm text-muted-foreground">
-                {currentPage} / {totalPages}
-              </span>
-              <button
-                type="button"
-                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                disabled={currentPage === totalPages}
-                className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary text-foreground transition-colors hover:bg-secondary/80 disabled:opacity-40"
-              >
-                <ChevronRight size={18} />
-              </button>
-            </div>
-          )}
+          {/* Pagination - Amazon/Booking style */}
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
         </>
       )}
     </div>
