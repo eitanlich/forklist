@@ -115,7 +115,7 @@ export default function Header() {
           >
             <UserButton.MenuItems>
               <UserButton.Link
-                label={t("profile")}
+                label={locale === "es" ? "Perfil" : "Profile"}
                 labelIcon={<span className="text-sm">👤</span>}
                 href="/settings/profile"
               />
