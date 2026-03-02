@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { format } from "date-fns";
+import { es } from "date-fns/locale";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { useI18n } from "@/lib/i18n";
 
 interface DatePickerProps {
   value: Date | undefined;
@@ -20,6 +22,9 @@ interface DatePickerProps {
 }
 
 export function DatePicker({ value, onChange, maxDate, placeholder = "Pick a date" }: DatePickerProps) {
+  const { locale } = useI18n();
+  const dateLocale = locale === "es" ? es : undefined;
+
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -31,7 +36,7 @@ export function DatePicker({ value, onChange, maxDate, placeholder = "Pick a dat
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
-          {value ? format(value, "PPP") : <span>{placeholder}</span>}
+          {value ? format(value, "PPP", { locale: dateLocale }) : <span>{placeholder}</span>}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0 min-h-[350px]" align="start">
@@ -40,6 +45,7 @@ export function DatePicker({ value, onChange, maxDate, placeholder = "Pick a dat
           selected={value}
           onSelect={onChange}
           disabled={(date) => maxDate ? date > maxDate : false}
+          locale={dateLocale}
           initialFocus
         />
       </PopoverContent>
