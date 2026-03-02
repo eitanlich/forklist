@@ -99,7 +99,35 @@
 - [ ] Preview para WhatsApp/Twitter (OG tags dinámicos)
 - [ ] Página pública /review/[id]/public
 
+### 🟡 Media Prioridad
+
+#### Instagram del Restaurant
+- [ ] Obtener link de Instagram desde Google Places
+- [ ] Mostrar botón Instagram en card del restaurant
+- [ ] Scraping del linktree/bio para encontrar menú
+
+#### Menú del Restaurant
+- [ ] Obtener foto del menú desde Google Places si existe
+- [ ] Detectar link a menú en Instagram bio (linktree, drive, etc)
+- [ ] Mostrar menú en la card del restaurant
+
+#### Reservas via ForkList
+- [ ] Detectar si restaurant tiene sistema de reservas (web/Instagram)
+- [ ] Link directo a reserva desde la app
+- [ ] Tracking de reservas hechas
+
 ### 🟢 Baja Prioridad / Nice-to-have
+
+#### Import Reviews de Google Maps
+- [ ] Conectar con Google Account
+- [ ] Detectar reviews existentes del usuario en Google Maps
+- [ ] Importar a ForkList con un click
+- [ ] (nice to have - en la práctica no se usa mucho)
+
+#### Compartir Reservas con Amigos
+- [ ] Ver reservas de amigos en ForkList
+- [ ] Invitar amigos a una reserva
+- [ ] Depende de: Social Features
 
 #### Social Features
 - [ ] Perfiles públicos de usuarios
@@ -158,6 +186,53 @@
 ### Caching
 - Páginas dinámicas: `export const dynamic = "force-dynamic"`
 - Mobile redirect: usar `window.location.href` en vez de `router.push()`
+
+---
+
+---
+
+## 💰 MONETIZACIÓN (por definir)
+
+### Ideas a explorar
+
+#### 1. Freemium / Suscripción
+- Free: hasta X reviews, features básicas
+- Pro ($5-10/mes): reviews ilimitadas, stats avanzados, export, sin ads
+
+#### 2. Comisión por Reservas
+- Si el usuario reserva via ForkList → comisión del restaurant
+- Modelo tipo TheFork/OpenTable (€2-4 por comensal)
+- Requiere: integración con restaurants
+
+#### 3. Affiliate / Referidos
+- Links de reserva con tracking
+- Comisión por reserva completada
+- No requiere integración directa
+
+#### 4. Restaurant Dashboard (B2B)
+- Restaurants pagan por ver analytics de sus reviews
+- Responder a reviews
+- Promociones a usuarios que los visitaron
+- Modelo tipo Yelp for Business
+
+#### 5. Publicidad
+- Ads de restaurants en búsqueda (sponsored results)
+- Native ads en feed
+- Menos intrusivo: solo en versión free
+
+#### 6. Data/Insights
+- Vender trends agregados (no PII) a marcas de F&B
+- Reports de industria gastronómica
+
+### Mi opinión
+- **Corto plazo:** affiliate/referidos (rápido de implementar)
+- **Medio plazo:** freemium + comisión reservas
+- **Largo plazo:** B2B dashboard para restaurants
+
+### Preguntas abiertas
+- [ ] ¿Cuál es el TAM en Argentina/LATAM?
+- [ ] ¿Competencia directa? (TheFork, TripAdvisor, Google Maps)
+- [ ] ¿Diferenciador principal?
 
 ---
 
