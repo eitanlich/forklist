@@ -254,6 +254,7 @@ interface HistoryContentProps {
 export default function HistoryContent({ reviews }: HistoryContentProps) {
   const t = useT();
   const [showFilters, setShowFilters] = useState(false);
+  const [showSort, setShowSort] = useState(false);
   const [ratingFilters, setRatingFilters] = useState<number[]>([]); // Multi-select
   const [occasionFilter, setOccasionFilter] = useState<Occasion | null>(null);
   const [sortBy, setSortBy] = useState<SortOption>("date-desc");
@@ -319,11 +320,12 @@ export default function HistoryContent({ reviews }: HistoryContentProps) {
   const clearFilters = () => {
     setRatingFilters([]);
     setOccasionFilter(null);
-    setSortBy("date-desc");
     setCurrentPage(1);
   };
 
-  const hasActiveFilters = ratingFilters.length > 0 || occasionFilter !== null || sortBy !== "date-desc";
+  // Count active filters (ratings count as 1 filter group if any selected)
+  const activeFilterCount = (ratingFilters.length > 0 ? 1 : 0) + (occasionFilter !== null ? 1 : 0);
+  const hasActiveFilters = activeFilterCount > 0;
 
   return (
     <div className="space-y-6">
@@ -331,125 +333,106 @@ export default function HistoryContent({ reviews }: HistoryContentProps) {
       <div className="flex items-center justify-between">
         <h1 className="font-serif text-3xl font-semibold tracking-tight">{t("myHistory")}</h1>
         {reviews.length > 0 && (
-          <button
-            type="button"
-            onClick={() => setShowFilters(!showFilters)}
-            className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm transition-colors ${
-              showFilters || hasActiveFilters
-                ? "bg-primary/10 text-primary"
-                : "bg-secondary text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <Filter size={16} />
-            {t("filters")}
-            {hasActiveFilters && (
-              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
-                !
-              </span>
-            )}
-          </button>
+          <div className="flex items-center gap-2">
+            {/* Filter button */}
+            <button
+              type="button"
+              onClick={() => {
+                setShowFilters(!showFilters);
+                setShowSort(false);
+              }}
+              className={`flex items-center gap-2 rounded-xl px-3 py-2 text-sm transition-colors ${
+                showFilters || hasActiveFilters
+                  ? "bg-primary/10 text-primary"
+                  : "bg-secondary text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Filter size={16} />
+              {t("filters")}
+              {activeFilterCount > 0 && (
+                <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-xs font-medium text-primary-foreground">
+                  {activeFilterCount}
+                </span>
+              )}
+            </button>
+
+            {/* Sort button */}
+            <button
+              type="button"
+              onClick={() => {
+                setShowSort(!showSort);
+                setShowFilters(false);
+              }}
+              className={`flex items-center gap-2 rounded-xl px-3 py-2 text-sm transition-colors ${
+                showSort || sortBy !== "date-desc"
+                  ? "bg-primary/10 text-primary"
+                  : "bg-secondary text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <ArrowUpDown size={16} />
+              {t("sort")}
+            </button>
+          </div>
         )}
       </div>
 
       {/* Filters panel */}
       {showFilters && reviews.length > 0 && (
-        <div className="space-y-5 rounded-2xl border border-border bg-card p-5">
-          {/* FILTERS SECTION */}
-          <div className="space-y-4">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              {t("filters")}
-            </p>
-
-            {/* Rating filter - multi-select exact values */}
-            <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">{t("rating")}</p>
-              <div className="flex gap-2">
-                {[5, 4, 3, 2, 1].map((rating) => (
-                  <button
-                    key={rating}
-                    type="button"
-                    onClick={() => toggleRating(rating)}
-                    className={`flex items-center gap-1 rounded-full border px-3 py-1.5 text-sm transition-colors ${
-                      ratingFilters.includes(rating)
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "border-border text-muted-foreground hover:border-foreground/30"
-                    }`}
-                  >
-                    <Star size={14} className="text-primary" fill="currentColor" />
-                    {rating}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Occasion filter */}
-            <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">{t("occasion")}</p>
-              <div className="flex flex-wrap gap-2">
+        <div className="space-y-4 rounded-2xl border border-border bg-card p-5">
+          {/* Rating filter - multi-select exact values */}
+          <div className="space-y-2">
+            <p className="text-sm text-muted-foreground">{t("rating")}</p>
+            <div className="flex gap-2">
+              {[5, 4, 3, 2, 1].map((rating) => (
                 <button
+                  key={rating}
                   type="button"
-                  onClick={() => {
-                    setOccasionFilter(null);
-                    setCurrentPage(1);
-                  }}
-                  className={`rounded-full border px-3 py-1.5 text-sm transition-colors ${
-                    occasionFilter === null
+                  onClick={() => toggleRating(rating)}
+                  className={`flex items-center gap-1 rounded-full border px-3 py-1.5 text-sm transition-colors ${
+                    ratingFilters.includes(rating)
                       ? "border-primary bg-primary/10 text-primary"
                       : "border-border text-muted-foreground hover:border-foreground/30"
                   }`}
                 >
-                  {t("all")}
+                  <Star size={14} className="text-primary" fill="currentColor" />
+                  {rating}
                 </button>
-                {OCCASIONS.map(({ value, label }) => (
-                  <button
-                    key={value}
-                    type="button"
-                    onClick={() => {
-                      setOccasionFilter(value);
-                      setCurrentPage(1);
-                    }}
-                    className={`rounded-full border px-3 py-1.5 text-sm transition-colors ${
-                      occasionFilter === value
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "border-border text-muted-foreground hover:border-foreground/30"
-                    }`}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
+              ))}
             </div>
           </div>
 
-          {/* Divider */}
-          <div className="border-t border-border" />
-
-          {/* SORT SECTION */}
-          <div className="space-y-4">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              {t("sortBy")}
-            </p>
+          {/* Occasion filter */}
+          <div className="space-y-2">
+            <p className="text-sm text-muted-foreground">{t("occasion")}</p>
             <div className="flex flex-wrap gap-2">
-              {[
-                { value: "date-desc" as SortOption, label: t("newestFirst") },
-                { value: "date-asc" as SortOption, label: t("oldestFirst") },
-                { value: "rating-desc" as SortOption, label: t("highestRating") },
-                { value: "rating-asc" as SortOption, label: t("lowestRating") },
-              ].map(({ value, label }) => (
+              <button
+                type="button"
+                onClick={() => {
+                  setOccasionFilter(null);
+                  setCurrentPage(1);
+                }}
+                className={`rounded-full border px-3 py-1.5 text-sm transition-colors ${
+                  occasionFilter === null
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border text-muted-foreground hover:border-foreground/30"
+                }`}
+              >
+                {t("all")}
+              </button>
+              {OCCASIONS.map(({ value, label }) => (
                 <button
                   key={value}
                   type="button"
                   onClick={() => {
-                    setSortBy(value);
+                    setOccasionFilter(value);
                     setCurrentPage(1);
                   }}
-                  className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors ${
-                    sortBy === value
+                  className={`rounded-full border px-3 py-1.5 text-sm transition-colors ${
+                    occasionFilter === value
                       ? "border-primary bg-primary/10 text-primary"
                       : "border-border text-muted-foreground hover:border-foreground/30"
                   }`}
                 >
-                  <ArrowUpDown size={12} />
                   {label}
                 </button>
               ))}
@@ -458,17 +441,45 @@ export default function HistoryContent({ reviews }: HistoryContentProps) {
 
           {/* Clear filters */}
           {hasActiveFilters && (
-            <>
-              <div className="border-t border-border" />
-              <button
-                type="button"
-                onClick={clearFilters}
-                className="text-sm text-primary hover:underline"
-              >
-                {t("clearFilters")}
-              </button>
-            </>
+            <button
+              type="button"
+              onClick={clearFilters}
+              className="text-sm text-primary hover:underline"
+            >
+              {t("clearFilters")}
+            </button>
           )}
+        </div>
+      )}
+
+      {/* Sort panel */}
+      {showSort && reviews.length > 0 && (
+        <div className="rounded-2xl border border-border bg-card p-5">
+          <div className="flex flex-wrap gap-2">
+            {[
+              { value: "date-desc" as SortOption, label: t("newestFirst") },
+              { value: "date-asc" as SortOption, label: t("oldestFirst") },
+              { value: "rating-desc" as SortOption, label: t("highestRating") },
+              { value: "rating-asc" as SortOption, label: t("lowestRating") },
+            ].map(({ value, label }) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => {
+                  setSortBy(value);
+                  setCurrentPage(1);
+                  setShowSort(false);
+                }}
+                className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors ${
+                  sortBy === value
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border text-muted-foreground hover:border-foreground/30"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
