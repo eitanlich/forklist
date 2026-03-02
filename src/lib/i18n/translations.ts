@@ -30,6 +30,10 @@ export const translations = {
     orSelectCountry: "Or select country:",
     changeRestaurant: "Change restaurant",
     loadingRestaurant: "Loading restaurant...",
+    pressEnterForMore: "Press Enter for more results",
+    clearResults: "Clear",
+    noResultsFound: "No restaurants found",
+    loadMore: "Load more",
     
     // Review form
     overall: "Overall",
@@ -114,6 +118,10 @@ export const translations = {
     orSelectCountry: "O seleccioná un país:",
     changeRestaurant: "Cambiar restaurante",
     loadingRestaurant: "Cargando restaurante...",
+    pressEnterForMore: "Presioná Enter para más resultados",
+    clearResults: "Limpiar",
+    noResultsFound: "No se encontraron restaurantes",
+    loadMore: "Cargar más",
     
     // Review form
     overall: "General",
