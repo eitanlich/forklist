@@ -8,7 +8,7 @@ export default function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur-md pb-safe md:hidden transform-gpu">
+    <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-background backdrop-blur-none pb-safe md:hidden transform-gpu" style={{ position: 'fixed' }}>
       <div className="mx-auto flex h-16 max-w-2xl items-center justify-around px-8">
         {/* Home */}
         <Link
