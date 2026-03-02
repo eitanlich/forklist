@@ -1,4 +1,5 @@
 export type Occasion = "date" | "family" | "friends" | "business" | "solo" | "other";
+export type MealType = "breakfast" | "brunch" | "lunch" | "snack" | "dinner" | "drinks";
 
 export interface DbUser {
   id: string;
@@ -35,6 +36,7 @@ export interface Review {
   rating_price: number;
   comment: string | null;
   occasion: Occasion | null;
+  meal_type: MealType | null;
   visited_at: string;
   created_at: string;
   updated_at: string;

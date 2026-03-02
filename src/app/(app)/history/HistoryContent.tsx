@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import type { ReviewWithRestaurant, Occasion } from "@/types";
+import type { ReviewWithRestaurant, Occasion, MealType } from "@/types";
 import { BookOpen, MapPin, Calendar, Star, Globe, Pencil, Trash2, Filter, ChevronLeft, ChevronRight, ArrowUpDown } from "lucide-react";
 import Link from "next/link";
 import { useT, useI18n } from "@/lib/i18n";
@@ -44,6 +44,15 @@ function ReviewCard({ review }: { review: ReviewWithRestaurant }) {
     business: t("business"),
     solo: t("solo"),
     other: t("other"),
+  };
+
+  const MEAL_TYPE_LABELS: Record<string, string> = {
+    breakfast: t("breakfast"),
+    brunch: t("brunch"),
+    lunch: t("lunch"),
+    snack: t("snack"),
+    dinner: t("dinner"),
+    drinks: t("drinks"),
   };
 
   return (
@@ -101,6 +110,11 @@ function ReviewCard({ review }: { review: ReviewWithRestaurant }) {
               <Calendar size={13} strokeWidth={1.5} />
               {formatDate(review.visited_at)}
             </div>
+            {review.meal_type && (
+              <span className="rounded-full bg-secondary px-3 py-1 text-sm text-muted-foreground">
+                {MEAL_TYPE_LABELS[review.meal_type] ?? review.meal_type}
+              </span>
+            )}
             {review.occasion && (
               <span className="rounded-full bg-secondary px-3 py-1 text-sm text-muted-foreground">
                 {OCCASION_LABELS[review.occasion] ?? review.occasion}
@@ -257,6 +271,7 @@ export default function HistoryContent({ reviews }: HistoryContentProps) {
   const [showSort, setShowSort] = useState(false);
   const [ratingFilters, setRatingFilters] = useState<number[]>([]); // Multi-select
   const [occasionFilter, setOccasionFilter] = useState<Occasion | null>(null);
+  const [mealTypeFilter, setMealTypeFilter] = useState<MealType | null>(null);
   const [sortBy, setSortBy] = useState<SortOption>("date-desc");
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -267,6 +282,15 @@ export default function HistoryContent({ reviews }: HistoryContentProps) {
     { value: "business", label: t("business") },
     { value: "solo", label: t("solo") },
     { value: "other", label: t("other") },
+  ];
+
+  const MEAL_TYPES: { value: MealType; label: string }[] = [
+    { value: "breakfast", label: t("breakfast") },
+    { value: "brunch", label: t("brunch") },
+    { value: "lunch", label: t("lunch") },
+    { value: "snack", label: t("snack") },
+    { value: "dinner", label: t("dinner") },
+    { value: "drinks", label: t("drinks") },
   ];
 
   // Toggle rating in multi-select
@@ -291,6 +315,11 @@ export default function HistoryContent({ reviews }: HistoryContentProps) {
       result = result.filter((r) => r.occasion === occasionFilter);
     }
 
+    // Filter by meal type
+    if (mealTypeFilter !== null) {
+      result = result.filter((r) => r.meal_type === mealTypeFilter);
+    }
+
     // Sort
     result.sort((a, b) => {
       switch (sortBy) {
@@ -308,7 +337,7 @@ export default function HistoryContent({ reviews }: HistoryContentProps) {
     });
 
     return result;
-  }, [reviews, ratingFilters, occasionFilter, sortBy]);
+  }, [reviews, ratingFilters, occasionFilter, mealTypeFilter, sortBy]);
 
   // Pagination
   const totalPages = Math.ceil(filteredReviews.length / ITEMS_PER_PAGE);
@@ -320,11 +349,12 @@ export default function HistoryContent({ reviews }: HistoryContentProps) {
   const clearFilters = () => {
     setRatingFilters([]);
     setOccasionFilter(null);
+    setMealTypeFilter(null);
     setCurrentPage(1);
   };
 
   // Count active filters (ratings count as 1 filter group if any selected)
-  const activeFilterCount = (ratingFilters.length > 0 ? 1 : 0) + (occasionFilter !== null ? 1 : 0);
+  const activeFilterCount = (ratingFilters.length > 0 ? 1 : 0) + (occasionFilter !== null ? 1 : 0) + (mealTypeFilter !== null ? 1 : 0);
   const hasActiveFilters = activeFilterCount > 0;
 
   return (
@@ -396,6 +426,44 @@ export default function HistoryContent({ reviews }: HistoryContentProps) {
                 >
                   <Star size={14} className="text-primary" fill="currentColor" />
                   {rating}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Meal Type filter */}
+          <div className="space-y-2">
+            <p className="text-sm text-muted-foreground">{t("mealType")}</p>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setMealTypeFilter(null);
+                  setCurrentPage(1);
+                }}
+                className={`rounded-full border px-3 py-1.5 text-sm transition-colors ${
+                  mealTypeFilter === null
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border text-muted-foreground hover:border-foreground/30"
+                }`}
+              >
+                {t("all")}
+              </button>
+              {MEAL_TYPES.map(({ value, label }) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => {
+                    setMealTypeFilter(value);
+                    setCurrentPage(1);
+                  }}
+                  className={`rounded-full border px-3 py-1.5 text-sm transition-colors ${
+                    mealTypeFilter === value
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border text-muted-foreground hover:border-foreground/30"
+                  }`}
+                >
+                  {label}
                 </button>
               ))}
             </div>

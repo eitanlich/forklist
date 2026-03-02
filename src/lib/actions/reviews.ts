@@ -72,6 +72,7 @@ export async function createReview(
     rating_price: parsed.data.rating_price,
     comment: parsed.data.comment ?? null,
     occasion: parsed.data.occasion ?? null,
+    meal_type: parsed.data.meal_type ?? null,
     visited_at: parsed.data.visited_at,
   });
 
@@ -125,6 +126,7 @@ export async function updateReview(
       rating_price: parsed.data.rating_price,
       comment: parsed.data.comment ?? null,
       occasion: parsed.data.occasion ?? null,
+      meal_type: parsed.data.meal_type ?? null,
       visited_at: parsed.data.visited_at,
       updated_at: new Date().toISOString(),
     })

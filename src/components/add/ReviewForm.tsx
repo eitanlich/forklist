@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Loader2, Star } from "lucide-react";
-import type { PlaceSuggestion, Occasion } from "@/types";
+import type { PlaceSuggestion, Occasion, MealType } from "@/types";
 import { createReview } from "@/lib/actions/reviews";
 import type { ReviewInput } from "@/lib/validations/review";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -91,6 +91,15 @@ export default function ReviewForm({ restaurant, onBack }: ReviewFormProps) {
     { value: "other", label: t("other") },
   ];
 
+  const MEAL_TYPES: { value: MealType; label: string }[] = [
+    { value: "breakfast", label: t("breakfast") },
+    { value: "brunch", label: t("brunch") },
+    { value: "lunch", label: t("lunch") },
+    { value: "snack", label: t("snack") },
+    { value: "dinner", label: t("dinner") },
+    { value: "drinks", label: t("drinks") },
+  ];
+
   const [ratings, setRatings] = useState({
     overall: 0,
     food: 0,
@@ -99,6 +108,7 @@ export default function ReviewForm({ restaurant, onBack }: ReviewFormProps) {
     price: 0,
   });
   const [occasion, setOccasion] = useState<Occasion | undefined>(undefined);
+  const [mealType, setMealType] = useState<MealType | undefined>(undefined);
   const [comment, setComment] = useState("");
   const [visitedAt, setVisitedAt] = useState<Date | undefined>(new Date());
 
@@ -130,6 +140,7 @@ export default function ReviewForm({ restaurant, onBack }: ReviewFormProps) {
       rating_price: ratings.price,
       comment: comment.trim() || undefined,
       occasion,
+      meal_type: mealType,
       visited_at: visitedAt ? format(visitedAt, "yyyy-MM-dd") : "",
     };
 
@@ -211,6 +222,29 @@ export default function ReviewForm({ restaurant, onBack }: ReviewFormProps) {
           value={ratings.price}
           onChange={(v) => setRating("price", v)}
         />
+      </div>
+
+      {/* Meal Type */}
+      <div className="space-y-2">
+        <p className="text-sm text-muted-foreground">{t("mealType")}</p>
+        <div className="flex flex-wrap gap-2">
+          {MEAL_TYPES.map(({ value, label }) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() =>
+                setMealType((prev) => (prev === value ? undefined : value))
+              }
+              className={`rounded-full border px-4 py-1.5 text-sm transition-colors duration-150 ${
+                mealType === value
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border text-muted-foreground hover:border-foreground/30 hover:text-foreground"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Occasion */}

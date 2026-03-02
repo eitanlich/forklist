@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Loader2, Star, MapPin } from "lucide-react";
-import type { ReviewWithRestaurant, Occasion } from "@/types";
+import type { ReviewWithRestaurant, Occasion, MealType } from "@/types";
 import { updateReview } from "@/lib/actions/reviews";
 import { DatePicker } from "@/components/ui/date-picker";
 import { format } from "date-fns";
@@ -74,6 +74,15 @@ export default function EditReviewForm({ review }: { review: ReviewWithRestauran
     { value: "other", label: t("other") },
   ];
 
+  const MEAL_TYPES: { value: MealType; label: string }[] = [
+    { value: "breakfast", label: t("breakfast") },
+    { value: "brunch", label: t("brunch") },
+    { value: "lunch", label: t("lunch") },
+    { value: "snack", label: t("snack") },
+    { value: "dinner", label: t("dinner") },
+    { value: "drinks", label: t("drinks") },
+  ];
+
   const [ratings, setRatings] = useState({
     overall: review.rating_overall,
     food: review.rating_food,
@@ -82,6 +91,7 @@ export default function EditReviewForm({ review }: { review: ReviewWithRestauran
     price: review.rating_price,
   });
   const [occasion, setOccasion] = useState<Occasion | undefined>(review.occasion ?? undefined);
+  const [mealType, setMealType] = useState<MealType | undefined>(review.meal_type ?? undefined);
   const [comment, setComment] = useState(review.comment ?? "");
   // Parse date from string to Date object
   const [visitedAt, setVisitedAt] = useState<Date | undefined>(
@@ -115,6 +125,7 @@ export default function EditReviewForm({ review }: { review: ReviewWithRestauran
           rating_price: ratings.price,
           comment: comment.trim() || undefined,
           occasion,
+          meal_type: mealType,
           visited_at: formattedDate,
         });
 
@@ -185,6 +196,27 @@ export default function EditReviewForm({ review }: { review: ReviewWithRestauran
         <StarRating label={t("service")} value={ratings.service} onChange={(v) => setRating("service", v)} />
         <StarRating label={t("ambiance")} value={ratings.ambiance} onChange={(v) => setRating("ambiance", v)} />
         <StarRating label={t("priceValue")} value={ratings.price} onChange={(v) => setRating("price", v)} />
+      </div>
+
+      {/* Meal Type */}
+      <div className="space-y-2">
+        <p className="text-sm text-muted-foreground">{t("mealType")}</p>
+        <div className="flex flex-wrap gap-2">
+          {MEAL_TYPES.map(({ value, label }) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => setMealType((prev) => (prev === value ? undefined : value))}
+              className={`rounded-full border px-4 py-1.5 text-sm transition-colors duration-150 ${
+                mealType === value
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border text-muted-foreground hover:border-foreground/30 hover:text-foreground"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Occasion */}

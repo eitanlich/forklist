@@ -23,6 +23,9 @@ export const reviewSchema = z.object({
   occasion: z
     .enum(["date", "family", "friends", "business", "solo", "other"])
     .optional(),
+  meal_type: z
+    .enum(["breakfast", "brunch", "lunch", "snack", "dinner", "drinks"])
+    .optional(),
   visited_at: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
 });
 
@@ -38,6 +41,9 @@ export const updateReviewSchema = z.object({
   comment: z.string().optional(),
   occasion: z
     .enum(["date", "family", "friends", "business", "solo", "other"])
+    .optional(),
+  meal_type: z
+    .enum(["breakfast", "brunch", "lunch", "snack", "dinner", "drinks"])
     .optional(),
   visited_at: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
 });
