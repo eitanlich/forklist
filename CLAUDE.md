@@ -39,11 +39,22 @@ ForkList es una app tipo Letterboxd pero para restaurantes. Los usuarios pueden 
 
 ### Fase 2 — Enriquecimiento (post-MVP)
 
+**Prioridad alta (feedback del founder):**
+- [ ] Links al restaurante desde reviews en historial (Google Maps, website)
+- [ ] Filtrar búsqueda por país/ciudad (nombres de restaurantes se repiten mucho)
+- [ ] Paginación en resultados de búsqueda
+- [ ] Cursor pointer en hover de elementos clickeables (UX básico)
+
+**Features planeadas:**
 - [ ] Wishlists: guardar restaurantes para visitar
 - [ ] Fotos via Places API
 - [ ] Mapa de restaurantes visitados
 - [ ] Filtros avanzados en historial (por ciudad, rating, ocasión, fecha)
 - [ ] Editar/eliminar reviews
+
+**Métricas del dashboard (repensar):**
+- Las métricas actuales (places, rating, occasion, cuisine) no copan 100%
+- Ideas: streak de días logueando, new places this month, mapa de ciudades
 
 ### Fase 3 — Social (futuro)
 
@@ -56,8 +67,8 @@ ForkList es una app tipo Letterboxd pero para restaurantes. Los usuarios pueden 
 
 ## Estado actual
 
-**Completados:** Steps 1, 2, 3, 4, 5, 6, 7
-**Próximo paso:** Step 8 — Dashboard con stats del usuario
+**Completados:** Steps 1-9 (MVP completo ✅)
+**Próximo paso:** Fase 2 — Links en reviews, filtros por país/ciudad, paginación, cursor hovers
 
 ---
 
