@@ -102,6 +102,7 @@ export const translations = {
     logFirstVisit: "Log your first visit",
     
     // Settings
+    profile: "Profile",
     language: "Language",
     settings: "Settings",
     signOut: "Sign out",
@@ -285,6 +286,7 @@ export const translations = {
     logFirstVisit: "Registrar tu primera visita",
     
     // Settings
+    profile: "Perfil",
     language: "Idioma",
     settings: "Configuración",
     signOut: "Cerrar sesión",

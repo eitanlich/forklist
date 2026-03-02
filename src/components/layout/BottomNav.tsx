@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, BookOpen, Plus, List } from "lucide-react";
+import { Home, BookOpen, Plus, List, User } from "lucide-react";
 import { useT } from "@/lib/i18n";
 
 export default function BottomNav() {
@@ -58,6 +58,19 @@ export default function BottomNav() {
         >
           <BookOpen size={20} strokeWidth={pathname === "/history" ? 2 : 1.5} />
           <span className="text-xs">{t("history")}</span>
+        </Link>
+
+        {/* Profile */}
+        <Link
+          href="/settings/profile"
+          className={`flex flex-col items-center gap-1 transition-colors duration-200 ${
+            pathname.startsWith("/settings")
+              ? "text-primary"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <User size={20} strokeWidth={pathname.startsWith("/settings") ? 2 : 1.5} />
+          <span className="text-xs">{t("profile")}</span>
         </Link>
       </div>
     </nav>
