@@ -209,6 +209,58 @@ export async function getCurrentUserProfile() {
   return user;
 }
 
+export async function deleteAccount(): Promise<{ error?: string; success?: boolean }> {
+  const { userId: clerkId } = await auth();
+  if (!clerkId) return { error: "Not authenticated" };
+
+  const supabase = createAdminClient();
+
+  // Get user
+  const { data: user } = await supabase
+    .from("users")
+    .select("id")
+    .eq("clerk_id", clerkId)
+    .single();
+
+  if (!user) return { error: "User not found" };
+
+  // Delete all user data (cascades will handle related tables)
+  // Order matters: delete from tables that reference users first
+  
+  // Delete reviews
+  await supabase.from("reviews").delete().eq("user_id", user.id);
+  
+  // Delete list items (via list cascade)
+  await supabase.from("lists").delete().eq("user_id", user.id);
+  
+  // Delete follows
+  await supabase.from("follows").delete().eq("follower_id", user.id);
+  await supabase.from("follows").delete().eq("following_id", user.id);
+  
+  // Delete review likes
+  await supabase.from("review_likes").delete().eq("user_id", user.id);
+  
+  // Delete notifications
+  await supabase.from("notifications").delete().eq("user_id", user.id);
+  await supabase.from("notifications").delete().eq("actor_id", user.id);
+  
+  // Delete comments
+  await supabase.from("review_comments").delete().eq("user_id", user.id);
+  
+  // Finally delete the user
+  const { error: deleteError } = await supabase
+    .from("users")
+    .delete()
+    .eq("id", user.id);
+
+  if (deleteError) {
+    console.error("Delete error:", deleteError);
+    return { error: "Failed to delete account" };
+  }
+
+  return { success: true };
+}
+
 export async function getPublicProfile(username: string) {
   const supabase = createAdminClient();
 

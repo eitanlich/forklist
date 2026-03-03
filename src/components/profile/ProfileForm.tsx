@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { updateProfile, uploadAvatar } from "@/lib/actions/profile";
 import { Camera, Loader2, User } from "lucide-react";
+import { useT } from "@/lib/i18n";
 
 interface ProfileFormProps {
   currentBio: string | null;
@@ -18,6 +19,7 @@ export function ProfileForm({
   isPrivate: initialPrivate,
   onSuccess,
 }: ProfileFormProps) {
+  const t = useT();
   const [bio, setBio] = useState(currentBio ?? "");
   const [isPrivate, setIsPrivate] = useState(initialPrivate);
   const [avatarUrl, setAvatarUrl] = useState(currentAvatarUrl);
@@ -101,16 +103,16 @@ export function ProfileForm({
           onChange={handleAvatarChange}
           className="hidden"
         />
-        <p className="text-xs text-muted-foreground">Max 2MB, JPG or PNG</p>
+        <p className="text-xs text-muted-foreground">{t("avatarHint")}</p>
       </div>
 
       {/* Bio */}
       <div className="space-y-2">
-        <label className="text-sm font-medium text-foreground">Bio</label>
+        <label className="text-sm font-medium text-foreground">{t("bio")}</label>
         <textarea
           value={bio}
           onChange={(e) => setBio(e.target.value.slice(0, 160))}
-          placeholder="Tell others a bit about yourself..."
+          placeholder={t("bioPlaceholder")}
           rows={3}
           className="w-full resize-none rounded-lg border border-border bg-secondary/50 px-3 py-2.5 text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
         />
@@ -122,9 +124,9 @@ export function ProfileForm({
       {/* Privacy Toggle */}
       <div className="flex items-center justify-between rounded-lg border border-border bg-secondary/30 p-4">
         <div className="space-y-0.5">
-          <p className="text-sm font-medium text-foreground">Private Profile</p>
+          <p className="text-sm font-medium text-foreground">{t("privateProfile")}</p>
           <p className="text-xs text-muted-foreground">
-            Hide your profile and reviews from others
+            {t("privateProfileHint")}
           </p>
         </div>
         <button
@@ -154,10 +156,10 @@ export function ProfileForm({
         {isSaving ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Saving...
+            {t("saving")}
           </>
         ) : (
-          "Save Changes"
+          t("saveChanges")
         )}
       </Button>
     </form>
