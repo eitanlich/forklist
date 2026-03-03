@@ -301,3 +301,10 @@ Buscar restaurant → Reservar via ForkList → Comer → Review en ForkList
 - Detector de platos (foto → identificar comida)
 - Multi-currency para precio
 - Dark/Light mode toggle
+
+### 🟡 Iteraciones UX
+
+#### Feed (Home)
+- [ ] Mejorar diseño del feed - iterar UX
+- [ ] Diferenciar reviews propias vs de otros
+- [ ] Posible: infinite scroll vs pagination
