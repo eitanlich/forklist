@@ -1,7 +1,11 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { auth } from "@clerk/nextjs/server";
 import { getPublicProfile } from "@/lib/actions/profile";
+import { getFollowStatus } from "@/lib/actions/follows";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { ProfileHeader, PublicReviewCard } from "@/components/profile";
+import { PublicProfileContent } from "./PublicProfileContent";
 
 interface Props {
   params: Promise<{ username: string }>;
@@ -49,51 +53,33 @@ export default async function PublicProfilePage({ params }: Props) {
     notFound();
   }
 
+  // Check if current user is viewing their own profile
+  const { userId: clerkId } = await auth();
+  let isOwnProfile = false;
+  let followStatus = { isFollowing: false, isPending: false };
+
+  if (clerkId) {
+    const supabase = createAdminClient();
+    const { data: currentUser } = await supabase
+      .from("users")
+      .select("id")
+      .eq("clerk_id", clerkId)
+      .single();
+
+    if (currentUser) {
+      isOwnProfile = currentUser.id === profile.id;
+      if (!isOwnProfile) {
+        followStatus = await getFollowStatus(profile.id);
+      }
+    }
+  }
+
   return (
-    <div className="min-h-dvh bg-background">
-      <div className="mx-auto max-w-2xl px-6 py-10 md:px-8">
-        {/* Header */}
-        <ProfileHeader
-          username={profile.username}
-          bio={profile.bio}
-          avatarUrl={profile.avatar_url}
-          followerCount={profile.follower_count}
-          followingCount={profile.following_count}
-          reviewCount={profile.reviews.length}
-        />
-
-        {/* Divider */}
-        <div className="my-6 border-t border-border" />
-
-        {/* Reviews */}
-        <div className="space-y-4">
-          <h2 className="font-serif text-xl font-medium text-foreground">
-            Reviews
-          </h2>
-
-          {profile.reviews.length === 0 ? (
-            <p className="py-8 text-center text-muted-foreground">
-              No reviews yet
-            </p>
-          ) : (
-            <div className="space-y-3">
-              {profile.reviews.map((review) => (
-                <PublicReviewCard key={review.id} review={review as any} />
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Footer */}
-        <div className="mt-12 text-center">
-          <a
-            href="/"
-            className="text-sm text-muted-foreground transition-colors hover:text-primary"
-          >
-            Powered by ForkList
-          </a>
-        </div>
-      </div>
-    </div>
+    <PublicProfileContent
+      profile={profile}
+      isOwnProfile={isOwnProfile}
+      isFollowing={followStatus.isFollowing}
+      isPending={followStatus.isPending}
+    />
   );
 }

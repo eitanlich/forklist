@@ -1,4 +1,8 @@
+"use client";
+
 import { User } from "lucide-react";
+import { FollowButton } from "@/components/social/FollowButton";
+import { useT } from "@/lib/i18n";
 
 interface ProfileHeaderProps {
   username: string;
@@ -7,6 +11,10 @@ interface ProfileHeaderProps {
   followerCount: number;
   followingCount: number;
   reviewCount: number;
+  userId?: string;
+  isFollowing?: boolean;
+  isPending?: boolean;
+  isOwnProfile?: boolean;
 }
 
 export function ProfileHeader({
@@ -16,7 +24,13 @@ export function ProfileHeader({
   followerCount,
   followingCount,
   reviewCount,
+  userId,
+  isFollowing = false,
+  isPending = false,
+  isOwnProfile = false,
 }: ProfileHeaderProps) {
+  const t = useT();
+
   return (
     <div className="flex flex-col items-center space-y-4 pb-6">
       {/* Avatar */}
@@ -44,19 +58,28 @@ export function ProfileHeader({
         )}
       </div>
 
+      {/* Follow Button */}
+      {userId && !isOwnProfile && (
+        <FollowButton
+          targetUserId={userId}
+          initialIsFollowing={isFollowing}
+          initialIsPending={isPending}
+        />
+      )}
+
       {/* Stats */}
       <div className="flex items-center gap-8">
         <div className="text-center">
           <p className="text-lg font-semibold text-foreground">{reviewCount}</p>
-          <p className="text-xs text-muted-foreground">Reviews</p>
+          <p className="text-xs text-muted-foreground">{t("reviews")}</p>
         </div>
         <div className="text-center">
           <p className="text-lg font-semibold text-foreground">{followerCount}</p>
-          <p className="text-xs text-muted-foreground">Followers</p>
+          <p className="text-xs text-muted-foreground">{t("followers")}</p>
         </div>
         <div className="text-center">
           <p className="text-lg font-semibold text-foreground">{followingCount}</p>
-          <p className="text-xs text-muted-foreground">Following</p>
+          <p className="text-xs text-muted-foreground">{t("followingCount")}</p>
         </div>
       </div>
     </div>

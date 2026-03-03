@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { UserPlus, UserMinus, Clock, Loader2 } from "lucide-react";
 import { followUser, unfollowUser } from "@/lib/actions/follows";
+import { useT } from "@/lib/i18n";
 
 interface FollowButtonProps {
   targetUserId: string;
@@ -17,6 +18,7 @@ export function FollowButton({
   initialIsPending = false,
   compact = false,
 }: FollowButtonProps) {
+  const t = useT();
   const [isFollowing, setIsFollowing] = useState(initialIsFollowing);
   const [isPending, setIsPending] = useState(initialIsPending);
   const [isPendingAction, startTransition] = useTransition();
@@ -66,7 +68,7 @@ export function FollowButton({
             ? "bg-secondary text-muted-foreground"
             : "bg-primary text-primary-foreground hover:opacity-90"
         }`}
-        title={isFollowing ? "Unfollow" : isPending ? "Requested" : "Follow"}
+        title={isFollowing ? t("unfollow") : isPending ? t("requested") : t("follow")}
       >
         {isPendingAction ? (
           <Loader2 size={16} className="animate-spin" />
@@ -103,7 +105,7 @@ export function FollowButton({
       ) : (
         <UserPlus size={16} />
       )}
-      {isFollowing ? "Following" : isPending ? "Requested" : "Follow"}
+      {isFollowing ? t("following") : isPending ? t("requested") : t("follow")}
     </button>
   );
 }

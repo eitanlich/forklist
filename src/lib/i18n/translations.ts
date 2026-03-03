@@ -2,6 +2,7 @@ export const translations = {
   en: {
     // Navigation
     home: "Home",
+    feed: "Feed",
     history: "History",
     
     // Home page
@@ -132,6 +133,21 @@ export const translations = {
     settings: "Settings",
     signOut: "Sign out",
     
+    // Social / Follow
+    follow: "Follow",
+    following: "Following",
+    unfollow: "Unfollow",
+    requested: "Requested",
+    followers: "Followers",
+    followingCount: "Following",
+    feedSubtitle: "See what people you follow are eating",
+    emptyFeed: "Your feed is empty",
+    emptyFeedHint: "Follow people to see their reviews here",
+    discoverPeople: "Discover people",
+    today: "Today",
+    yesterday: "Yesterday",
+    loading: "Loading...",
+    
     // Share
     share: "Share",
     shareReview: "Share Review",
@@ -211,6 +227,7 @@ export const translations = {
   es: {
     // Navigation
     home: "Inicio",
+    feed: "Feed",
     history: "Historial",
     
     // Home page
@@ -340,6 +357,21 @@ export const translations = {
     language: "Idioma",
     settings: "Configuración",
     signOut: "Cerrar sesión",
+    
+    // Social / Follow
+    follow: "Seguir",
+    following: "Siguiendo",
+    unfollow: "Dejar de seguir",
+    requested: "Solicitado",
+    followers: "Seguidores",
+    followingCount: "Siguiendo",
+    feedSubtitle: "Mirá qué están comiendo las personas que seguís",
+    emptyFeed: "Tu feed está vacío",
+    emptyFeedHint: "Seguí personas para ver sus reviews acá",
+    discoverPeople: "Descubrir personas",
+    today: "Hoy",
+    yesterday: "Ayer",
+    loading: "Cargando...",
     
     // Share
     share: "Compartir",
