@@ -258,7 +258,7 @@ export function ReviewContent({ review }: ReviewContentProps) {
                 {locale === "es" ? "Compartir" : "Share"}
               </button>
               <Link
-                href="/history"
+                href={`/edit-review/${review.id}`}
                 className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-secondary py-3 text-sm font-medium hover:bg-secondary/80 transition-colors"
               >
                 <Pencil size={16} />
