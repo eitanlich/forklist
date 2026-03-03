@@ -155,3 +155,14 @@
 2. Verificar que campos existen en tablas
 3. Verificar rutas públicas en middleware
 4. No conflictos entre (app) y (public)
+
+---
+
+## 🔴 BUGS CRÍTICOS (Fase 3 - continuar mañana)
+
+### Follow system no funciona
+- [ ] Debuggear flujo completo de follow
+- [ ] Verificar botón FollowButton
+- [ ] Verificar server action followUser/unfollowUser
+- [ ] Verificar tabla follows en Supabase
+- [ ] Testear: buscar usuario → follow → verificar en DB → mostrar en followers
