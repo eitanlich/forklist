@@ -40,8 +40,8 @@ function ProfileContent({
   const [viewMode, setViewMode] = useState<ViewMode>("list");
 
   return (
-    <div className="min-h-dvh bg-background">
-      <div className="mx-auto max-w-2xl px-6 py-10 md:px-8">
+    <div className="bg-background">
+      <div className="py-4">
         {/* Settings link for own profile */}
         {isOwnProfile && (
           <div className="mb-4 flex justify-end">

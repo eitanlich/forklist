@@ -18,14 +18,25 @@ export function ProfileStats({ userId, initialStats }: ProfileStatsProps) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    // Skip fetch if we have initialStats and period is "all"
+    if (period === "all" && initialStats) {
+      setStats(initialStats);
+      return;
+    }
+    
     async function fetchStats() {
       setLoading(true);
-      const newStats = await getProfileStats(userId, period);
-      setStats(newStats);
-      setLoading(false);
+      try {
+        const newStats = await getProfileStats(userId, period);
+        setStats(newStats);
+      } catch (err) {
+        console.error("Error fetching stats:", err);
+      } finally {
+        setLoading(false);
+      }
     }
     fetchStats();
-  }, [userId, period]);
+  }, [userId, period, initialStats]);
 
   const periodLabels: Record<TimePeriod, string> = {
     month: locale === "es" ? "Este mes" : "This Month",

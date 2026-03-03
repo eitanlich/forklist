@@ -48,7 +48,12 @@ export async function getProfileStats(
     query = query.gte("visited_at", dateFilter);
   }
 
-  const { data: reviews } = await query;
+  const { data: reviews, error } = await query;
+  
+  // Debug: log if there's an issue
+  if (error) {
+    console.error("Error fetching reviews for stats:", error);
+  }
 
   // Calculate stats from reviews
   const restaurantIds = new Set<string>();
