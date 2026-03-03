@@ -38,9 +38,8 @@ export async function getProfileStats(
     .select(`
       id, 
       rating_overall, 
-      cuisine_type,
       occasion,
-      restaurant:restaurants!reviews_restaurant_id_fkey(id, city)
+      restaurant:restaurants!reviews_restaurant_id_fkey(id, city, cuisine_type)
     `)
     .eq("user_id", userId);
 
@@ -70,9 +69,9 @@ export async function getProfileStats(
     if (restaurant?.city) cities.add(restaurant.city);
     totalRating += review.rating_overall;
     
-    // Count cuisines
-    if (review.cuisine_type) {
-      cuisineCounts[review.cuisine_type] = (cuisineCounts[review.cuisine_type] || 0) + 1;
+    // Count cuisines (cuisine_type is on restaurant, not review)
+    if (restaurant?.cuisine_type) {
+      cuisineCounts[restaurant.cuisine_type] = (cuisineCounts[restaurant.cuisine_type] || 0) + 1;
     }
     
     // Count occasions
