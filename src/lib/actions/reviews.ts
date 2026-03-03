@@ -182,6 +182,7 @@ export async function getPublicReview(reviewId: string) {
     .from("reviews")
     .select(`
       id,
+      user_id,
       rating_overall,
       rating_food,
       rating_service,

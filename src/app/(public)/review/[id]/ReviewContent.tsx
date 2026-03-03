@@ -1,0 +1,287 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Star, MapPin, Calendar, Globe, User, Pencil, Trash2, ArrowLeft } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
+import { deleteReview } from "@/lib/actions/reviews";
+
+interface ReviewContentProps {
+  review: any;
+  isOwner: boolean;
+}
+
+function Stars({ rating, size = 16 }: { rating: number; size?: number }) {
+  return (
+    <div className="flex items-center gap-0.5">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <Star
+          key={star}
+          size={size}
+          strokeWidth={1.5}
+          className={rating >= star ? "text-primary" : "text-muted-foreground/25"}
+          fill={rating >= star ? "currentColor" : "none"}
+        />
+      ))}
+    </div>
+  );
+}
+
+export function ReviewContent({ review, isOwner }: ReviewContentProps) {
+  const { locale } = useI18n();
+  const router = useRouter();
+  const [deleting, setDeleting] = useState(false);
+
+  const restaurant = review.restaurant as any;
+  const user = review.user as any;
+  const visitDate = new Date(review.visited_at);
+
+  const OCCASION_LABELS: Record<string, Record<string, string>> = {
+    en: {
+      date: "Date Night",
+      family: "Family",
+      friends: "Friends",
+      business: "Business",
+      solo: "Solo",
+      other: "Other",
+    },
+    es: {
+      date: "Cita",
+      family: "Familia",
+      friends: "Amigos",
+      business: "Negocios",
+      solo: "Solo",
+      other: "Otro",
+    },
+  };
+
+  const MEAL_TYPE_LABELS: Record<string, Record<string, string>> = {
+    en: {
+      breakfast: "Breakfast",
+      brunch: "Brunch",
+      lunch: "Lunch",
+      snack: "Snack",
+      dinner: "Dinner",
+      drinks: "Drinks",
+    },
+    es: {
+      breakfast: "Desayuno",
+      brunch: "Brunch",
+      lunch: "Almuerzo",
+      snack: "Merienda",
+      dinner: "Cena",
+      drinks: "Tragos",
+    },
+  };
+
+  const handleDelete = async () => {
+    const confirmMsg = locale === "es" 
+      ? "¿Seguro que querés eliminar esta review?" 
+      : "Are you sure you want to delete this review?";
+    
+    if (!confirm(confirmMsg)) return;
+
+    setDeleting(true);
+    const result = await deleteReview(review.id);
+    
+    if ("error" in result) {
+      alert(result.error);
+      setDeleting(false);
+    } else {
+      router.push("/history");
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Back button */}
+      <button
+        type="button"
+        onClick={() => router.back()}
+        className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+      >
+        <ArrowLeft size={20} />
+        <span>{locale === "es" ? "Volver" : "Back"}</span>
+      </button>
+
+      {/* Restaurant Card */}
+      <article className="overflow-hidden rounded-2xl border border-border bg-card">
+        {/* Restaurant Image */}
+        {restaurant.photo_reference && (
+          <div className="aspect-video w-full overflow-hidden">
+            <img
+              src={`/api/places/photo?ref=${encodeURIComponent(restaurant.photo_reference)}`}
+              alt={restaurant.name}
+              className="h-full w-full object-cover"
+            />
+          </div>
+        )}
+
+        <div className="p-6">
+          {/* Restaurant Name & Location */}
+          <h1 className="font-serif text-2xl font-semibold tracking-tight">
+            {restaurant.name}
+          </h1>
+          {restaurant.city && (
+            <div className="mt-1 flex items-center gap-1.5 text-muted-foreground">
+              <MapPin size={14} strokeWidth={1.5} />
+              <span>{restaurant.city}</span>
+            </div>
+          )}
+
+          {/* Overall Rating */}
+          <div className="mt-4">
+            <Stars rating={review.rating_overall} size={24} />
+          </div>
+
+          {/* Detailed Ratings */}
+          <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground">
+            <span className="flex items-center gap-1.5">
+              {locale === "es" ? "Comida" : "Food"} <Stars rating={review.rating_food} size={12} />
+            </span>
+            <span className="flex items-center gap-1.5">
+              {locale === "es" ? "Servicio" : "Service"} <Stars rating={review.rating_service} size={12} />
+            </span>
+            <span className="flex items-center gap-1.5">
+              {locale === "es" ? "Ambiente" : "Ambiance"} <Stars rating={review.rating_ambiance} size={12} />
+            </span>
+            <span className="flex items-center gap-1.5">
+              {locale === "es" ? "Precio" : "Price"} <Stars rating={review.rating_price} size={12} />
+            </span>
+          </div>
+
+          {/* Meta Info */}
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+              <Calendar size={14} strokeWidth={1.5} />
+              {visitDate.toLocaleDateString(locale === "es" ? "es-ES" : "en-US", {
+                month: "long",
+                day: "numeric",
+                year: "numeric",
+              })}
+            </div>
+            {review.meal_type && (
+              <span className="rounded-full bg-secondary px-3 py-1 text-sm text-muted-foreground">
+                {MEAL_TYPE_LABELS[locale]?.[review.meal_type] ?? review.meal_type}
+              </span>
+            )}
+            {review.occasion && (
+              <span className="rounded-full bg-secondary px-3 py-1 text-sm text-muted-foreground">
+                {OCCASION_LABELS[locale]?.[review.occasion] ?? review.occasion}
+              </span>
+            )}
+          </div>
+
+          {/* Comment */}
+          {review.comment && (
+            <div className="mt-6 border-t border-border pt-6">
+              <p className="text-foreground/90 leading-relaxed italic">
+                &ldquo;{review.comment}&rdquo;
+              </p>
+            </div>
+          )}
+
+          {/* Restaurant Links */}
+          {(restaurant.google_maps_url || restaurant.website) && (
+            <div className="mt-6 flex items-center gap-2">
+              {restaurant.google_maps_url && (
+                <a
+                  href={restaurant.google_maps_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 rounded-full bg-secondary px-4 py-2 text-sm text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
+                >
+                  <MapPin size={14} strokeWidth={1.5} />
+                  {locale === "es" ? "Ver en Maps" : "View on Maps"}
+                </a>
+              )}
+              {restaurant.website && (
+                <a
+                  href={restaurant.website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 rounded-full bg-secondary px-4 py-2 text-sm text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
+                >
+                  <Globe size={14} strokeWidth={1.5} />
+                  Website
+                </a>
+              )}
+            </div>
+          )}
+
+          {/* Reviewer */}
+          {user?.username && (
+            <div className="mt-6 border-t border-border pt-6">
+              <Link
+                href={`/u/${user.username}`}
+                className="flex items-center gap-3 group"
+              >
+                {user.avatar_url ? (
+                  <img
+                    src={user.avatar_url}
+                    alt={user.username}
+                    className="h-10 w-10 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary">
+                    <User size={18} className="text-muted-foreground" />
+                  </div>
+                )}
+                <div>
+                  <p className="text-sm text-muted-foreground">
+                    {locale === "es" ? "Review de" : "Reviewed by"}
+                  </p>
+                  <p className="font-medium text-foreground group-hover:text-primary transition-colors">
+                    @{user.username}
+                  </p>
+                </div>
+              </Link>
+            </div>
+          )}
+
+          {/* Owner Actions */}
+          {isOwner && (
+            <div className="mt-6 flex gap-3 border-t border-border pt-6">
+              <Link
+                href={`/review/${review.id}/edit`}
+                className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-secondary py-3 text-sm font-medium hover:bg-secondary/80 transition-colors"
+              >
+                <Pencil size={16} />
+                {locale === "es" ? "Editar" : "Edit"}
+              </Link>
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={deleting}
+                className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-destructive/10 py-3 text-sm font-medium text-destructive hover:bg-destructive/20 transition-colors disabled:opacity-50"
+              >
+                <Trash2 size={16} />
+                {deleting 
+                  ? (locale === "es" ? "Eliminando..." : "Deleting...") 
+                  : (locale === "es" ? "Eliminar" : "Delete")}
+              </button>
+            </div>
+          )}
+        </div>
+      </article>
+
+      {/* Footer / CTA - only show if not owner */}
+      {!isOwner && (
+        <div className="text-center space-y-4">
+          <p className="text-sm text-muted-foreground">
+            {locale === "es" 
+              ? "Registrá tus experiencias en restaurantes" 
+              : "Track your own restaurant experiences"}
+          </p>
+          <a
+            href="/"
+            className="inline-block rounded-xl bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+          >
+            {locale === "es" ? "Empezá tu ForkList" : "Start your ForkList"}
+          </a>
+        </div>
+      )}
+    </div>
+  );
+}
