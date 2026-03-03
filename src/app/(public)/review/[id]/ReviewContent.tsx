@@ -1,15 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Star, MapPin, Calendar, Globe, User, Pencil, Trash2, ArrowLeft } from "lucide-react";
+import { Star, MapPin, Calendar, Globe, User, Pencil, Trash2, ArrowLeft, Share2 } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
+import { useUser } from "@/lib/user";
 import { deleteReview } from "@/lib/actions/reviews";
+import { ShareModal } from "@/components/share/ShareModal";
 
 interface ReviewContentProps {
   review: any;
-  isOwner: boolean;
 }
 
 function Stars({ rating, size = 16 }: { rating: number; size?: number }) {
@@ -28,13 +29,18 @@ function Stars({ rating, size = 16 }: { rating: number; size?: number }) {
   );
 }
 
-export function ReviewContent({ review, isOwner }: ReviewContentProps) {
+export function ReviewContent({ review }: ReviewContentProps) {
   const { locale } = useI18n();
+  const { user } = useUser();
   const router = useRouter();
   const [deleting, setDeleting] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+
+  // Check ownership on client side
+  const isOwner = user?.id === review.user_id;
 
   const restaurant = review.restaurant as any;
-  const user = review.user as any;
+  const reviewUser = review.user as any;
   const visitDate = new Date(review.visited_at);
 
   const OCCASION_LABELS: Record<string, Record<string, string>> = {
@@ -210,17 +216,17 @@ export function ReviewContent({ review, isOwner }: ReviewContentProps) {
             </div>
           )}
 
-          {/* Reviewer */}
-          {user?.username && (
+          {/* Reviewer - only show if not owner */}
+          {reviewUser?.username && !isOwner && (
             <div className="mt-6 border-t border-border pt-6">
               <Link
-                href={`/u/${user.username}`}
+                href={`/u/${reviewUser.username}`}
                 className="flex items-center gap-3 group"
               >
-                {user.avatar_url ? (
+                {reviewUser.avatar_url ? (
                   <img
-                    src={user.avatar_url}
-                    alt={user.username}
+                    src={reviewUser.avatar_url}
+                    alt={reviewUser.username}
                     className="h-10 w-10 rounded-full object-cover"
                   />
                 ) : (
@@ -233,7 +239,7 @@ export function ReviewContent({ review, isOwner }: ReviewContentProps) {
                     {locale === "es" ? "Review de" : "Reviewed by"}
                   </p>
                   <p className="font-medium text-foreground group-hover:text-primary transition-colors">
-                    @{user.username}
+                    @{reviewUser.username}
                   </p>
                 </div>
               </Link>
@@ -243,8 +249,16 @@ export function ReviewContent({ review, isOwner }: ReviewContentProps) {
           {/* Owner Actions */}
           {isOwner && (
             <div className="mt-6 flex gap-3 border-t border-border pt-6">
+              <button
+                type="button"
+                onClick={() => setShowShareModal(true)}
+                className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary/10 py-3 text-sm font-medium text-primary hover:bg-primary/20 transition-colors"
+              >
+                <Share2 size={16} />
+                {locale === "es" ? "Compartir" : "Share"}
+              </button>
               <Link
-                href={`/review/${review.id}/edit`}
+                href={`/history?edit=${review.id}`}
                 className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-secondary py-3 text-sm font-medium hover:bg-secondary/80 transition-colors"
               >
                 <Pencil size={16} />
@@ -258,7 +272,7 @@ export function ReviewContent({ review, isOwner }: ReviewContentProps) {
               >
                 <Trash2 size={16} />
                 {deleting 
-                  ? (locale === "es" ? "Eliminando..." : "Deleting...") 
+                  ? (locale === "es" ? "..." : "...") 
                   : (locale === "es" ? "Eliminar" : "Delete")}
               </button>
             </div>
@@ -266,8 +280,8 @@ export function ReviewContent({ review, isOwner }: ReviewContentProps) {
         </div>
       </article>
 
-      {/* Footer / CTA - only show if not owner */}
-      {!isOwner && (
+      {/* Footer / CTA - only show if not owner and not logged in */}
+      {!isOwner && !user && (
         <div className="text-center space-y-4">
           <p className="text-sm text-muted-foreground">
             {locale === "es" 
@@ -282,6 +296,14 @@ export function ReviewContent({ review, isOwner }: ReviewContentProps) {
           </a>
         </div>
       )}
+
+      {/* Share Modal */}
+      <ShareModal
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        reviewId={review.id}
+        restaurantName={restaurant.name}
+      />
     </div>
   );
 }

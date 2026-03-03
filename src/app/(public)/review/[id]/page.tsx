@@ -1,8 +1,6 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { auth } from "@clerk/nextjs/server";
 import { getPublicReview } from "@/lib/actions/reviews";
-import { createAdminClient } from "@/lib/supabase/admin";
 import { ReviewContent } from "./ReviewContent";
 
 interface Props {
@@ -56,22 +54,5 @@ export default async function PublicReviewPage({ params }: Props) {
     notFound();
   }
 
-  // Check if current user is the owner
-  let isOwner = false;
-  const { userId: clerkId } = await auth();
-  
-  if (clerkId) {
-    const supabase = createAdminClient();
-    const { data: currentUser } = await supabase
-      .from("users")
-      .select("id")
-      .eq("clerk_id", clerkId)
-      .single();
-    
-    if (currentUser) {
-      isOwner = (review as any).user_id === currentUser.id;
-    }
-  }
-
-  return <ReviewContent review={review} isOwner={isOwner} />;
+  return <ReviewContent review={review} />;
 }
