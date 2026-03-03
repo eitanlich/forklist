@@ -3,32 +3,39 @@
 import { useState, useEffect } from "react";
 import { Star, MapPin, Heart, Utensils, Calendar, Building2 } from "lucide-react";
 import { useT, useI18n } from "@/lib/i18n";
-import { getProfileStats, type ProfileStats as ProfileStatsType, type TimePeriod } from "@/lib/actions/profile-stats";
+
+type TimePeriod = "month" | "year" | "all";
+
+interface ProfileStatsData {
+  totalReviews: number;
+  totalRestaurants: number;
+  averageRating: number;
+  topCuisine: string | null;
+  topOccasion: string | null;
+  totalLikesReceived: number;
+  totalCities: number;
+}
 
 interface ProfileStatsProps {
   userId: string;
-  initialStats?: ProfileStatsType;
 }
 
-export function ProfileStats({ userId, initialStats }: ProfileStatsProps) {
+export function ProfileStats({ userId }: ProfileStatsProps) {
   const t = useT();
   const { locale } = useI18n();
   const [period, setPeriod] = useState<TimePeriod>("all");
-  const [stats, setStats] = useState<ProfileStatsType | null>(initialStats ?? null);
-  const [loading, setLoading] = useState(false);
+  const [stats, setStats] = useState<ProfileStatsData | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Skip fetch if we have initialStats and period is "all"
-    if (period === "all" && initialStats) {
-      setStats(initialStats);
-      return;
-    }
-    
     async function fetchStats() {
       setLoading(true);
       try {
-        const newStats = await getProfileStats(userId, period);
-        setStats(newStats);
+        const response = await fetch(`/api/user/${userId}/stats?period=${period}`);
+        if (response.ok) {
+          const data = await response.json();
+          setStats(data);
+        }
       } catch (err) {
         console.error("Error fetching stats:", err);
       } finally {
@@ -36,15 +43,13 @@ export function ProfileStats({ userId, initialStats }: ProfileStatsProps) {
       }
     }
     fetchStats();
-  }, [userId, period, initialStats]);
+  }, [userId, period]);
 
   const periodLabels: Record<TimePeriod, string> = {
     month: locale === "es" ? "Este mes" : "This Month",
     year: locale === "es" ? "Este año" : "This Year",
     all: locale === "es" ? "Todo" : "All Time",
   };
-
-  if (!stats) return null;
 
   return (
     <div className="space-y-4">
@@ -70,7 +75,7 @@ export function ProfileStats({ userId, initialStats }: ProfileStatsProps) {
       <div className={`grid grid-cols-3 gap-2 transition-opacity ${loading ? "opacity-50" : ""}`}>
         {/* Reviews */}
         <div className="rounded-xl bg-secondary/50 p-3 text-center">
-          <p className="text-lg font-semibold text-foreground">{stats.totalReviews}</p>
+          <p className="text-lg font-semibold text-foreground">{stats?.totalReviews ?? 0}</p>
           <p className="text-xs text-muted-foreground">{t("reviews")}</p>
         </div>
 
@@ -78,7 +83,7 @@ export function ProfileStats({ userId, initialStats }: ProfileStatsProps) {
         <div className="rounded-xl bg-secondary/50 p-3 text-center">
           <div className="flex items-center justify-center gap-1">
             <MapPin size={14} className="text-primary" />
-            <span className="text-lg font-semibold text-foreground">{stats.totalRestaurants}</span>
+            <span className="text-lg font-semibold text-foreground">{stats?.totalRestaurants ?? 0}</span>
           </div>
           <p className="text-xs text-muted-foreground">{t("statsPlaces")}</p>
         </div>
@@ -88,7 +93,7 @@ export function ProfileStats({ userId, initialStats }: ProfileStatsProps) {
           <div className="flex items-center justify-center gap-1">
             <Star size={14} className="text-yellow-500" />
             <span className="text-lg font-semibold text-foreground">
-              {stats.averageRating > 0 ? stats.averageRating.toFixed(1) : "-"}
+              {stats?.averageRating && stats.averageRating > 0 ? stats.averageRating.toFixed(1) : "-"}
             </span>
           </div>
           <p className="text-xs text-muted-foreground">{t("statsAvgRating")}</p>
@@ -99,7 +104,7 @@ export function ProfileStats({ userId, initialStats }: ProfileStatsProps) {
           <div className="flex items-center justify-center gap-1">
             <Utensils size={14} className="text-primary" />
             <span className="text-sm font-semibold text-foreground truncate">
-              {stats.topCuisine || "-"}
+              {stats?.topCuisine || "-"}
             </span>
           </div>
           <p className="text-xs text-muted-foreground">{t("statsTopCuisine")}</p>
@@ -110,7 +115,7 @@ export function ProfileStats({ userId, initialStats }: ProfileStatsProps) {
           <div className="flex items-center justify-center gap-1">
             <Calendar size={14} className="text-primary" />
             <span className="text-sm font-semibold text-foreground truncate">
-              {stats.topOccasion || "-"}
+              {stats?.topOccasion || "-"}
             </span>
           </div>
           <p className="text-xs text-muted-foreground">{t("statsTopOccasion")}</p>
@@ -120,14 +125,14 @@ export function ProfileStats({ userId, initialStats }: ProfileStatsProps) {
         <div className="rounded-xl bg-secondary/50 p-3 text-center">
           <div className="flex items-center justify-center gap-1">
             <Heart size={14} className="text-destructive" />
-            <span className="text-lg font-semibold text-foreground">{stats.totalLikesReceived}</span>
+            <span className="text-lg font-semibold text-foreground">{stats?.totalLikesReceived ?? 0}</span>
           </div>
           <p className="text-xs text-muted-foreground">{t("statsLikes")}</p>
         </div>
       </div>
 
       {/* Cities (smaller, at bottom) */}
-      {stats.totalCities > 0 && (
+      {stats && stats.totalCities > 0 && (
         <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
           <Building2 size={14} />
           <span>
