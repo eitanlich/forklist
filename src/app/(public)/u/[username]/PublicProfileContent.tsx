@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ProfileHeader, PublicReviewCard, ProfileStats } from "@/components/profile";
 import { useT, useI18n } from "@/lib/i18n";
 import { I18nProvider } from "@/lib/i18n/context";
+import type { ProfileStats as ProfileStatsType } from "@/lib/actions/profile-stats";
 
 interface Profile {
   id: string;
@@ -22,6 +23,7 @@ interface PublicProfileContentProps {
   isOwnProfile: boolean;
   isFollowing: boolean;
   isPending: boolean;
+  initialStats?: ProfileStatsType;
 }
 
 type ViewMode = "list" | "grid";
@@ -31,6 +33,7 @@ function ProfileContent({
   isOwnProfile,
   isFollowing,
   isPending,
+  initialStats,
 }: PublicProfileContentProps) {
   const t = useT();
   const { locale } = useI18n();
@@ -68,7 +71,7 @@ function ProfileContent({
 
         {/* Stats */}
         <div className="my-6">
-          <ProfileStats userId={profile.id} />
+          <ProfileStats userId={profile.id} initialStats={initialStats} />
         </div>
 
         {/* Divider */}
@@ -146,7 +149,7 @@ function ProfileContent({
 // Simple grid card for grid view
 function GridReviewCard({ review }: { review: any }) {
   const photoUrl = review.restaurant?.photo_reference
-    ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${review.restaurant.photo_reference}&key=${process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY}`
+    ? `/api/places/photo?ref=${encodeURIComponent(review.restaurant.photo_reference)}`
     : null;
 
   return (

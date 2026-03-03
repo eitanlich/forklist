@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { auth } from "@clerk/nextjs/server";
 import { getPublicProfile } from "@/lib/actions/profile";
 import { getFollowStatus } from "@/lib/actions/follows";
+import { getProfileStats } from "@/lib/actions/profile-stats";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ProfileHeader, PublicReviewCard } from "@/components/profile";
 import { PublicProfileContent } from "./PublicProfileContent";
@@ -74,12 +75,16 @@ export default async function PublicProfilePage({ params }: Props) {
     }
   }
 
+  // Fetch initial stats
+  const initialStats = await getProfileStats(profile.id, "all");
+
   return (
     <PublicProfileContent
       profile={profile}
       isOwnProfile={isOwnProfile}
       isFollowing={followStatus.isFollowing}
       isPending={followStatus.isPending}
+      initialStats={initialStats}
     />
   );
 }
