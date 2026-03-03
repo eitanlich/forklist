@@ -82,16 +82,11 @@ function ReviewCard({ review, onShare }: { review: ReviewWithRestaurant; onShare
                 <Share2 size={14} strokeWidth={1.5} />
               </button>
               <Link
-                href={`/review/${review.id}/edit`}
+                href={`/review/${review.id}`}
                 className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+                title="View review"
               >
                 <Pencil size={14} strokeWidth={1.5} />
-              </Link>
-              <Link
-                href={`/review/${review.id}/delete`}
-                className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
-              >
-                <Trash2 size={14} strokeWidth={1.5} />
               </Link>
             </div>
           </div>
