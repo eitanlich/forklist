@@ -50,9 +50,11 @@ export async function getProfileStats(
 
   const { data: reviews, error } = await query;
   
-  // Debug: log if there's an issue
+  // Debug logging
+  console.log("[getProfileStats] userId:", userId, "period:", period);
+  console.log("[getProfileStats] reviews count:", reviews?.length ?? 0);
   if (error) {
-    console.error("Error fetching reviews for stats:", error);
+    console.error("[getProfileStats] Error:", error);
   }
 
   // Calculate stats from reviews
