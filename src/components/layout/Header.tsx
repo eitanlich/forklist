@@ -1,11 +1,11 @@
 "use client";
 
-import { UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Globe, Plus } from "lucide-react";
+import { Globe, Plus, User } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useI18n, useT, type Locale } from "@/lib/i18n";
+import { useUser } from "@/lib/user";
 
 const LANGUAGES: { code: Locale; name: string; flag: string }[] = [
   { code: "en", name: "English", flag: "🇺🇸" },
@@ -16,8 +16,12 @@ export default function Header() {
   const { locale, setLocale } = useI18n();
   const t = useT();
   const pathname = usePathname();
+  const { user } = useUser();
   const [showLangMenu, setShowLangMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  // Go to public profile if username exists, otherwise settings
+  const profileHref = user?.username ? `/u/${user.username}` : "/settings/profile";
 
   const navItems = [
     { href: "/home", label: t("home") },
@@ -106,21 +110,22 @@ export default function Header() {
             )}
           </div>
 
-          <UserButton
-            appearance={{
-              elements: {
-                avatarBox: "h-9 w-9 transition-transform duration-300 hover:scale-105",
-              },
-            }}
+          {/* Profile link */}
+          <Link
+            href={profileHref}
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary text-muted-foreground transition-all hover:bg-secondary/80 hover:text-foreground"
+            aria-label="Profile"
           >
-            <UserButton.MenuItems>
-              <UserButton.Link
-                label={locale === "es" ? "Perfil" : "Profile"}
-                labelIcon={<span className="text-sm">👤</span>}
-                href="/settings/profile"
+            {user?.avatar_url ? (
+              <img
+                src={user.avatar_url}
+                alt="Profile"
+                className="h-9 w-9 rounded-full object-cover"
               />
-            </UserButton.MenuItems>
-          </UserButton>
+            ) : (
+              <User size={18} />
+            )}
+          </Link>
         </div>
       </div>
     </header>

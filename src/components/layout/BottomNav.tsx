@@ -4,10 +4,16 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, BookOpen, Plus, Search, User } from "lucide-react";
 import { useT } from "@/lib/i18n";
+import { useUser } from "@/lib/user";
 
 export default function BottomNav() {
   const pathname = usePathname();
   const t = useT();
+  const { user } = useUser();
+  
+  // Go to public profile if username exists, otherwise settings
+  const profileHref = user?.username ? `/u/${user.username}` : "/settings/profile";
+  const isProfileActive = pathname.startsWith("/u/") || pathname.startsWith("/settings");
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-background backdrop-blur-none pb-safe md:hidden transform-gpu" style={{ position: 'fixed' }}>
@@ -62,14 +68,14 @@ export default function BottomNav() {
 
         {/* Profile */}
         <Link
-          href="/settings/profile"
+          href={profileHref}
           className={`flex flex-col items-center gap-1 transition-colors duration-200 ${
-            pathname.startsWith("/settings")
+            isProfileActive
               ? "text-primary"
               : "text-muted-foreground hover:text-foreground"
           }`}
         >
-          <User size={20} strokeWidth={pathname.startsWith("/settings") ? 2 : 1.5} />
+          <User size={20} strokeWidth={isProfileActive ? 2 : 1.5} />
           <span className="text-xs">{t("profile")}</span>
         </Link>
       </div>
