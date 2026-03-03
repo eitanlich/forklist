@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useClerk } from "@clerk/nextjs";
 import { UsernameForm, ProfileForm } from "@/components/profile";
-import { ExternalLink, Share2, Copy, Check, Trash2, Loader2 } from "lucide-react";
-import { useT } from "@/lib/i18n";
+import { ExternalLink, Share2, Copy, Check, Trash2, Loader2, LogOut } from "lucide-react";
+import { useT, useI18n } from "@/lib/i18n";
 import { deleteAccount } from "@/lib/actions/profile";
 
 interface ProfileSettingsContentProps {
@@ -21,7 +22,9 @@ export function ProfileSettingsContent({
   isPrivate,
 }: ProfileSettingsContentProps) {
   const router = useRouter();
+  const { signOut } = useClerk();
   const t = useT();
+  const { locale } = useI18n();
   const [currentUsername, setCurrentUsername] = useState(username);
   const [copied, setCopied] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -150,6 +153,18 @@ export function ProfileSettingsContent({
           </button>
         </section>
       )}
+
+      {/* Sign Out */}
+      <section className="rounded-xl border border-border bg-card p-6">
+        <button
+          type="button"
+          onClick={() => signOut({ redirectUrl: "/" })}
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-secondary py-3 font-medium text-foreground transition-colors hover:bg-secondary/80"
+        >
+          <LogOut size={18} />
+          {locale === "es" ? "Cerrar sesión" : "Sign out"}
+        </button>
+      </section>
 
       {/* Danger Zone - Delete Account */}
       <section className="rounded-xl border border-destructive/50 bg-card p-6">
