@@ -7,6 +7,8 @@ export interface FollowUser {
   id: string;
   username: string | null;
   created_at: string;
+  bio?: string | null;
+  avatar_url?: string | null;
 }
 
 export interface FollowStatus {
@@ -143,7 +145,7 @@ export async function getFollowers(
   // Get followers
   const { data: follows } = await supabase
     .from("follows")
-    .select("follower:users!follows_follower_id_fkey(id, username, created_at)")
+    .select("follower:users!follows_follower_id_fkey(id, username, created_at, bio, avatar_url)")
     .eq("following_id", userId)
     .eq("status", "active")
     .order("created_at", { ascending: false })
@@ -176,7 +178,7 @@ export async function getFollowing(
   // Get following
   const { data: follows } = await supabase
     .from("follows")
-    .select("following:users!follows_following_id_fkey(id, username, created_at)")
+    .select("following:users!follows_following_id_fkey(id, username, created_at, bio, avatar_url)")
     .eq("follower_id", userId)
     .eq("status", "active")
     .order("created_at", { ascending: false })
@@ -242,24 +244,24 @@ export async function getFeedReviews(
   const supabase = createAdminClient();
   const offset = (page - 1) * limit;
 
-  // Get IDs of people the current user follows
+  // Get IDs of people the current user follows + self
   const { data: follows } = await supabase
     .from("follows")
     .select("following_id")
     .eq("follower_id", currentUserId)
     .eq("status", "active");
 
-  if (!follows || follows.length === 0) {
-    return { reviews: [], total: 0, hasMore: false };
+  // Include own reviews + reviews from people we follow
+  const userIds = [currentUserId];
+  if (follows && follows.length > 0) {
+    userIds.push(...follows.map((f) => f.following_id));
   }
-
-  const followingIds = follows.map((f) => f.following_id);
 
   // Get total count
   const { count } = await supabase
     .from("reviews")
     .select("*", { count: "exact", head: true })
-    .in("user_id", followingIds);
+    .in("user_id", userIds);
 
   // Get reviews
   const { data: reviews } = await supabase
@@ -273,7 +275,7 @@ export async function getFeedReviews(
       user:users!reviews_user_id_fkey(id, username),
       restaurant:restaurants!reviews_restaurant_id_fkey(id, name, city, photo_reference)
     `)
-    .in("user_id", followingIds)
+    .in("user_id", userIds)
     .order("created_at", { ascending: false })
     .range(offset, offset + limit - 1);
 

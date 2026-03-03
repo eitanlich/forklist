@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { User } from "lucide-react";
 import { FollowButton } from "@/components/social/FollowButton";
 import { useT } from "@/lib/i18n";
@@ -73,14 +74,14 @@ export function ProfileHeader({
           <p className="text-lg font-semibold text-foreground">{reviewCount}</p>
           <p className="text-xs text-muted-foreground">{t("reviews")}</p>
         </div>
-        <div className="text-center">
+        <Link href={`/u/${username}/followers`} className="text-center hover:opacity-70 transition-opacity">
           <p className="text-lg font-semibold text-foreground">{followerCount}</p>
           <p className="text-xs text-muted-foreground">{t("followers")}</p>
-        </div>
-        <div className="text-center">
+        </Link>
+        <Link href={`/u/${username}/following`} className="text-center hover:opacity-70 transition-opacity">
           <p className="text-lg font-semibold text-foreground">{followingCount}</p>
           <p className="text-xs text-muted-foreground">{t("followingCount")}</p>
-        </div>
+        </Link>
       </div>
     </div>
   );

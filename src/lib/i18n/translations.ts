@@ -150,6 +150,24 @@ export const translations = {
     yesterday: "Yesterday",
     loading: "Loading...",
     
+    // Explore
+    explore: "Explore",
+    exploreSubtitle: "Discover foodies and trending reviews",
+    searchUsersPlaceholder: "Search users...",
+    users: "Users",
+    noUsersFound: "No users found",
+    trendingReviews: "Trending Reviews",
+    
+    // Profile Stats
+    statsPlaces: "Places",
+    statsCountries: "Countries",
+    statsAvgRating: "Avg Rating",
+    statsLikesReceived: "Likes",
+    
+    // Followers/Following
+    noFollowersYet: "No followers yet",
+    notFollowingAnyone: "Not following anyone yet",
+    
     // Share
     share: "Share",
     shareReview: "Share Review",
@@ -376,6 +394,24 @@ export const translations = {
     today: "Hoy",
     yesterday: "Ayer",
     loading: "Cargando...",
+    
+    // Explore
+    explore: "Explorar",
+    exploreSubtitle: "Descubrí foodies y reviews populares",
+    searchUsersPlaceholder: "Buscar usuarios...",
+    users: "Usuarios",
+    noUsersFound: "No se encontraron usuarios",
+    trendingReviews: "Reviews populares",
+    
+    // Profile Stats
+    statsPlaces: "Lugares",
+    statsCountries: "Países",
+    statsAvgRating: "Rating prom.",
+    statsLikesReceived: "Likes",
+    
+    // Followers/Following
+    noFollowersYet: "Sin seguidores todavía",
+    notFollowingAnyone: "No sigue a nadie todavía",
     
     // Share
     share: "Compartir",

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, BookOpen, Plus, List, User } from "lucide-react";
+import { Home, BookOpen, Plus, Search, User } from "lucide-react";
 import { useT } from "@/lib/i18n";
 
 export default function BottomNav() {
@@ -25,17 +25,17 @@ export default function BottomNav() {
           <span className="text-xs">{t("home")}</span>
         </Link>
 
-        {/* Lists */}
+        {/* Explore */}
         <Link
-          href="/lists"
+          href="/explore"
           className={`flex flex-col items-center gap-1 transition-colors duration-200 ${
-            pathname.startsWith("/lists")
+            pathname.startsWith("/explore")
               ? "text-primary"
               : "text-muted-foreground hover:text-foreground"
           }`}
         >
-          <List size={20} strokeWidth={pathname.startsWith("/lists") ? 2 : 1.5} />
-          <span className="text-xs">{t("lists")}</span>
+          <Search size={20} strokeWidth={pathname.startsWith("/explore") ? 2 : 1.5} />
+          <span className="text-xs">{t("explore")}</span>
         </Link>
 
         {/* Add — elevated center FAB */}
