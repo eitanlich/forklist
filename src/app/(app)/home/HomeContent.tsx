@@ -20,17 +20,17 @@ interface HomeContentProps {
 
 export default function HomeContent({ firstName, stats, followingCount }: HomeContentProps) {
   const t = useT();
-  const [activeTab, setActiveTab] = useState<"feed" | "stats">(followingCount > 0 ? "feed" : "stats");
+  const [activeTab, setActiveTab] = useState<"feed" | "stats">("feed");
   const [feedReviews, setFeedReviews] = useState<FeedReview[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const [page, setPage] = useState(1);
 
   useEffect(() => {
-    if (activeTab === "feed" && followingCount > 0) {
+    if (activeTab === "feed") {
       loadFeed();
     }
-  }, [activeTab, followingCount]);
+  }, [activeTab]);
 
   const loadFeed = async (nextPage = 1) => {
     setLoading(true);
@@ -77,8 +77,7 @@ export default function HomeContent({ firstName, stats, followingCount }: HomeCo
       </div>
 
       {/* Tabs */}
-      {followingCount > 0 && (
-        <div className="flex gap-1 rounded-xl bg-secondary/50 p-1">
+      <div className="flex gap-1 rounded-xl bg-secondary/50 p-1">
           <button
             type="button"
             onClick={() => setActiveTab("feed")}
@@ -102,10 +101,9 @@ export default function HomeContent({ firstName, stats, followingCount }: HomeCo
             {t("yourStats")}
           </button>
         </div>
-      )}
 
       {/* Feed Tab */}
-      {activeTab === "feed" && followingCount > 0 && (
+      {activeTab === "feed" && (
         <div className="space-y-4">
           {loading && feedReviews.length === 0 ? (
             <div className="flex items-center justify-center py-12">
