@@ -162,6 +162,9 @@ export const translations = {
     statsPlaces: "Places",
     statsCountries: "Countries",
     statsAvgRating: "Avg Rating",
+    statsTopCuisine: "Top Cuisine",
+    statsTopOccasion: "Top Occasion", 
+    statsLikes: "Likes",
     statsLikesReceived: "Likes",
     
     // Followers/Following
@@ -407,6 +410,9 @@ export const translations = {
     statsPlaces: "Lugares",
     statsCountries: "Países",
     statsAvgRating: "Rating prom.",
+    statsTopCuisine: "Cocina top",
+    statsTopOccasion: "Ocasión top",
+    statsLikes: "Likes",
     statsLikesReceived: "Likes",
     
     // Followers/Following

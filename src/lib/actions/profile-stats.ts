@@ -2,36 +2,86 @@
 
 import { createAdminClient } from "@/lib/supabase/admin";
 
+export type TimePeriod = "month" | "year" | "all";
+
 export interface ProfileStats {
   totalReviews: number;
   totalRestaurants: number;
-  totalCountries: number;
   averageRating: number;
+  topCuisine: string | null;
+  topOccasion: string | null;
   totalLikesReceived: number;
+  totalCities: number;
 }
 
-export async function getProfileStats(userId: string): Promise<ProfileStats> {
+export async function getProfileStats(
+  userId: string,
+  period: TimePeriod = "all"
+): Promise<ProfileStats> {
   const supabase = createAdminClient();
 
-  // Get reviews
-  const { data: reviews, count: reviewCount } = await supabase
+  // Calculate date filter based on period
+  let dateFilter: string | null = null;
+  const now = new Date();
+  
+  if (period === "month") {
+    const monthAgo = new Date(now.getFullYear(), now.getMonth(), 1);
+    dateFilter = monthAgo.toISOString();
+  } else if (period === "year") {
+    const yearStart = new Date(now.getFullYear(), 0, 1);
+    dateFilter = yearStart.toISOString();
+  }
+
+  // Build query
+  let query = supabase
     .from("reviews")
-    .select("id, rating_overall, restaurant:restaurants!reviews_restaurant_id_fkey(id, country)", { count: "exact" })
+    .select(`
+      id, 
+      rating_overall, 
+      cuisine_type,
+      occasion,
+      restaurant:restaurants!reviews_restaurant_id_fkey(id, city)
+    `)
     .eq("user_id", userId);
+
+  if (dateFilter) {
+    query = query.gte("visited_at", dateFilter);
+  }
+
+  const { data: reviews } = await query;
 
   // Calculate stats from reviews
   const restaurantIds = new Set<string>();
-  const countries = new Set<string>();
+  const cities = new Set<string>();
+  const cuisineCounts: Record<string, number> = {};
+  const occasionCounts: Record<string, number> = {};
   let totalRating = 0;
 
   for (const review of reviews ?? []) {
     const restaurant = Array.isArray(review.restaurant) ? review.restaurant[0] : review.restaurant;
     if (restaurant?.id) restaurantIds.add(restaurant.id);
-    if (restaurant?.country) countries.add(restaurant.country);
+    if (restaurant?.city) cities.add(restaurant.city);
     totalRating += review.rating_overall;
+    
+    // Count cuisines
+    if (review.cuisine_type) {
+      cuisineCounts[review.cuisine_type] = (cuisineCounts[review.cuisine_type] || 0) + 1;
+    }
+    
+    // Count occasions
+    if (review.occasion) {
+      occasionCounts[review.occasion] = (occasionCounts[review.occasion] || 0) + 1;
+    }
   }
 
-  // Get total likes received on user's reviews
+  // Find top cuisine and occasion
+  const topCuisine = Object.entries(cuisineCounts)
+    .sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
+  
+  const topOccasion = Object.entries(occasionCounts)
+    .sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
+
+  // Get total likes received on user's reviews (within period)
   const reviewIds = (reviews ?? []).map((r) => r.id);
   let totalLikes = 0;
   
@@ -43,11 +93,15 @@ export async function getProfileStats(userId: string): Promise<ProfileStats> {
     totalLikes = likeCount ?? 0;
   }
 
+  const reviewCount = reviews?.length ?? 0;
+
   return {
-    totalReviews: reviewCount ?? 0,
+    totalReviews: reviewCount,
     totalRestaurants: restaurantIds.size,
-    totalCountries: countries.size,
     averageRating: reviewCount ? Math.round((totalRating / reviewCount) * 10) / 10 : 0,
+    topCuisine,
+    topOccasion,
     totalLikesReceived: totalLikes,
+    totalCities: cities.size,
   };
 }
