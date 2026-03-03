@@ -39,6 +39,7 @@ export const translations = {
     // Review form
     overall: "Overall",
     food: "Food",
+    overallRating: "Overall Rating",
     service: "Service",
     ambiance: "Ambiance",
     priceValue: "Price / Value",
@@ -287,6 +288,7 @@ export const translations = {
     // Review form
     overall: "General",
     food: "Comida",
+    overallRating: "Calificación general",
     service: "Servicio",
     ambiance: "Ambiente",
     priceValue: "Precio / Valor",

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Star, MapPin, Calendar } from "lucide-react";
 
 interface PublicReviewCardProps {
@@ -29,7 +30,10 @@ export function PublicReviewCard({ review }: PublicReviewCardProps) {
   const visitDate = new Date(review.visited_at);
 
   return (
-    <div className="rounded-xl border border-border bg-card p-4 transition-colors hover:bg-card/80">
+    <Link 
+      href={`/review/${review.id}`}
+      className="block rounded-xl border border-border bg-card p-4 transition-all hover:bg-card/80 hover:border-primary/30"
+    >
       <div className="flex gap-4">
         {/* Restaurant Image */}
         <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-secondary">
@@ -95,6 +99,6 @@ export function PublicReviewCard({ review }: PublicReviewCardProps) {
           )}
         </div>
       </div>
-    </div>
+    </Link>
   );
 }

@@ -5,7 +5,7 @@ import { Grid3X3, List, Settings } from "lucide-react";
 import Link from "next/link";
 import { ProfileHeader, PublicReviewCard, ProfileStats } from "@/components/profile";
 import { useT, useI18n } from "@/lib/i18n";
-import { I18nProvider } from "@/lib/i18n/context";
+
 
 
 interface Profile {
@@ -152,7 +152,10 @@ function GridReviewCard({ review }: { review: any }) {
     : null;
 
   return (
-    <div className="relative aspect-square overflow-hidden bg-secondary">
+    <Link 
+      href={`/review/${review.id}`}
+      className="relative aspect-square overflow-hidden bg-secondary hover:opacity-90 transition-opacity"
+    >
       {photoUrl ? (
         <img
           src={photoUrl}
@@ -169,14 +172,10 @@ function GridReviewCard({ review }: { review: any }) {
         <span>⭐</span>
         <span>{review.rating_overall}</span>
       </div>
-    </div>
+    </Link>
   );
 }
 
 export function PublicProfileContent(props: PublicProfileContentProps) {
-  return (
-    <I18nProvider>
-      <ProfileContent {...props} />
-    </I18nProvider>
-  );
+  return <ProfileContent {...props} />;
 }
