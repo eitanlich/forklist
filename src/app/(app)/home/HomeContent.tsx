@@ -1,136 +1,247 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Plus, Search, Utensils, Star, Users, TrendingUp } from "lucide-react";
+import { Plus, Search, Utensils, Star, MapPin, Users, Loader2 } from "lucide-react";
 import { useT } from "@/lib/i18n";
+import { getFeedReviews, type FeedReview } from "@/lib/actions/follows";
 
 interface UserStats {
   totalReviews: number;
   uniqueRestaurants: number;
   avgRating: number | null;
-  topOccasion: string | null;
-  topCuisine: string | null;
-}
-
-function StatCard({
-  icon: Icon,
-  label,
-  value,
-  subtext,
-}: {
-  icon: React.ElementType;
-  label: string;
-  value: string | number;
-  subtext?: string;
-}) {
-  return (
-    <div className="group flex flex-col gap-2 rounded-2xl border border-border bg-card p-5 transition-all duration-300 hover:border-primary/20 hover:bg-card/80">
-      <div className="flex items-center gap-2 text-muted-foreground">
-        <Icon size={15} strokeWidth={1.5} />
-        <span className="text-sm font-medium tracking-wide uppercase">{label}</span>
-      </div>
-      <p className="font-serif text-3xl font-semibold tracking-tight">{value}</p>
-      {subtext && <p className="text-sm text-muted-foreground">{subtext}</p>}
-    </div>
-  );
 }
 
 interface HomeContentProps {
   firstName: string;
   stats: UserStats;
+  followingCount: number;
 }
 
-export default function HomeContent({ firstName, stats }: HomeContentProps) {
+export default function HomeContent({ firstName, stats, followingCount }: HomeContentProps) {
   const t = useT();
-  const hasReviews = stats.totalReviews > 0;
+  const [activeTab, setActiveTab] = useState<"feed" | "stats">(followingCount > 0 ? "feed" : "stats");
+  const [feedReviews, setFeedReviews] = useState<FeedReview[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
+  const [page, setPage] = useState(1);
 
-  const OCCASION_LABELS: Record<string, string> = {
-    date: t("dateNight"),
-    family: t("family"),
-    friends: t("friends"),
-    business: t("business"),
-    solo: t("solo"),
-    other: t("other"),
+  useEffect(() => {
+    if (activeTab === "feed" && followingCount > 0) {
+      loadFeed();
+    }
+  }, [activeTab, followingCount]);
+
+  const loadFeed = async (nextPage = 1) => {
+    setLoading(true);
+    const result = await getFeedReviews(nextPage, 10);
+    if (nextPage === 1) {
+      setFeedReviews(result.reviews);
+    } else {
+      setFeedReviews([...feedReviews, ...result.reviews]);
+    }
+    setHasMore(result.hasMore);
+    setPage(nextPage);
+    setLoading(false);
+  };
+
+  const formatDate = (dateStr: string): string => {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) return t("today");
+    if (diffDays === 1) return t("yesterday");
+    if (diffDays < 7) return `${diffDays}d`;
+    
+    return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
   };
 
   return (
-    <div className="space-y-10">
-      {/* Greeting */}
-      <div className="space-y-1">
-        <p className="text-base text-muted-foreground font-medium">{t("welcomeBack")},</p>
-        <h1 className="font-serif text-4xl font-semibold tracking-tight">{firstName}</h1>
+    <div className="space-y-6">
+      {/* Greeting + Search */}
+      <div className="space-y-4">
+        <div>
+          <p className="text-sm text-muted-foreground">{t("welcomeBack")},</p>
+          <h1 className="font-serif text-3xl font-semibold tracking-tight">{firstName}</h1>
+        </div>
+
+        <Link
+          href="/add"
+          className="group flex items-center gap-3 rounded-xl border border-border bg-secondary/50 px-4 py-3 text-muted-foreground transition-all hover:border-primary/30 hover:bg-secondary"
+        >
+          <Search size={18} />
+          <span className="text-sm">{t("searchForRestaurant")}...</span>
+        </Link>
       </div>
 
-      {/* Search CTA */}
-      <Link
-        href="/add"
-        className="group flex items-center gap-4 rounded-2xl border border-border bg-secondary/50 px-5 py-4 text-muted-foreground transition-all duration-300 hover:border-primary/30 hover:bg-secondary hover:text-foreground"
-      >
-        <Search size={18} strokeWidth={1.5} className="transition-transform duration-300 group-hover:scale-110" />
-        <span className="text-base">{t("searchForRestaurant")}...</span>
-      </Link>
-
-      {/* Stats Grid */}
-      {hasReviews ? (
-        <div className="grid grid-cols-2 gap-4">
-          <StatCard
-            icon={Utensils}
-            label={t("places")}
-            value={stats.uniqueRestaurants}
-            subtext={`${stats.totalReviews} ${t("visits")}`}
-          />
-          <StatCard
-            icon={Star}
-            label={t("rating")}
-            value={stats.avgRating?.toFixed(1) ?? "-"}
-            subtext={t("average")}
-          />
-          {stats.topOccasion && (
-            <StatCard
-              icon={Users}
-              label={t("occasion")}
-              value={OCCASION_LABELS[stats.topOccasion] ?? stats.topOccasion}
-            />
-          )}
-          {stats.topCuisine && (
-            <StatCard
-              icon={TrendingUp}
-              label={t("cuisine")}
-              value={stats.topCuisine}
-            />
-          )}
-        </div>
-      ) : (
-        <div className="rounded-2xl border border-dashed border-border bg-card/30 p-10 text-center">
-          <Utensils className="mx-auto h-10 w-10 text-muted-foreground/30" strokeWidth={1.5} />
-          <p className="mt-4 text-base text-muted-foreground">
-            {t("noVisitsYet")}
-          </p>
+      {/* Tabs */}
+      {followingCount > 0 && (
+        <div className="flex gap-1 rounded-xl bg-secondary/50 p-1">
+          <button
+            type="button"
+            onClick={() => setActiveTab("feed")}
+            className={`flex-1 rounded-lg py-2 text-sm font-medium transition-colors ${
+              activeTab === "feed"
+                ? "bg-card text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {t("feed")}
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("stats")}
+            className={`flex-1 rounded-lg py-2 text-sm font-medium transition-colors ${
+              activeTab === "stats"
+                ? "bg-card text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {t("yourStats")}
+          </button>
         </div>
       )}
 
-      {/* Quick actions */}
-      <div className="grid grid-cols-2 gap-4">
-        <Link
-          href="/add"
-          className="group flex flex-col items-center justify-center gap-3 rounded-2xl border border-border bg-card py-8 transition-all duration-300 hover:border-primary/30 hover:bg-card/80"
-        >
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary transition-transform duration-300 group-hover:scale-110">
-            <Plus size={22} strokeWidth={2} />
-          </div>
-          <span className="text-base font-medium">{t("logAVisit")}</span>
-        </Link>
+      {/* Feed Tab */}
+      {activeTab === "feed" && followingCount > 0 && (
+        <div className="space-y-4">
+          {loading && feedReviews.length === 0 ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          ) : feedReviews.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-border bg-card/30 p-8 text-center">
+              <Users className="mx-auto h-10 w-10 text-muted-foreground/50" />
+              <p className="mt-4 text-muted-foreground">{t("emptyFeedHint")}</p>
+            </div>
+          ) : (
+            <>
+              {feedReviews.map((review) => (
+                <Link
+                  key={review.id}
+                  href={`/review/${review.id}`}
+                  className="flex gap-4 rounded-xl border border-border bg-card p-4 transition-all hover:border-primary/20"
+                >
+                  {/* Photo */}
+                  {review.restaurant.photo_reference ? (
+                    <img
+                      src={`/api/places/photo?ref=${encodeURIComponent(review.restaurant.photo_reference)}`}
+                      alt={review.restaurant.name}
+                      className="h-16 w-16 shrink-0 rounded-lg object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg bg-secondary">
+                      <MapPin className="h-5 w-5 text-muted-foreground" />
+                    </div>
+                  )}
 
-        <Link
-          href="/history"
-          className="group flex flex-col items-center justify-center gap-3 rounded-2xl border border-border bg-card py-8 transition-all duration-300 hover:border-primary/30 hover:bg-card/80"
-        >
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary text-muted-foreground transition-transform duration-300 group-hover:scale-110">
-            <span className="font-serif text-xl font-semibold">H</span>
+                  {/* Content */}
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="text-xs text-muted-foreground">
+                          <span className="font-medium text-foreground">@{review.user.username}</span>
+                          {" · "}{formatDate(review.created_at)}
+                        </p>
+                        <h3 className="mt-1 font-serif font-semibold truncate">
+                          {review.restaurant.name}
+                        </h3>
+                      </div>
+                      <div className="flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5">
+                        <Star size={12} className="text-primary" fill="currentColor" />
+                        <span className="text-xs font-medium text-primary">{review.rating_overall}</span>
+                      </div>
+                    </div>
+                    {review.comment && (
+                      <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
+                        {review.comment}
+                      </p>
+                    )}
+                  </div>
+                </Link>
+              ))}
+
+              {hasMore && (
+                <button
+                  type="button"
+                  onClick={() => loadFeed(page + 1)}
+                  disabled={loading}
+                  className="w-full rounded-xl bg-secondary py-3 text-sm font-medium text-foreground transition-colors hover:bg-secondary/80 disabled:opacity-50"
+                >
+                  {loading ? t("loading") : t("loadMore")}
+                </button>
+              )}
+            </>
+          )}
+        </div>
+      )}
+
+      {/* Stats Tab / Default when no follows */}
+      {(activeTab === "stats" || followingCount === 0) && (
+        <div className="space-y-6">
+          {/* Stats */}
+          {stats.totalReviews > 0 ? (
+            <div className="grid grid-cols-3 gap-3">
+              <div className="rounded-xl border border-border bg-card p-4 text-center">
+                <p className="font-serif text-2xl font-semibold">{stats.uniqueRestaurants}</p>
+                <p className="text-xs text-muted-foreground">{t("places")}</p>
+              </div>
+              <div className="rounded-xl border border-border bg-card p-4 text-center">
+                <p className="font-serif text-2xl font-semibold">{stats.totalReviews}</p>
+                <p className="text-xs text-muted-foreground">{t("reviews")}</p>
+              </div>
+              <div className="rounded-xl border border-border bg-card p-4 text-center">
+                <p className="font-serif text-2xl font-semibold">{stats.avgRating?.toFixed(1) ?? "-"}</p>
+                <p className="text-xs text-muted-foreground">{t("average")}</p>
+              </div>
+            </div>
+          ) : (
+            <div className="rounded-xl border border-dashed border-border bg-card/30 p-8 text-center">
+              <Utensils className="mx-auto h-10 w-10 text-muted-foreground/50" />
+              <p className="mt-4 text-muted-foreground">{t("noVisitsYet")}</p>
+            </div>
+          )}
+
+          {/* Quick Actions */}
+          <div className="grid grid-cols-2 gap-3">
+            <Link
+              href="/add"
+              className="flex flex-col items-center gap-2 rounded-xl border border-border bg-card py-6 transition-all hover:border-primary/30"
+            >
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                <Plus size={20} />
+              </div>
+              <span className="text-sm font-medium">{t("logAVisit")}</span>
+            </Link>
+            <Link
+              href="/history"
+              className="flex flex-col items-center gap-2 rounded-xl border border-border bg-card py-6 transition-all hover:border-primary/30"
+            >
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary text-muted-foreground">
+                <Utensils size={18} />
+              </div>
+              <span className="text-sm font-medium">{t("myHistory")}</span>
+            </Link>
           </div>
-          <span className="text-base font-medium">{t("myHistory")}</span>
-        </Link>
-      </div>
+
+          {/* Suggest following */}
+          {followingCount === 0 && (
+            <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 text-center">
+              <p className="text-sm text-muted-foreground">
+                {t("followSuggestion")}
+              </p>
+              <Link
+                href="/explore"
+                className="mt-3 inline-block rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+              >
+                {t("discoverPeople")}
+              </Link>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

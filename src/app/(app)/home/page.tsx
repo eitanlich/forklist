@@ -3,59 +3,56 @@ import { currentUser } from "@clerk/nextjs/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import HomeContent from "./HomeContent";
 
-// Don't cache this page - always fetch fresh data
 export const dynamic = "force-dynamic";
 
 interface UserStats {
   totalReviews: number;
   uniqueRestaurants: number;
   avgRating: number | null;
-  topOccasion: string | null;
-  topCuisine: string | null;
 }
 
-async function getUserStats(userId: string): Promise<UserStats> {
+async function getUserData(clerkId: string) {
   const supabase = createAdminClient();
+  
+  // Get user
+  const { data: dbUser } = await supabase
+    .from("users")
+    .select("id")
+    .eq("clerk_id", clerkId)
+    .single();
 
-  const { data: reviews } = await supabase
-    .from("reviews")
-    .select("rating_overall, occasion, restaurant_id, restaurant:restaurants(cuisine_type)")
-    .eq("user_id", userId);
-
-  if (!reviews || reviews.length === 0) {
-    return {
-      totalReviews: 0,
-      uniqueRestaurants: 0,
-      avgRating: null,
-      topOccasion: null,
-      topCuisine: null,
+  if (!dbUser) {
+    return { 
+      userId: null, 
+      followingCount: 0, 
+      stats: { totalReviews: 0, uniqueRestaurants: 0, avgRating: null } 
     };
   }
 
-  const totalReviews = reviews.length;
-  const uniqueRestaurantIds = new Set(reviews.map((r) => r.restaurant_id));
-  const uniqueRestaurants = uniqueRestaurantIds.size;
-  const avgRating = reviews.reduce((sum, r) => sum + r.rating_overall, 0) / totalReviews;
+  // Get following count
+  const { count: followingCount } = await supabase
+    .from("follows")
+    .select("*", { count: "exact", head: true })
+    .eq("follower_id", dbUser.id)
+    .eq("status", "active");
 
-  const occasionCounts: Record<string, number> = {};
-  reviews.forEach((r) => {
-    if (r.occasion) {
-      occasionCounts[r.occasion] = (occasionCounts[r.occasion] || 0) + 1;
-    }
-  });
-  const topOccasion = Object.entries(occasionCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
+  // Get user stats
+  const { data: reviews } = await supabase
+    .from("reviews")
+    .select("rating_overall, restaurant_id")
+    .eq("user_id", dbUser.id);
 
-  const cuisineCounts: Record<string, number> = {};
-  reviews.forEach((r) => {
-    const restaurant = Array.isArray(r.restaurant) ? r.restaurant[0] : r.restaurant;
-    const cuisine = (restaurant as { cuisine_type: string | null } | null)?.cuisine_type;
-    if (cuisine) {
-      cuisineCounts[cuisine] = (cuisineCounts[cuisine] || 0) + 1;
-    }
-  });
-  const topCuisine = Object.entries(cuisineCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
+  const totalReviews = reviews?.length ?? 0;
+  const uniqueRestaurants = new Set(reviews?.map((r) => r.restaurant_id)).size;
+  const avgRating = totalReviews > 0
+    ? reviews!.reduce((sum, r) => sum + r.rating_overall, 0) / totalReviews
+    : null;
 
-  return { totalReviews, uniqueRestaurants, avgRating, topOccasion, topCuisine };
+  return {
+    userId: dbUser.id,
+    followingCount: followingCount ?? 0,
+    stats: { totalReviews, uniqueRestaurants, avgRating },
+  };
 }
 
 export default async function HomePage() {
@@ -63,16 +60,15 @@ export default async function HomePage() {
   const user = await currentUser();
   const firstName = user?.firstName ?? "there";
 
-  const supabase = createAdminClient();
-  const { data: dbUser } = await supabase
-    .from("users")
-    .select("id")
-    .eq("clerk_id", clerkId!)
-    .single();
+  const { userId, followingCount, stats } = clerkId 
+    ? await getUserData(clerkId)
+    : { userId: null, followingCount: 0, stats: { totalReviews: 0, uniqueRestaurants: 0, avgRating: null } };
 
-  const stats = dbUser
-    ? await getUserStats(dbUser.id)
-    : { totalReviews: 0, uniqueRestaurants: 0, avgRating: null, topOccasion: null, topCuisine: null };
-
-  return <HomeContent firstName={firstName} stats={stats} />;
+  return (
+    <HomeContent 
+      firstName={firstName} 
+      stats={stats}
+      followingCount={followingCount}
+    />
+  );
 }
