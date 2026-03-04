@@ -69,5 +69,22 @@ export async function POST(req: Request) {
     }
   }
 
+  if (evt.type === "user.deleted") {
+    const { id } = evt.data;
+    
+    if (id) {
+      // Delete user from Supabase (CASCADE will handle reviews, follows, likes)
+      const { error } = await supabase
+        .from("users")
+        .delete()
+        .eq("clerk_id", id);
+
+      if (error) {
+        console.error("Error deleting user:", error);
+        return new Response("Database error", { status: 500 });
+      }
+    }
+  }
+
   return new Response("OK", { status: 200 });
 }

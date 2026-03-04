@@ -247,7 +247,7 @@ export async function deleteAccount(): Promise<{ error?: string; success?: boole
   // Delete comments
   await supabase.from("review_comments").delete().eq("user_id", user.id);
   
-  // Finally delete the user
+  // Finally delete the user from Supabase
   const { error: deleteError } = await supabase
     .from("users")
     .delete()
@@ -256,6 +256,17 @@ export async function deleteAccount(): Promise<{ error?: string; success?: boole
   if (deleteError) {
     console.error("Delete error:", deleteError);
     return { error: "Failed to delete account" };
+  }
+
+  // Delete user from Clerk
+  try {
+    const { clerkClient } = await import("@clerk/nextjs/server");
+    const client = await clerkClient();
+    await client.users.deleteUser(clerkId);
+  } catch (err) {
+    console.error("Error deleting from Clerk:", err);
+    // Don't fail the whole operation - Supabase data is already deleted
+    // The webhook will clean up if user tries to sign in again
   }
 
   return { success: true };
