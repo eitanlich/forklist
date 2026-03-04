@@ -1,7 +1,7 @@
 "use server";
 
-import { auth } from "@clerk/nextjs/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getCurrentUserId } from "@/lib/actions/user";
 
 export interface FollowUser {
   id: string;
@@ -14,21 +14,6 @@ export interface FollowUser {
 export interface FollowStatus {
   isFollowing: boolean;
   isPending: boolean;
-}
-
-// Get current user's Supabase ID
-async function getCurrentUserId(): Promise<string | null> {
-  const { userId: clerkId } = await auth();
-  if (!clerkId) return null;
-
-  const supabase = createAdminClient();
-  const { data: user } = await supabase
-    .from("users")
-    .select("id")
-    .eq("clerk_id", clerkId)
-    .single();
-
-  return user?.id ?? null;
 }
 
 // Get user by username
@@ -66,7 +51,6 @@ export async function followUser(
   if (!targetUser) return { error: "User not found" };
 
   // For now, all profiles are public -> status = 'active'
-  // If we add private profiles later, this would check and set 'pending'
   const { error } = await supabase.from("follows").insert({
     follower_id: currentUserId,
     following_id: targetUserId,
@@ -78,6 +62,7 @@ export async function followUser(
       // Already following
       return { success: true };
     }
+    console.error("[followUser] Insert error:", error);
     return { error: "Failed to follow user" };
   }
 

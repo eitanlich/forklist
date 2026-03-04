@@ -1,23 +1,7 @@
 "use server";
 
-import { auth } from "@clerk/nextjs/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { revalidatePath } from "next/cache";
-
-// Get current user's Supabase ID
-async function getCurrentUserId(): Promise<string | null> {
-  const { userId: clerkId } = await auth();
-  if (!clerkId) return null;
-
-  const supabase = createAdminClient();
-  const { data: user } = await supabase
-    .from("users")
-    .select("id")
-    .eq("clerk_id", clerkId)
-    .single();
-
-  return user?.id ?? null;
-}
+import { getCurrentUserId } from "@/lib/actions/user";
 
 export async function toggleLike(
   reviewId: string
