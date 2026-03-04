@@ -5,8 +5,8 @@ import { getPublicProfile } from "@/lib/actions/profile";
 import { getFollowStatus } from "@/lib/actions/follows";
 
 import { createAdminClient } from "@/lib/supabase/admin";
-import { ProfileHeader, PublicReviewCard } from "@/components/profile";
 import { PublicProfileContent } from "./PublicProfileContent";
+import { PrivateProfileContent } from "./PrivateProfileContent";
 
 interface Props {
   params: Promise<{ username: string }>;
@@ -14,14 +14,22 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { username } = await params;
-  const profile = await getPublicProfile(username);
+  const result = await getPublicProfile(username);
 
-  if (!profile) {
+  if (result.status === "not_found") {
     return {
       title: "Profile Not Found - ForkList",
     };
   }
 
+  if (result.status === "private") {
+    return {
+      title: `@${result.username} - ForkList`,
+      description: "This profile is private",
+    };
+  }
+
+  const profile = result.profile;
   const title = `@${profile.username} - ForkList`;
   const description = profile.bio || `Check out @${profile.username}'s restaurant reviews on ForkList`;
 
@@ -48,11 +56,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function PublicProfilePage({ params }: Props) {
   const { username } = await params;
-  const profile = await getPublicProfile(username);
+  const result = await getPublicProfile(username);
 
-  if (!profile) {
+  if (result.status === "not_found") {
     notFound();
   }
+
+  if (result.status === "private") {
+    return <PrivateProfileContent username={result.username} />;
+  }
+
+  const profile = result.profile;
 
   // Check if current user is viewing their own profile
   const { userId: clerkId } = await auth();

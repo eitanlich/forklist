@@ -272,7 +272,23 @@ export async function deleteAccount(): Promise<{ error?: string; success?: boole
   return { success: true };
 }
 
-export async function getPublicProfile(username: string) {
+export type ProfileResult = 
+  | { status: "not_found" }
+  | { status: "private"; username: string }
+  | { status: "public"; profile: PublicProfile };
+
+interface PublicProfile {
+  id: string;
+  username: string;
+  bio: string | null;
+  avatar_url: string | null;
+  is_private: boolean;
+  follower_count: number;
+  following_count: number;
+  reviews: any[];
+}
+
+export async function getPublicProfile(username: string): Promise<ProfileResult> {
   const supabase = createAdminClient();
 
   const { data: user } = await supabase
@@ -281,7 +297,11 @@ export async function getPublicProfile(username: string) {
     .eq("username", username.toLowerCase())
     .single();
 
-  if (!user || user.is_private) return null;
+  if (!user) return { status: "not_found" };
+  
+  if (user.is_private) {
+    return { status: "private", username: user.username };
+  }
 
   // Get public reviews
   const { data: reviews } = await supabase
@@ -313,7 +333,10 @@ export async function getPublicProfile(username: string) {
     .limit(50);
 
   return {
-    ...user,
-    reviews: reviews ?? [],
+    status: "public",
+    profile: {
+      ...user,
+      reviews: reviews ?? [],
+    },
   };
 }
