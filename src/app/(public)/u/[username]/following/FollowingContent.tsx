@@ -11,6 +11,7 @@ interface FollowingContentProps {
   userId: string;
   username: string;
   isOwnProfile?: boolean;
+  currentUserId?: string;
 }
 
 interface FollowingUser {
@@ -20,7 +21,7 @@ interface FollowingUser {
   avatar_url?: string | null;
 }
 
-export function FollowingContent({ userId, username, isOwnProfile = false }: FollowingContentProps) {
+export function FollowingContent({ userId, username, isOwnProfile = false, currentUserId }: FollowingContentProps) {
   const t = useT();
   const [users, setUsers] = useState<FollowingUser[]>([]);
   const [followStatus, setFollowStatus] = useState<Record<string, { isFollowing: boolean; isPending: boolean }>>({});
@@ -110,6 +111,7 @@ export function FollowingContent({ userId, username, isOwnProfile = false }: Fol
                 avatarUrl={user.avatar_url}
                 isFollowing={followStatus[user.id]?.isFollowing ?? false}
                 isPending={followStatus[user.id]?.isPending ?? false}
+                currentUserId={currentUserId}
                 showFollowButton
                 onFollowChange={(isNowFollowing) => {
                   if (!isNowFollowing && isOwnProfile) {

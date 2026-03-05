@@ -20,6 +20,7 @@ interface UserListItemProps {
   onFollowChange?: (isNowFollowing: boolean) => void;
   isRemoving?: boolean;
   isOwnProfile?: boolean;
+  currentUserId?: string; // To hide follow button for self
 }
 
 export function UserListItem({
@@ -37,6 +38,7 @@ export function UserListItem({
   onFollowChange,
   isRemoving = false,
   isOwnProfile = false,
+  currentUserId,
 }: UserListItemProps) {
   const t = useT();
   const { locale } = useI18n();
@@ -86,7 +88,7 @@ export function UserListItem({
       ) : (
         <div className="flex-1 min-w-0 opacity-70">{content}</div>
       )}
-      {showFollowButton && !isOwnProfile && hasProfile && (
+      {showFollowButton && !isOwnProfile && hasProfile && currentUserId !== id && (
         <FollowButton
           targetUserId={id}
           initialIsFollowing={isFollowing}

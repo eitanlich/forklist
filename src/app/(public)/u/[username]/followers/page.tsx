@@ -44,6 +44,7 @@ export default async function FollowersPage({ params }: Props) {
       userId={profile.id} 
       username={profile.username!} 
       isOwnProfile={isOwnProfile}
+      currentUserId={currentUserId ?? undefined}
     />
   );
 }

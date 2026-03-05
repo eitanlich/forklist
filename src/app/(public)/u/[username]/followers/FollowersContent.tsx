@@ -12,6 +12,7 @@ interface FollowersContentProps {
   userId: string;
   username: string;
   isOwnProfile?: boolean;
+  currentUserId?: string;
 }
 
 interface FollowerUser {
@@ -21,7 +22,7 @@ interface FollowerUser {
   avatar_url?: string | null;
 }
 
-export function FollowersContent({ userId, username, isOwnProfile = false }: FollowersContentProps) {
+export function FollowersContent({ userId, username, isOwnProfile = false, currentUserId }: FollowersContentProps) {
   const t = useT();
   const { locale } = useI18n();
   const [users, setUsers] = useState<FollowerUser[]>([]);
@@ -120,6 +121,7 @@ export function FollowersContent({ userId, username, isOwnProfile = false }: Fol
                 showRemoveButton={isOwnProfile}
                 onRemove={() => setRemoveModalUser(user)}
                 isRemoving={removingIds.has(user.id)}
+                currentUserId={currentUserId}
               />
             ))}
             {hasMore && (
