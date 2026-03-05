@@ -1,6 +1,6 @@
 # ForkList Backlog
 
-> Última actualización: 2026-03-04
+> Última actualización: 2026-03-05
 
 ## Leyenda
 - 🔴 Alta prioridad
@@ -99,6 +99,18 @@
 - Si el webhook de Clerk falla, `getCurrentUserId()` en `lib/actions/user.ts` auto-sincroniza el usuario
 - Busca en Clerk API y crea el registro en Supabase
 - Previene errores silenciosos en follow/like/etc
+
+### CRÍTICO: Caching en Next.js (2026-03-05)
+**Para datos que deben ser siempre frescos (likes, follows, counts):**
+- NO cargar en server components (page.tsx)
+- Cargar en CLIENTE con useEffect
+- Ejemplo: `PublicProfileContent.tsx` carga likes con `getBatchLikeInfo()` en useEffect
+- `noStore()` y `dynamic = "force-dynamic"` NO son suficientes
+
+### Auto-username desde email (2026-03-05)
+- Usuarios sin username reciben uno automático: `email.split("@")[0]`
+- Aplicado en `getCurrentUserId()` y webhook de Clerk
+- Evita inconsistencias en contadores de likes vs avatares mostrados
 
 ### i18n
 - Archivos en `src/lib/i18n/`
