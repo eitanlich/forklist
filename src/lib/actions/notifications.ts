@@ -136,28 +136,75 @@ export async function getActivityNotifications(limit = 50): Promise<{
 }
 
 export async function getNotificationCounts(): Promise<{
-  activityCount: number;
+  totalCount: number;
   requestsCount: number;
 }> {
   noStore();
   
   const userId = await getCurrentUserId();
   if (!userId) {
-    return { activityCount: 0, requestsCount: 0 };
+    return { totalCount: 0, requestsCount: 0 };
   }
 
   const supabase = createServerClient();
 
-  // For now, we'll just count pending requests
-  // Activity count would need a "read" tracking system
+  // Get pending follow requests count
   const { count: requestsCount } = await supabase
     .from("follows")
     .select("*", { count: "exact", head: true })
     .eq("following_id", userId)
     .eq("status", "pending");
 
+  // Get user's last seen timestamp (column may not exist yet)
+  const { data: user, error: userError } = await supabase
+    .from("users")
+    .select("last_notifications_seen_at")
+    .eq("id", userId)
+    .single();
+
+  // If column doesn't exist or no data, use epoch
+  const lastSeen = (!userError && user?.last_notifications_seen_at) 
+    ? user.last_notifications_seen_at 
+    : "1970-01-01T00:00:00Z";
+
+  // Count new likes since last seen
+  const { count: newLikesCount } = await supabase
+    .from("likes")
+    .select("id, reviews!inner(user_id)", { count: "exact", head: true })
+    .eq("reviews.user_id", userId)
+    .neq("user_id", userId)
+    .gt("created_at", lastSeen);
+
+  // Count new followers since last seen
+  const { count: newFollowersCount } = await supabase
+    .from("follows")
+    .select("*", { count: "exact", head: true })
+    .eq("following_id", userId)
+    .eq("status", "active")
+    .gt("created_at", lastSeen);
+
+  const activityCount = (newLikesCount || 0) + (newFollowersCount || 0);
+  const totalCount = activityCount + (requestsCount || 0);
+
   return {
-    activityCount: 0, // TODO: implement read tracking
+    totalCount,
     requestsCount: requestsCount || 0,
   };
+}
+
+export async function markNotificationsAsSeen(): Promise<{ success: boolean }> {
+  noStore();
+  
+  const userId = await getCurrentUserId();
+  if (!userId) return { success: false };
+
+  const supabase = createServerClient();
+  
+  // Try to update - will fail silently if column doesn't exist
+  const { error } = await supabase
+    .from("users")
+    .update({ last_notifications_seen_at: new Date().toISOString() })
+    .eq("id", userId);
+
+  return { success: !error };
 }

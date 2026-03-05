@@ -26,7 +26,7 @@ export default function Header() {
   useEffect(() => {
     async function loadCounts() {
       const counts = await getNotificationCounts();
-      setNotificationCount(counts.requestsCount);
+      setNotificationCount(counts.totalCount);
     }
     loadCounts();
   }, [pathname]); // Refresh on route change

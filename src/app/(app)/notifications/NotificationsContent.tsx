@@ -6,6 +6,7 @@ import { User, Heart, UserPlus, Check, X, Loader2 } from "lucide-react";
 import { useT, useI18n } from "@/lib/i18n";
 import { 
   getActivityNotifications, 
+  markNotificationsAsSeen,
   type ActivityNotification 
 } from "@/lib/actions/notifications";
 import { 
@@ -269,6 +270,11 @@ function RequestsTab() {
 export function NotificationsContent({ isPrivate, initialRequestsCount }: NotificationsContentProps) {
   const { locale } = useI18n();
   const [activeTab, setActiveTab] = useState<TabType>("activity");
+
+  // Mark notifications as seen when page loads
+  useEffect(() => {
+    markNotificationsAsSeen();
+  }, []);
 
   return (
     <div className="space-y-4 pb-24">
