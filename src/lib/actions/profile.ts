@@ -195,6 +195,40 @@ export async function uploadAvatar(
   return { url: avatarUrl };
 }
 
+export async function removeAvatar(): Promise<{ error?: string; success?: boolean }> {
+  const { userId: clerkId } = await auth();
+  if (!clerkId) return { error: "Not authenticated" };
+
+  const supabase = createAdminClient();
+
+  // Get user
+  const { data: user } = await supabase
+    .from("users")
+    .select("id, avatar_url")
+    .eq("clerk_id", clerkId)
+    .single();
+
+  if (!user) return { error: "User not found" };
+  if (!user.avatar_url) return { success: true }; // Already no avatar
+
+  // Delete from storage
+  const oldPath = user.avatar_url.split("/avatars/")[1];
+  if (oldPath) {
+    await supabase.storage.from("avatars").remove([oldPath]);
+  }
+
+  // Clear avatar_url in DB
+  const { error: updateError } = await supabase
+    .from("users")
+    .update({ avatar_url: null })
+    .eq("id", user.id);
+
+  if (updateError) return { error: "Failed to remove avatar" };
+
+  revalidatePath("/settings/profile");
+  return { success: true };
+}
+
 export async function getCurrentUserProfile() {
   const { userId: clerkId } = await auth();
   if (!clerkId) return null;

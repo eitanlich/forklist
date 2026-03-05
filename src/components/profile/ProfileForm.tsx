@@ -2,8 +2,8 @@
 
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { updateProfile, uploadAvatar } from "@/lib/actions/profile";
-import { Camera, Loader2, User } from "lucide-react";
+import { updateProfile, uploadAvatar, removeAvatar } from "@/lib/actions/profile";
+import { Camera, Loader2, User, X } from "lucide-react";
 import { useT } from "@/lib/i18n";
 
 interface ProfileFormProps {
@@ -48,6 +48,22 @@ export function ProfileForm({
     }
   };
 
+  const handleRemoveAvatar = async () => {
+    if (!avatarUrl) return;
+    
+    setIsUploading(true);
+    setError(null);
+
+    const result = await removeAvatar();
+    setIsUploading(false);
+
+    if (result.error) {
+      setError(result.error);
+    } else {
+      setAvatarUrl(null);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
@@ -83,6 +99,19 @@ export function ProfileForm({
               </div>
             )}
           </div>
+          {/* Remove button - only show if has avatar */}
+          {avatarUrl && (
+            <button
+              type="button"
+              onClick={handleRemoveAvatar}
+              disabled={isUploading}
+              className="absolute -top-1 -right-1 rounded-full bg-destructive p-1.5 text-destructive-foreground shadow-lg transition-transform hover:scale-105 disabled:opacity-50"
+              aria-label="Remove avatar"
+            >
+              <X className="h-3 w-3" />
+            </button>
+          )}
+          {/* Upload button */}
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
