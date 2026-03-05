@@ -222,6 +222,7 @@ export function ProfileSettingsContent({
         message={locale === "es" ? "¿Estás seguro que querés cerrar sesión?" : "Are you sure you want to sign out?"}
         confirmText={locale === "es" ? "Cerrar sesión" : "Sign out"}
         cancelText={locale === "es" ? "Cancelar" : "Cancel"}
+        destructive
         isLoading={isSigningOut}
       />
 
