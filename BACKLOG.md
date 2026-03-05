@@ -58,6 +58,15 @@
 - [x] Stats de perfil con total de likes
 - [x] Auto-username desde email (evita inconsistencias)
 
+### Fase 4.5 - Private Profiles & Follow Requests ✅ (2026-03-05)
+- [x] Follow a usuario privado → status pending
+- [x] Botón muestra "Requested" con reloj
+- [x] Página /requests para ver solicitudes pendientes
+- [x] Accept/Reject follow requests
+- [x] Remove follower desde página de followers
+- [x] Cancel pending request (como solicitante)
+- [x] Búsqueda muestra usuarios privados con candado
+
 ---
 
 ## Bugs Conocidos
@@ -84,6 +93,8 @@
 
 ### 🟡 Fase 6 - Engagement
 - [ ] Comentarios en reviews
+- [ ] Push notifications para follow requests
+- [ ] Email notifications para follow requests
 - [ ] Discovery avanzado (popular, cercanos)
 - [ ] Fotos propias
 
