@@ -24,18 +24,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function FollowersPage({ params }: Props) {
   const { username } = await params;
-  const result = await getPublicProfile(username);
+  const currentUserId = await getCurrentUserId();
+  const result = await getPublicProfile(username, currentUserId);
 
   if (result.status === "not_found") {
     notFound();
   }
 
+  // If private and NOT the owner, redirect to profile page
   if (result.status === "private") {
     redirect(`/u/${result.username}`);
   }
 
   const profile = result.profile;
-  const currentUserId = await getCurrentUserId();
   const isOwnProfile = currentUserId === profile.id;
   
   return (
