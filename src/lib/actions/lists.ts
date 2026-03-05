@@ -89,18 +89,26 @@ export async function getLists(): Promise<
 
   if (error) return { error: "Failed to fetch lists" };
 
-  const listsWithCount: ListWithCount[] = (lists || []).map((list) => ({
-    id: list.id,
-    user_id: list.user_id,
-    name: list.name,
-    description: list.description,
-    is_public: list.is_public,
-    created_at: list.created_at,
-    updated_at: list.updated_at,
-    item_count: Array.isArray(list.list_items) 
-      ? list.list_items.length 
-      : (list.list_items as { count: number })?.count ?? 0,
-  }));
+  const listsWithCount: ListWithCount[] = (lists || []).map((list) => {
+    // Supabase returns count as [{ count: number }] when using select with (count)
+    const listItems = list.list_items as { count: number }[] | { count: number } | null;
+    let itemCount = 0;
+    if (Array.isArray(listItems) && listItems.length > 0) {
+      itemCount = listItems[0]?.count ?? 0;
+    } else if (listItems && typeof listItems === "object" && "count" in listItems) {
+      itemCount = listItems.count;
+    }
+    return {
+      id: list.id,
+      user_id: list.user_id,
+      name: list.name,
+      description: list.description,
+      is_public: list.is_public,
+      created_at: list.created_at,
+      updated_at: list.updated_at,
+      item_count: itemCount,
+    };
+  });
 
   return { success: true, lists: listsWithCount };
 }
@@ -203,6 +211,87 @@ export async function addToList(
     .eq("id", data.list_id);
 
   return { success: true };
+}
+
+export async function updateListPrivacy(
+  listId: string,
+  isPublic: boolean
+): Promise<{ error: string } | { success: true }> {
+  const { userId: clerkId } = await auth();
+  if (!clerkId) return { error: "Not authenticated" };
+
+  const supabase = createAdminClient();
+
+  const { data: user } = await supabase
+    .from("users")
+    .select("id")
+    .eq("clerk_id", clerkId)
+    .single();
+
+  if (!user) return { error: "User not found" };
+
+  // Verify list belongs to user
+  const { data: list } = await supabase
+    .from("lists")
+    .select("id, user_id")
+    .eq("id", listId)
+    .single();
+
+  if (!list) return { error: "List not found" };
+  if (list.user_id !== user.id) return { error: "Not authorized" };
+
+  const { error: updateError } = await supabase
+    .from("lists")
+    .update({ is_public: isPublic, updated_at: new Date().toISOString() })
+    .eq("id", listId);
+
+  if (updateError) return { error: "Failed to update list privacy" };
+
+  return { success: true };
+}
+
+export async function getPublicListsForUser(
+  userId: string,
+  includePrivate: boolean = false
+): Promise<{ error: string } | { success: true; lists: ListWithCount[] }> {
+  const supabase = createAdminClient();
+
+  let query = supabase
+    .from("lists")
+    .select("*, list_items(count)")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+
+  if (!includePrivate) {
+    query = query.eq("is_public", true);
+  }
+
+  const { data: lists, error } = await query;
+
+  if (error) return { error: "Failed to fetch lists" };
+
+  const listsWithCount: ListWithCount[] = (lists || []).map((list) => {
+    // Supabase returns count as [{ count: number }] when using select with (count)
+    const listItems = list.list_items as { count: number }[] | { count: number } | null;
+    let itemCount = 0;
+    if (Array.isArray(listItems) && listItems.length > 0) {
+      itemCount = listItems[0]?.count ?? 0;
+    } else if (listItems && typeof listItems === "object" && "count" in listItems) {
+      itemCount = listItems.count;
+    }
+    return {
+      id: list.id,
+      user_id: list.user_id,
+      name: list.name,
+      description: list.description,
+      is_public: list.is_public,
+      created_at: list.created_at,
+      updated_at: list.updated_at,
+      item_count: itemCount,
+    };
+  });
+
+  return { success: true, lists: listsWithCount };
 }
 
 export async function removeFromList(

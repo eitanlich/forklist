@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Grid3X3, List, Settings } from "lucide-react";
+import { Grid3X3, List, Settings, Lock, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { ProfileHeader, PublicReviewCard, ProfileStats } from "@/components/profile";
 import { useT, useI18n } from "@/lib/i18n";
+import type { ListWithCount } from "@/lib/actions/lists";
 
 
 
@@ -23,7 +24,7 @@ interface PublicProfileContentProps {
   isOwnProfile: boolean;
   isFollowing: boolean;
   isPending: boolean;
-
+  lists?: ListWithCount[];
 }
 
 type ViewMode = "list" | "grid";
@@ -33,6 +34,7 @@ function ProfileContent({
   isOwnProfile,
   isFollowing,
   isPending,
+  lists = [],
 }: PublicProfileContentProps) {
   const t = useT();
   const { locale } = useI18n();

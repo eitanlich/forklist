@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Star, MapPin, Calendar, User } from "lucide-react";
 import type { FeedReview } from "@/lib/actions/follows";
+import { LikeButton } from "@/components/ui/LikeButton";
 
 function Stars({ rating, size = 14 }: { rating: number; size?: number }) {
   return (
@@ -44,9 +45,11 @@ function formatRelativeDate(dateStr: string): string {
 
 interface FeedCardProps {
   review: FeedReview;
+  likeCount?: number;
+  hasLiked?: boolean;
 }
 
-export function FeedCard({ review }: FeedCardProps) {
+export function FeedCard({ review, likeCount = 0, hasLiked = false }: FeedCardProps) {
   const { user, restaurant } = review;
 
   return (
@@ -120,6 +123,15 @@ export function FeedCard({ review }: FeedCardProps) {
           </p>
         </div>
       )}
+
+      {/* Actions */}
+      <div className="flex items-center border-t border-border px-5 py-3">
+        <LikeButton
+          reviewId={review.id}
+          initialLiked={hasLiked}
+          initialCount={likeCount}
+        />
+      </div>
     </article>
   );
 }

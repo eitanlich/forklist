@@ -68,8 +68,8 @@
 
 | Prioridad | Feature | Esfuerzo |
 |-----------|---------|----------|
-| 1 | Buscar usuarios por email (username es opcional) | 1-2 hs |
-| 2 | Sign out más accesible | 30 min |
+| 1 | UI de likes clickeable (backend listo) | 1 hr |
+| 2 | Buscar usuarios por email (username es opcional) | 1-2 hs |
 | 3 | Mejorar feed UX | 2-3 hs |
 | 4 | Filtros en historial | 2-3 hs |
 | 5 | Onboarding nuevos usuarios | 2 hs |

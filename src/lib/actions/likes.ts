@@ -76,3 +76,31 @@ export async function getLikeInfo(
 
   return { count, hasLiked };
 }
+
+export async function getBatchLikeInfo(
+  reviewIds: string[]
+): Promise<Record<string, { count: number; hasLiked: boolean }>> {
+  if (reviewIds.length === 0) return {};
+
+  const userId = await getCurrentUserId();
+  const supabase = createAdminClient();
+
+  // Get all likes for these reviews
+  const { data: allLikes } = await supabase
+    .from("likes")
+    .select("review_id, user_id")
+    .in("review_id", reviewIds);
+
+  // Build the result
+  const result: Record<string, { count: number; hasLiked: boolean }> = {};
+
+  for (const reviewId of reviewIds) {
+    const reviewLikes = (allLikes ?? []).filter((l) => l.review_id === reviewId);
+    result[reviewId] = {
+      count: reviewLikes.length,
+      hasLiked: userId ? reviewLikes.some((l) => l.user_id === userId) : false,
+    };
+  }
+
+  return result;
+}

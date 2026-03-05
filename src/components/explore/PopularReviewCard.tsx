@@ -1,14 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { Heart, User, Star, MapPin } from "lucide-react";
+import { User, Star, MapPin } from "lucide-react";
 import type { PopularReview } from "@/lib/actions/explore";
+import { LikeButton } from "@/components/ui/LikeButton";
 
 interface PopularReviewCardProps {
   review: PopularReview;
+  hasLiked?: boolean;
 }
 
-export function PopularReviewCard({ review }: PopularReviewCardProps) {
+export function PopularReviewCard({ review, hasLiked = false }: PopularReviewCardProps) {
   const { user, restaurant, rating_overall, comment, like_count } = review;
 
   return (
