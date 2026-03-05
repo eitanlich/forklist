@@ -68,8 +68,8 @@ export const translations = {
     
     // History
     yourReviews: "Your Reviews",
-    reviewCount: "reviews",
-    reviews: "reviews",
+    reviewCount: "Reviews",
+    reviews: "Reviews",
     noReviewsFound: "No reviews found",
     filters: "Filters",
     sort: "Sort",
@@ -336,9 +336,9 @@ export const translations = {
     rateAllCategories: "Calificá las 5 categorías para guardar",
     
     // History
-    yourReviews: "Tus reviews",
-    reviewCount: "reviews",
-    reviews: "reviews",
+    yourReviews: "Tus Reseñas",
+    reviewCount: "Reseñas",
+    reviews: "Reseñas",
     noReviewsFound: "No se encontraron reviews",
     filters: "Filtros",
     sort: "Ordenar",

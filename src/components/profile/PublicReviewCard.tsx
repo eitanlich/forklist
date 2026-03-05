@@ -74,7 +74,7 @@ export function PublicReviewCard({ review, likeCount = 0, hasLiked = false }: Pu
               <div className="flex items-center gap-1 rounded-full bg-primary/10 px-2 py-1">
                 <Star className="h-3.5 w-3.5 fill-primary text-primary" />
                 <span className="text-sm font-medium text-primary">
-                  {review.rating_overall.toFixed(1)}
+                  {Math.round(review.rating_overall)}
                 </span>
               </div>
             </div>
