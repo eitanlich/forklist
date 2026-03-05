@@ -273,7 +273,10 @@ export function NotificationsContent({ isPrivate, initialRequestsCount }: Notifi
 
   // Mark notifications as seen when page loads
   useEffect(() => {
-    markNotificationsAsSeen();
+    markNotificationsAsSeen().then(() => {
+      // Emit custom event to update badge in header
+      window.dispatchEvent(new CustomEvent("notifications-seen"));
+    });
   }, []);
 
   return (

@@ -22,14 +22,21 @@ export default function Header() {
   const [notificationCount, setNotificationCount] = useState(0);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // Load notification count on mount
+  // Load notification count on mount and route change
   useEffect(() => {
     async function loadCounts() {
       const counts = await getNotificationCounts();
       setNotificationCount(counts.totalCount);
     }
     loadCounts();
-  }, [pathname]); // Refresh on route change
+  }, [pathname]);
+
+  // Listen for notifications-seen event to reset badge
+  useEffect(() => {
+    const handleSeen = () => setNotificationCount(0);
+    window.addEventListener("notifications-seen", handleSeen);
+    return () => window.removeEventListener("notifications-seen", handleSeen);
+  }, []);
 
   // Go to public profile if username exists, otherwise settings
   const profileHref = user?.username ? `/u/${user.username}` : "/settings/profile";
