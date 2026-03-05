@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { updateProfile, uploadAvatar, removeAvatar } from "@/lib/actions/profile";
-import { Camera, Loader2, Pencil, User, X } from "lucide-react";
+import { Camera, Loader2, Pencil, User, X, Globe2, Lock } from "lucide-react";
 import { useT } from "@/lib/i18n";
 
 interface ProfileFormProps {
@@ -229,25 +229,35 @@ export function ProfileForm({
       </div>
 
       {/* Privacy Toggle */}
-      <div className="flex items-center justify-between rounded-lg border border-border bg-secondary/30 p-4">
-        <div className="space-y-0.5">
-          <p className="text-sm font-medium text-foreground">{t("privateProfile")}</p>
-          <p className="text-xs text-muted-foreground">
-            {t("privateProfileHint")}
-          </p>
+      <div className="flex items-center justify-between rounded-xl border border-border bg-card p-4">
+        <div className="flex items-center gap-3">
+          {isPrivate ? (
+            <Lock size={18} className="text-muted-foreground" />
+          ) : (
+            <Globe2 size={18} className="text-primary" />
+          )}
+          <div>
+            <p className="text-sm font-medium">
+              {isPrivate ? t("privateProfile") : t("publicProfile")}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {isPrivate ? t("privateProfileHint") : t("publicProfileHint")}
+            </p>
+          </div>
         </div>
         <button
           type="button"
           role="switch"
-          aria-checked={isPrivate}
+          aria-checked={!isPrivate}
           onClick={() => setIsPrivate(!isPrivate)}
           className={`relative h-6 w-11 rounded-full transition-colors ${
-            isPrivate ? "bg-primary" : "bg-muted"
-          }`}
+            !isPrivate ? "bg-primary" : "bg-secondary"
+          } disabled:opacity-50`}
+          aria-label={isPrivate ? t("makePublic") : t("makePrivate")}
         >
           <span
-            className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white transition-transform ${
-              isPrivate ? "translate-x-5" : "translate-x-0"
+            className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
+              !isPrivate ? "left-[22px]" : "left-0.5"
             }`}
           />
         </button>
