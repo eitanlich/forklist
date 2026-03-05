@@ -37,5 +37,13 @@ export default async function FollowingPage({ params }: Props) {
   }
 
   const profile = result.profile;
-  return <FollowingContent userId={profile.id} username={profile.username!} />;
+  const isOwnProfile = currentUserId === profile.id;
+  
+  return (
+    <FollowingContent 
+      userId={profile.id} 
+      username={profile.username!}
+      isOwnProfile={isOwnProfile}
+    />
+  );
 }

@@ -10,6 +10,7 @@ import { UserListItem } from "@/components/social/UserListItem";
 interface FollowingContentProps {
   userId: string;
   username: string;
+  isOwnProfile?: boolean;
 }
 
 interface FollowingUser {
@@ -19,7 +20,7 @@ interface FollowingUser {
   avatar_url?: string | null;
 }
 
-export function FollowingContent({ userId, username }: FollowingContentProps) {
+export function FollowingContent({ userId, username, isOwnProfile = false }: FollowingContentProps) {
   const t = useT();
   const [users, setUsers] = useState<FollowingUser[]>([]);
   const [followStatus, setFollowStatus] = useState<Record<string, { isFollowing: boolean; isPending: boolean }>>({});
@@ -41,10 +42,20 @@ export function FollowingContent({ userId, username }: FollowingContentProps) {
       }
       
       // Load follow status for current user
+      // If own profile, all users are already followed (they're in YOUR following list)
       if (newUsers.length > 0) {
-        const userIds = newUsers.map((u) => u.id);
-        const status = await getBatchFollowStatus(userIds);
-        setFollowStatus((prev) => ({ ...prev, ...status }));
+        if (isOwnProfile) {
+          // Mark all as following since they're in your following list
+          const status: Record<string, { isFollowing: boolean; isPending: boolean }> = {};
+          newUsers.forEach((u) => {
+            status[u.id] = { isFollowing: true, isPending: false };
+          });
+          setFollowStatus((prev) => ({ ...prev, ...status }));
+        } else {
+          const userIds = newUsers.map((u) => u.id);
+          const status = await getBatchFollowStatus(userIds);
+          setFollowStatus((prev) => ({ ...prev, ...status }));
+        }
       }
       
       setTotal(result.total);
