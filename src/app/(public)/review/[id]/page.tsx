@@ -58,13 +58,16 @@ export default async function PublicReviewPage({ params }: Props) {
   // Pre-fetch like data on server
   const [likeInfo, likedBy] = await Promise.all([
     getLikeInfo(id),
-    getLikedBy(id, 5),
+    getLikedBy(id, 10), // Get more users for display
   ]);
 
   return (
     <ReviewContent 
       review={review} 
-      initialLikeInfo={likeInfo}
+      initialLikeInfo={{
+        count: likedBy.total, // Use same source for count
+        hasLiked: likeInfo.hasLiked,
+      }}
       initialLikedBy={likedBy.users}
       initialTotalLikes={likedBy.total}
     />

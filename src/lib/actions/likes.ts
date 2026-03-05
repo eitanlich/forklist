@@ -118,16 +118,10 @@ export async function getLikedBy(
 ): Promise<{ users: LikeUser[]; total: number }> {
   const supabase = createAdminClient();
 
-  // Get total count
-  const { count } = await supabase
+  // Get users who liked (with count in same query)
+  const { data: likes, count } = await supabase
     .from("likes")
-    .select("*", { count: "exact", head: true })
-    .eq("review_id", reviewId);
-
-  // Get users who liked
-  const { data: likes } = await supabase
-    .from("likes")
-    .select("user:users(id, username, avatar_url)")
+    .select("user:users(id, username, avatar_url)", { count: "exact" })
     .eq("review_id", reviewId)
     .order("created_at", { ascending: false })
     .limit(limit);
@@ -137,7 +131,9 @@ export async function getLikedBy(
       const user = Array.isArray(l.user) ? l.user[0] : l.user;
       return user as LikeUser;
     })
-    .filter((u) => u && u.username); // Only users with usernames
+    .filter((u): u is LikeUser => u !== null);
 
+  // Total should reflect actual displayable users, not just like count
+  // This prevents showing "3 likes" but only 2 avatars
   return { users, total: count ?? 0 };
 }

@@ -53,9 +53,10 @@ export function ReviewContent({
 
   // Refresh liked by list when like state changes
   const refreshLikedBy = async () => {
-    const likedBy = await getLikedBy(review.id, 5);
+    const likedBy = await getLikedBy(review.id, 10);
     setLikedByUsers(likedBy.users);
     setTotalLikes(likedBy.total);
+    setLikeCount(likedBy.total); // Keep count in sync
   };
 
   // Check ownership on client side
@@ -249,15 +250,15 @@ export function ReviewContent({
                 )}
               </button>
               
-              {/* Liked by users */}
-              {totalLikes > 0 && (
+              {/* Liked by users - only show if we have displayable users */}
+              {likedByUsers.length > 0 && (
                 <div className="flex items-center gap-2">
                   {/* Avatar stack */}
                   <div className="flex -space-x-2">
                     {likedByUsers.slice(0, 3).map((u) => (
                       <Link
                         key={u.id}
-                        href={`/u/${u.username}`}
+                        href={u.username ? `/u/${u.username}` : "#"}
                         className="relative h-7 w-7 rounded-full border-2 border-background overflow-hidden hover:z-10 transition-transform hover:scale-110"
                       >
                         {u.avatar_url ? (
@@ -271,16 +272,16 @@ export function ReviewContent({
                     ))}
                   </div>
                   
-                  {/* Names / count */}
+                  {/* Names / count - use likedByUsers.length for consistency */}
                   <span className="text-sm text-muted-foreground">
-                    {totalLikes === 1 && likedByUsers[0]?.username ? (
+                    {likedByUsers.length === 1 && likedByUsers[0]?.username ? (
                       <Link href={`/u/${likedByUsers[0].username}`} className="hover:text-foreground">
                         @{likedByUsers[0].username}
                       </Link>
-                    ) : totalLikes <= 3 ? (
-                      likedByUsers.map((u, i) => (
+                    ) : likedByUsers.length <= 3 ? (
+                      likedByUsers.filter(u => u.username).map((u, i, arr) => (
                         <span key={u.id}>
-                          {i > 0 && (i === likedByUsers.length - 1 ? (locale === "es" ? " y " : " and ") : ", ")}
+                          {i > 0 && (i === arr.length - 1 ? (locale === "es" ? " y " : " and ") : ", ")}
                           <Link href={`/u/${u.username}`} className="hover:text-foreground">
                             @{u.username}
                           </Link>
@@ -291,7 +292,7 @@ export function ReviewContent({
                         <Link href={`/u/${likedByUsers[0]?.username}`} className="hover:text-foreground">
                           @{likedByUsers[0]?.username}
                         </Link>
-                        {" "}{locale === "es" ? "y" : "and"} {totalLikes - 1} {locale === "es" ? "más" : "others"}
+                        {" "}{locale === "es" ? "y" : "and"} {likedByUsers.length - 1} {locale === "es" ? "más" : "others"}
                       </>
                     )}
                   </span>
