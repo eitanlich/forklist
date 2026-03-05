@@ -6,6 +6,7 @@ import { ArrowLeft, Loader2 } from "lucide-react";
 import { useT, useI18n } from "@/lib/i18n";
 import { getFollowers, removeFollower, getBatchFollowStatus } from "@/lib/actions/follows";
 import { UserListItem } from "@/components/social/UserListItem";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
 
 interface FollowersContentProps {
   userId: string;
@@ -30,6 +31,9 @@ export function FollowersContent({ userId, username, isOwnProfile = false }: Fol
   const [isLoading, setIsLoading] = useState(true);
   const [hasMore, setHasMore] = useState(false);
   const [removingIds, setRemovingIds] = useState<Set<string>>(new Set());
+  
+  // Modal state for remove confirmation
+  const [removeModalUser, setRemoveModalUser] = useState<FollowerUser | null>(null);
 
   useEffect(() => {
     async function loadFollowers() {
@@ -58,12 +62,6 @@ export function FollowersContent({ userId, username, isOwnProfile = false }: Fol
   }, [userId, page, isOwnProfile]);
 
   const handleRemoveFollower = async (followerId: string) => {
-    const confirmMsg = locale === "es"
-      ? "¿Seguro que querés eliminar este seguidor?"
-      : "Are you sure you want to remove this follower?";
-    
-    if (!confirm(confirmMsg)) return;
-
     setRemovingIds((prev) => new Set(prev).add(followerId));
     
     const result = await removeFollower(followerId);
@@ -78,6 +76,7 @@ export function FollowersContent({ userId, username, isOwnProfile = false }: Fol
       next.delete(followerId);
       return next;
     });
+    setRemoveModalUser(null);
   };
 
   return (
@@ -119,7 +118,7 @@ export function FollowersContent({ userId, username, isOwnProfile = false }: Fol
                 isPending={followStatus[user.id]?.isPending ?? false}
                 showFollowButton={!isOwnProfile}
                 showRemoveButton={isOwnProfile}
-                onRemove={() => handleRemoveFollower(user.id)}
+                onRemove={() => setRemoveModalUser(user)}
                 isRemoving={removingIds.has(user.id)}
               />
             ))}
@@ -144,6 +143,23 @@ export function FollowersContent({ userId, username, isOwnProfile = false }: Fol
       <p className="text-center text-xs text-muted-foreground">
         {total} {t("followers").toLowerCase()}
       </p>
+
+      {/* Remove follower confirmation modal */}
+      <ConfirmModal
+        isOpen={!!removeModalUser}
+        onClose={() => setRemoveModalUser(null)}
+        onConfirm={() => removeModalUser && handleRemoveFollower(removeModalUser.id)}
+        title={locale === "es" ? "Eliminar seguidor" : "Remove follower"}
+        message={
+          locale === "es"
+            ? `@${removeModalUser?.username || "usuario"} ya no podrá ver tus publicaciones ni encontrarte en búsquedas. No se le notificará que lo eliminaste.`
+            : `@${removeModalUser?.username || "user"} will no longer be able to see your posts or find you in search. They won't be notified that you removed them.`
+        }
+        confirmText={locale === "es" ? "Eliminar" : "Remove"}
+        cancelText={locale === "es" ? "Cancelar" : "Cancel"}
+        destructive
+        isLoading={removeModalUser ? removingIds.has(removeModalUser.id) : false}
+      />
     </div>
   );
 }

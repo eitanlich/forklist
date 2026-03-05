@@ -17,6 +17,7 @@ interface Profile {
   avatar_url: string | null;
   follower_count: number;
   following_count: number;
+  is_private: boolean;
   reviews: any[];
 }
 
@@ -84,6 +85,7 @@ function ProfileContent({
           isFollowing={isFollowing}
           isPending={isPending}
           isOwnProfile={isOwnProfile}
+          isPrivate={profile.is_private}
         />
 
         {/* Stats */}

@@ -18,6 +18,7 @@ interface ProfileHeaderProps {
   isFollowing?: boolean;
   isPending?: boolean;
   isOwnProfile?: boolean;
+  isPrivate?: boolean;
 }
 
 export function ProfileHeader({
@@ -31,6 +32,7 @@ export function ProfileHeader({
   isFollowing = false,
   isPending = false,
   isOwnProfile = false,
+  isPrivate = false,
 }: ProfileHeaderProps) {
   const t = useT();
   const [followerCount, setFollowerCount] = useState(initialFollowerCount);
@@ -77,6 +79,8 @@ export function ProfileHeader({
       {userId && !isOwnProfile && (
         <FollowButton
           targetUserId={userId}
+          targetUsername={username}
+          targetIsPrivate={isPrivate}
           initialIsFollowing={isFollowing}
           initialIsPending={isPending}
         />

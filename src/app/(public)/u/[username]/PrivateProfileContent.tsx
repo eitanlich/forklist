@@ -39,6 +39,8 @@ function PrivateProfileInner({
           {isLoggedIn && userId && (
             <FollowButton
               targetUserId={userId}
+              targetUsername={username}
+              targetIsPrivate={true}
               initialIsFollowing={isFollowing}
               initialIsPending={isPending}
             />
