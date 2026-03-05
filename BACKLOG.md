@@ -50,6 +50,14 @@
 - [x] Profile settings (edit bio, avatar, delete account)
 - [x] Sign out
 
+### Fase 4 - Likes UI ✅ (2026-03-05)
+- [x] Like/unlike en review cards
+- [x] Like/unlike en review detail
+- [x] Contador de likes en cards
+- [x] "Liked by" con avatares en review detail
+- [x] Stats de perfil con total de likes
+- [x] Auto-username desde email (evita inconsistencias)
+
 ---
 
 ## Bugs Conocidos
@@ -64,29 +72,27 @@
 
 ## Pendiente
 
-### 🔴 Fase 4 - Polish & Growth (ACTUAL)
+### 🔴 Fase 5 - Polish & Growth (ACTUAL)
 
 | Prioridad | Feature | Esfuerzo |
 |-----------|---------|----------|
-| ✅ | UI de likes clickeable | DONE |
-| 2 | Buscar usuarios por email (username es opcional) | 1-2 hs |
-| 3 | Mejorar feed UX | 2-3 hs |
-| 4 | Filtros en historial | 2-3 hs |
-| 5 | Onboarding nuevos usuarios | 2 hs |
-| 6 | Notificaciones (follow/like) | 3-4 hs |
+| 1 | Buscar usuarios por email (username es opcional) | 1-2 hs |
+| 2 | Mejorar feed UX | 2-3 hs |
+| 3 | Filtros en historial | 2-3 hs |
+| 4 | Onboarding nuevos usuarios | 2 hs |
+| 5 | Notificaciones (follow/like) | 3-4 hs |
 
-### 🟡 Fase 5 - Engagement
-- [x] UI de likes clickeable ✅ (2026-03-05)
+### 🟡 Fase 6 - Engagement
 - [ ] Comentarios en reviews
 - [ ] Discovery avanzado (popular, cercanos)
 - [ ] Fotos propias
 
-### 🟡 Fase 6 - Features Avanzados
+### 🟡 Fase 7 - Features Avanzados
 - [ ] Mapa de restaurantes
 - [ ] Stats avanzados / Year in Review
 - [ ] Gamification (badges, streaks)
 
-### 🟢 Fase 7 - Monetización
+### 🟢 Fase 8 - Monetización
 - [ ] Freemium
 - [ ] Reservas
 - [ ] B2B dashboard
