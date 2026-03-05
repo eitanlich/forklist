@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { useT, useI18n } from "@/lib/i18n";
-import { getFollowers, removeFollower } from "@/lib/actions/follows";
+import { getFollowers, removeFollower, getBatchFollowStatus } from "@/lib/actions/follows";
 import { UserListItem } from "@/components/social/UserListItem";
 
 interface FollowersContentProps {
@@ -24,6 +24,7 @@ export function FollowersContent({ userId, username, isOwnProfile = false }: Fol
   const t = useT();
   const { locale } = useI18n();
   const [users, setUsers] = useState<FollowerUser[]>([]);
+  const [followStatus, setFollowStatus] = useState<Record<string, { isFollowing: boolean; isPending: boolean }>>({});
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
@@ -34,17 +35,27 @@ export function FollowersContent({ userId, username, isOwnProfile = false }: Fol
     async function loadFollowers() {
       setIsLoading(true);
       const result = await getFollowers(userId, page);
+      const newUsers = result.users as FollowerUser[];
+      
       if (page === 1) {
-        setUsers(result.users as FollowerUser[]);
+        setUsers(newUsers);
       } else {
-        setUsers((prev) => [...prev, ...(result.users as FollowerUser[])]);
+        setUsers((prev) => [...prev, ...newUsers]);
       }
+      
+      // Load follow status for current user (only if not own profile)
+      if (!isOwnProfile && newUsers.length > 0) {
+        const userIds = newUsers.map((u) => u.id);
+        const status = await getBatchFollowStatus(userIds);
+        setFollowStatus((prev) => ({ ...prev, ...status }));
+      }
+      
       setTotal(result.total);
       setHasMore(result.users.length === 20);
       setIsLoading(false);
     }
     loadFollowers();
-  }, [userId, page]);
+  }, [userId, page, isOwnProfile]);
 
   const handleRemoveFollower = async (followerId: string) => {
     const confirmMsg = locale === "es"
@@ -104,6 +115,8 @@ export function FollowersContent({ userId, username, isOwnProfile = false }: Fol
                 username={user.username}
                 bio={user.bio}
                 avatarUrl={user.avatar_url}
+                isFollowing={followStatus[user.id]?.isFollowing ?? false}
+                isPending={followStatus[user.id]?.isPending ?? false}
                 showFollowButton={!isOwnProfile}
                 showRemoveButton={isOwnProfile}
                 onRemove={() => handleRemoveFollower(user.id)}

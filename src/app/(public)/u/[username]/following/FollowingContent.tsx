@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { useT } from "@/lib/i18n";
-import { getFollowing } from "@/lib/actions/follows";
+import { getFollowing, getBatchFollowStatus } from "@/lib/actions/follows";
 import { UserListItem } from "@/components/social/UserListItem";
 
 interface FollowingContentProps {
@@ -22,6 +22,7 @@ interface FollowingUser {
 export function FollowingContent({ userId, username }: FollowingContentProps) {
   const t = useT();
   const [users, setUsers] = useState<FollowingUser[]>([]);
+  const [followStatus, setFollowStatus] = useState<Record<string, { isFollowing: boolean; isPending: boolean }>>({});
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
@@ -31,11 +32,21 @@ export function FollowingContent({ userId, username }: FollowingContentProps) {
     async function loadFollowing() {
       setIsLoading(true);
       const result = await getFollowing(userId, page);
+      const newUsers = result.users as FollowingUser[];
+      
       if (page === 1) {
-        setUsers(result.users as FollowingUser[]);
+        setUsers(newUsers);
       } else {
-        setUsers((prev) => [...prev, ...(result.users as FollowingUser[])]);
+        setUsers((prev) => [...prev, ...newUsers]);
       }
+      
+      // Load follow status for current user
+      if (newUsers.length > 0) {
+        const userIds = newUsers.map((u) => u.id);
+        const status = await getBatchFollowStatus(userIds);
+        setFollowStatus((prev) => ({ ...prev, ...status }));
+      }
+      
       setTotal(result.total);
       setHasMore(result.users.length === 20);
       setIsLoading(false);
@@ -78,6 +89,8 @@ export function FollowingContent({ userId, username }: FollowingContentProps) {
                 username={user.username}
                 bio={user.bio}
                 avatarUrl={user.avatar_url}
+                isFollowing={followStatus[user.id]?.isFollowing ?? false}
+                isPending={followStatus[user.id]?.isPending ?? false}
                 showFollowButton
               />
             ))}
