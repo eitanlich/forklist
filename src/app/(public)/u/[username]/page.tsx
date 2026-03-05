@@ -4,6 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 import { getPublicProfile } from "@/lib/actions/profile";
 import { getFollowStatus } from "@/lib/actions/follows";
 import { getPublicListsForUser } from "@/lib/actions/lists";
+import { getBatchLikeInfo } from "@/lib/actions/likes";
 
 import { createAdminClient } from "@/lib/supabase/admin";
 import { PublicProfileContent } from "./PublicProfileContent";
@@ -96,6 +97,10 @@ export default async function PublicProfilePage({ params }: Props) {
   const listsResult = await getPublicListsForUser(profile.id, isOwnProfile);
   const lists = "success" in listsResult ? listsResult.lists : [];
 
+  // Pre-fetch like info for all reviews
+  const reviewIds = profile.reviews.map((r: any) => r.id);
+  const likeInfo = reviewIds.length > 0 ? await getBatchLikeInfo(reviewIds) : {};
+
   return (
     <PublicProfileContent
       profile={profile}
@@ -103,6 +108,7 @@ export default async function PublicProfilePage({ params }: Props) {
       isFollowing={followStatus.isFollowing}
       isPending={followStatus.isPending}
       lists={lists}
+      initialLikeInfo={likeInfo}
     />
   );
 }
