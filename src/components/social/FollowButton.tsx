@@ -9,6 +9,7 @@ interface FollowButtonProps {
   targetUserId: string;
   initialIsFollowing: boolean;
   initialIsPending?: boolean;
+  onFollowChange?: (isNowFollowing: boolean) => void;
   compact?: boolean;
 }
 
@@ -16,6 +17,7 @@ export function FollowButton({
   targetUserId,
   initialIsFollowing,
   initialIsPending = false,
+  onFollowChange,
   compact = false,
 }: FollowButtonProps) {
   const t = useT();
@@ -55,6 +57,9 @@ export function FollowButton({
         
         if (wasFollowing) {
           result = await unfollowUser(targetUserId);
+          if (!("error" in result)) {
+            onFollowChange?.(false);
+          }
         } else if (wasPending) {
           result = await cancelFollowRequest(targetUserId);
         } else {
@@ -64,6 +69,9 @@ export function FollowButton({
             setIsFollowing(false);
             setIsPending(true);
             return;
+          }
+          if (!("error" in result)) {
+            onFollowChange?.(true);
           }
         }
 

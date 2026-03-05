@@ -29,6 +29,14 @@ export function FollowingContent({ userId, username, isOwnProfile = false }: Fol
   const [isLoading, setIsLoading] = useState(true);
   const [hasMore, setHasMore] = useState(false);
 
+  // When user unfollows from own list, remove from UI
+  const handleUnfollow = (unfollowedUserId: string) => {
+    if (isOwnProfile) {
+      setUsers((prev) => prev.filter((u) => u.id !== unfollowedUserId));
+      setTotal((prev) => prev - 1);
+    }
+  };
+
   useEffect(() => {
     async function loadFollowing() {
       setIsLoading(true);
@@ -103,6 +111,11 @@ export function FollowingContent({ userId, username, isOwnProfile = false }: Fol
                 isFollowing={followStatus[user.id]?.isFollowing ?? false}
                 isPending={followStatus[user.id]?.isPending ?? false}
                 showFollowButton
+                onFollowChange={(isNowFollowing) => {
+                  if (!isNowFollowing && isOwnProfile) {
+                    handleUnfollow(user.id);
+                  }
+                }}
               />
             ))}
             {hasMore && (

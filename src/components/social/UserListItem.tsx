@@ -17,6 +17,7 @@ interface UserListItemProps {
   showFollowButton?: boolean;
   showRemoveButton?: boolean;
   onRemove?: () => void;
+  onFollowChange?: (isNowFollowing: boolean) => void;
   isRemoving?: boolean;
   isOwnProfile?: boolean;
 }
@@ -33,6 +34,7 @@ export function UserListItem({
   showFollowButton = true,
   showRemoveButton = false,
   onRemove,
+  onFollowChange,
   isRemoving = false,
   isOwnProfile = false,
 }: UserListItemProps) {
@@ -89,6 +91,7 @@ export function UserListItem({
           targetUserId={id}
           initialIsFollowing={isFollowing}
           initialIsPending={isPending}
+          onFollowChange={onFollowChange}
           compact
         />
       )}
