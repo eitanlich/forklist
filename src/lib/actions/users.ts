@@ -1,5 +1,6 @@
 "use server";
 
+import { auth } from "@clerk/nextjs/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export interface SearchUser {
@@ -21,6 +22,19 @@ export async function searchUsers(
   const supabase = createAdminClient();
   const searchTerm = query.trim().toLowerCase();
   
+  // Get current user to exclude from results
+  const { userId: clerkId } = await auth();
+  let currentUserId: string | null = null;
+  
+  if (clerkId) {
+    const { data: currentUser } = await supabase
+      .from("users")
+      .select("id")
+      .eq("clerk_id", clerkId)
+      .single();
+    currentUserId = currentUser?.id ?? null;
+  }
+  
   // Check if query looks like an email
   const isEmailSearch = searchTerm.includes("@");
 
@@ -28,12 +42,18 @@ export async function searchUsers(
 
   if (isEmailSearch) {
     // Search by exact email match (for finding friends)
-    const { data, error } = await supabase
+    let query = supabase
       .from("users")
       .select("id, username, email, bio, avatar_url, is_private")
       .eq("is_private", false)
-      .ilike("email", searchTerm)
-      .limit(limit);
+      .ilike("email", searchTerm);
+    
+    // Exclude current user
+    if (currentUserId) {
+      query = query.neq("id", currentUserId);
+    }
+    
+    const { data, error } = await query.limit(limit);
 
     if (error) {
       return { users: [], error: "Failed to search users" };
@@ -41,12 +61,18 @@ export async function searchUsers(
     users = data ?? [];
   } else {
     // Search by username
-    const { data, error } = await supabase
+    let query = supabase
       .from("users")
       .select("id, username, email, bio, avatar_url, is_private")
       .eq("is_private", false)
-      .ilike("username", `%${searchTerm}%`)
-      .limit(limit);
+      .ilike("username", `%${searchTerm}%`);
+    
+    // Exclude current user
+    if (currentUserId) {
+      query = query.neq("id", currentUserId);
+    }
+    
+    const { data, error } = await query.limit(limit);
 
     if (error) {
       return { users: [], error: "Failed to search users" };
