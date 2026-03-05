@@ -85,7 +85,34 @@ export default async function PublicProfilePage({ params }: Props) {
   }
 
   if (result.status === "private") {
-    return <PrivateProfileContent username={result.username} />;
+    // Get follow status for private profile
+    let followStatus = { isFollowing: false, isPending: false };
+    let targetUserId: string | null = null;
+    
+    if (currentUserId) {
+      // Get the private user's ID to check follow status
+      const supabase = createAdminClient();
+      const { data: privateUser } = await supabase
+        .from("users")
+        .select("id")
+        .eq("username", result.username)
+        .single();
+      
+      if (privateUser) {
+        targetUserId = privateUser.id;
+        followStatus = await getFollowStatus(privateUser.id);
+      }
+    }
+    
+    return (
+      <PrivateProfileContent 
+        username={result.username}
+        userId={targetUserId}
+        isFollowing={followStatus.isFollowing}
+        isPending={followStatus.isPending}
+        isLoggedIn={!!currentUserId}
+      />
+    );
   }
 
   const profile = result.profile;

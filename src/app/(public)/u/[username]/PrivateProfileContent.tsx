@@ -2,12 +2,23 @@
 
 import { Lock } from "lucide-react";
 import { I18nProvider, useT } from "@/lib/i18n";
+import { FollowButton } from "@/components/social/FollowButton";
 
 interface PrivateProfileContentProps {
   username: string;
+  userId?: string | null;
+  isFollowing?: boolean;
+  isPending?: boolean;
+  isLoggedIn?: boolean;
 }
 
-function PrivateProfileInner({ username }: PrivateProfileContentProps) {
+function PrivateProfileInner({ 
+  username, 
+  userId, 
+  isFollowing = false, 
+  isPending = false,
+  isLoggedIn = false,
+}: PrivateProfileContentProps) {
   const t = useT();
 
   return (
@@ -24,6 +35,15 @@ function PrivateProfileInner({ username }: PrivateProfileContentProps) {
             @{username}
           </h1>
 
+          {/* Follow Button - only show if logged in and have userId */}
+          {isLoggedIn && userId && (
+            <FollowButton
+              targetUserId={userId}
+              initialIsFollowing={isFollowing}
+              initialIsPending={isPending}
+            />
+          )}
+
           {/* Private message */}
           <div className="max-w-sm space-y-2">
             <p className="text-lg font-medium text-foreground">
@@ -37,7 +57,7 @@ function PrivateProfileInner({ username }: PrivateProfileContentProps) {
           {/* Back link */}
           <a
             href="/explore"
-            className="mt-4 rounded-xl bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground transition-all hover:opacity-90"
+            className="mt-4 rounded-xl bg-secondary px-6 py-2.5 text-sm font-medium text-foreground transition-all hover:opacity-90"
           >
             {t("backToExplore")}
           </a>
@@ -57,10 +77,22 @@ function PrivateProfileInner({ username }: PrivateProfileContentProps) {
   );
 }
 
-export function PrivateProfileContent(props: PrivateProfileContentProps) {
+export function PrivateProfileContent({
+  username,
+  userId,
+  isFollowing,
+  isPending,
+  isLoggedIn,
+}: PrivateProfileContentProps) {
   return (
     <I18nProvider>
-      <PrivateProfileInner {...props} />
+      <PrivateProfileInner 
+        username={username}
+        userId={userId}
+        isFollowing={isFollowing}
+        isPending={isPending}
+        isLoggedIn={isLoggedIn}
+      />
     </I18nProvider>
   );
 }

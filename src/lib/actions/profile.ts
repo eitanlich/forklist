@@ -341,7 +341,20 @@ export async function getPublicProfile(
   // Allow owner to view their own private profile
   const isOwner = currentUserId && currentUserId === user.id;
   
-  if (user.is_private && !isOwner) {
+  // Check if current user is an approved follower
+  let isApprovedFollower = false;
+  if (user.is_private && !isOwner && currentUserId) {
+    const { data: followRecord } = await supabase
+      .from("follows")
+      .select("status")
+      .eq("follower_id", currentUserId)
+      .eq("following_id", user.id)
+      .eq("status", "active")
+      .single();
+    isApprovedFollower = !!followRecord;
+  }
+  
+  if (user.is_private && !isOwner && !isApprovedFollower) {
     return { status: "private", username: user.username };
   }
 
