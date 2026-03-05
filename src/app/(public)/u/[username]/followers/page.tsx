@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { getPublicProfile } from "@/lib/actions/profile";
+import { getCurrentUserId } from "@/lib/actions/user";
 import { FollowersContent } from "./FollowersContent";
 
 interface Props {
@@ -34,5 +35,14 @@ export default async function FollowersPage({ params }: Props) {
   }
 
   const profile = result.profile;
-  return <FollowersContent userId={profile.id} username={profile.username!} />;
+  const currentUserId = await getCurrentUserId();
+  const isOwnProfile = currentUserId === profile.id;
+  
+  return (
+    <FollowersContent 
+      userId={profile.id} 
+      username={profile.username!} 
+      isOwnProfile={isOwnProfile}
+    />
+  );
 }

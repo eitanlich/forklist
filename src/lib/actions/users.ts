@@ -9,6 +9,7 @@ export interface SearchUser {
   email: string | null;
   bio: string | null;
   avatar_url: string | null;
+  is_private: boolean;
 }
 
 export async function searchUsers(
@@ -42,10 +43,10 @@ export async function searchUsers(
 
   if (isEmailSearch) {
     // Search by exact email match (for finding friends)
+    // Include private profiles - they can be found but need follow request
     let query = supabase
       .from("users")
       .select("id, username, email, bio, avatar_url, is_private")
-      .eq("is_private", false)
       .ilike("email", searchTerm);
     
     // Exclude current user
@@ -61,10 +62,10 @@ export async function searchUsers(
     users = data ?? [];
   } else {
     // Search by username
+    // Include private profiles - they can be found but need follow request
     let query = supabase
       .from("users")
       .select("id, username, email, bio, avatar_url, is_private")
-      .eq("is_private", false)
       .ilike("username", `%${searchTerm}%`);
     
     // Exclude current user
@@ -88,6 +89,7 @@ export async function searchUsers(
       email: u.email ? maskEmail(u.email) : null,
       bio: u.bio,
       avatar_url: u.avatar_url,
+      is_private: u.is_private ?? false,
     })),
   };
 }

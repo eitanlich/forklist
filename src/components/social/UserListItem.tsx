@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { User } from "lucide-react";
+import { User, UserMinus, Loader2, Lock } from "lucide-react";
 import { FollowButton } from "./FollowButton";
-import { useT } from "@/lib/i18n";
+import { useT, useI18n } from "@/lib/i18n";
 
 interface UserListItemProps {
   id: string;
@@ -11,9 +11,13 @@ interface UserListItemProps {
   email?: string | null;
   bio?: string | null;
   avatarUrl?: string | null;
+  isPrivate?: boolean;
   isFollowing?: boolean;
   isPending?: boolean;
   showFollowButton?: boolean;
+  showRemoveButton?: boolean;
+  onRemove?: () => void;
+  isRemoving?: boolean;
   isOwnProfile?: boolean;
 }
 
@@ -23,12 +27,17 @@ export function UserListItem({
   email,
   bio,
   avatarUrl,
+  isPrivate = false,
   isFollowing = false,
   isPending = false,
   showFollowButton = true,
+  showRemoveButton = false,
+  onRemove,
+  isRemoving = false,
   isOwnProfile = false,
 }: UserListItemProps) {
   const t = useT();
+  const { locale } = useI18n();
   
   // If no username, show email-based result but user can't be linked yet
   const displayName = username ? `@${username}` : email || t("unknownUser");
@@ -50,7 +59,12 @@ export function UserListItem({
         )}
       </div>
       <div className="min-w-0 flex-1">
-        <p className="font-medium text-foreground truncate">{displayName}</p>
+        <div className="flex items-center gap-1.5">
+          <p className="font-medium text-foreground truncate">{displayName}</p>
+          {isPrivate && (
+            <Lock size={12} className="text-muted-foreground flex-shrink-0" />
+          )}
+        </div>
         {bio && (
           <p className="text-sm text-muted-foreground truncate">{bio}</p>
         )}
@@ -77,6 +91,23 @@ export function UserListItem({
           initialIsPending={isPending}
           compact
         />
+      )}
+      {showRemoveButton && onRemove && (
+        <button
+          onClick={onRemove}
+          disabled={isRemoving}
+          className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-muted-foreground hover:bg-destructive/10 hover:text-destructive disabled:opacity-50 transition-colors"
+          title={locale === "es" ? "Eliminar" : "Remove"}
+        >
+          {isRemoving ? (
+            <Loader2 size={14} className="animate-spin" />
+          ) : (
+            <UserMinus size={14} />
+          )}
+          <span className="hidden sm:inline">
+            {locale === "es" ? "Eliminar" : "Remove"}
+          </span>
+        </button>
       )}
     </div>
   );

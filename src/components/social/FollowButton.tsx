@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { UserPlus, UserMinus, Clock, Loader2 } from "lucide-react";
-import { followUser, unfollowUser } from "@/lib/actions/follows";
+import { followUser, unfollowUser, cancelFollowRequest } from "@/lib/actions/follows";
 import { useT } from "@/lib/i18n";
 
 interface FollowButtonProps {
@@ -24,23 +24,42 @@ export function FollowButton({
   const [isPendingAction, startTransition] = useTransition();
 
   const handleClick = () => {
-    // Optimistic update
+    // Save current state for potential revert
     const wasFollowing = isFollowing;
     const wasPending = isPending;
 
-    if (isFollowing || isPending) {
+    // Optimistic update
+    if (isFollowing) {
+      // Unfollow
+      setIsFollowing(false);
+      setIsPending(false);
+    } else if (isPending) {
+      // Cancel request
       setIsFollowing(false);
       setIsPending(false);
     } else {
+      // Follow - we'll know if pending after server response
       setIsFollowing(true);
       setIsPending(false);
     }
 
     startTransition(async () => {
       try {
-        const result = wasFollowing || wasPending
-          ? await unfollowUser(targetUserId)
-          : await followUser(targetUserId);
+        let result;
+        
+        if (wasFollowing) {
+          result = await unfollowUser(targetUserId);
+        } else if (wasPending) {
+          result = await cancelFollowRequest(targetUserId);
+        } else {
+          result = await followUser(targetUserId);
+          // Check if follow resulted in pending request
+          if ("success" in result && result.pending) {
+            setIsFollowing(false);
+            setIsPending(true);
+            return;
+          }
+        }
 
         if ("error" in result) {
           // Revert on error

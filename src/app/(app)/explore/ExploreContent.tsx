@@ -104,6 +104,7 @@ export function ExploreContent() {
                   email={user.email}
                   bio={user.bio}
                   avatarUrl={user.avatar_url}
+                  isPrivate={user.is_private}
                   showFollowButton
                 />
               ))}

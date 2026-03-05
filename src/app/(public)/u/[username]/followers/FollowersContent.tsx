@@ -3,13 +3,14 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowLeft, Loader2 } from "lucide-react";
-import { useT } from "@/lib/i18n";
-import { getFollowers } from "@/lib/actions/follows";
+import { useT, useI18n } from "@/lib/i18n";
+import { getFollowers, removeFollower } from "@/lib/actions/follows";
 import { UserListItem } from "@/components/social/UserListItem";
 
 interface FollowersContentProps {
   userId: string;
   username: string;
+  isOwnProfile?: boolean;
 }
 
 interface FollowerUser {
@@ -19,13 +20,15 @@ interface FollowerUser {
   avatar_url?: string | null;
 }
 
-export function FollowersContent({ userId, username }: FollowersContentProps) {
+export function FollowersContent({ userId, username, isOwnProfile = false }: FollowersContentProps) {
   const t = useT();
+  const { locale } = useI18n();
   const [users, setUsers] = useState<FollowerUser[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [hasMore, setHasMore] = useState(false);
+  const [removingIds, setRemovingIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     async function loadFollowers() {
@@ -42,6 +45,29 @@ export function FollowersContent({ userId, username }: FollowersContentProps) {
     }
     loadFollowers();
   }, [userId, page]);
+
+  const handleRemoveFollower = async (followerId: string) => {
+    const confirmMsg = locale === "es"
+      ? "¿Seguro que querés eliminar este seguidor?"
+      : "Are you sure you want to remove this follower?";
+    
+    if (!confirm(confirmMsg)) return;
+
+    setRemovingIds((prev) => new Set(prev).add(followerId));
+    
+    const result = await removeFollower(followerId);
+    
+    if (result.success) {
+      setUsers((prev) => prev.filter((u) => u.id !== followerId));
+      setTotal((prev) => prev - 1);
+    }
+    
+    setRemovingIds((prev) => {
+      const next = new Set(prev);
+      next.delete(followerId);
+      return next;
+    });
+  };
 
   return (
     <div className="space-y-4 pb-24">
@@ -78,7 +104,10 @@ export function FollowersContent({ userId, username }: FollowersContentProps) {
                 username={user.username}
                 bio={user.bio}
                 avatarUrl={user.avatar_url}
-                showFollowButton
+                showFollowButton={!isOwnProfile}
+                showRemoveButton={isOwnProfile}
+                onRemove={() => handleRemoveFollower(user.id)}
+                isRemoving={removingIds.has(user.id)}
               />
             ))}
             {hasMore && (

@@ -32,7 +32,7 @@ export async function getUserByUsername(username: string) {
 // Follow a user
 export async function followUser(
   targetUserId: string
-): Promise<{ error: string } | { success: true }> {
+): Promise<{ error: string } | { success: true; pending?: boolean }> {
   const currentUserId = await getCurrentUserId();
   if (!currentUserId) return { error: "Not authenticated" };
 
@@ -42,32 +42,34 @@ export async function followUser(
 
   const supabase = createAdminClient();
 
-  // Check if target user exists
+  // Check if target user exists and if they're private
   const { data: targetUser } = await supabase
     .from("users")
-    .select("id")
+    .select("id, is_private")
     .eq("id", targetUserId)
     .single();
 
   if (!targetUser) return { error: "User not found" };
 
-  // For now, all profiles are public -> status = 'active'
+  // If target is private, create pending request; otherwise active
+  const status = targetUser.is_private ? "pending" : "active";
+  
   const { error } = await supabase.from("follows").insert({
     follower_id: currentUserId,
     following_id: targetUserId,
-    status: "active",
+    status,
   });
 
   if (error) {
     if (error.code === "23505") {
-      // Already following
-      return { success: true };
+      // Already following or pending
+      return { success: true, pending: status === "pending" };
     }
     console.error("[followUser] Insert error:", error);
     return { error: "Failed to follow user" };
   }
 
-  return { success: true };
+  return { success: true, pending: status === "pending" };
 }
 
 // Unfollow a user
@@ -286,4 +288,159 @@ export async function getFeedReviews(
     total,
     hasMore: offset + limit < total,
   };
+}
+
+// ============================================
+// FOLLOW REQUEST MANAGEMENT (Private Profiles)
+// ============================================
+
+export interface FollowRequest {
+  id: string;
+  follower_id: string;
+  username: string;
+  avatar_url: string | null;
+  bio: string | null;
+  created_at: string;
+}
+
+// Get pending follow requests for current user
+export async function getPendingFollowRequests(): Promise<{ requests: FollowRequest[]; total: number }> {
+  noStore();
+  const currentUserId = await getCurrentUserId();
+  if (!currentUserId) return { requests: [], total: 0 };
+
+  const supabase = createAdminClient();
+
+  const { data: follows, count } = await supabase
+    .from("follows")
+    .select("id, follower_id, created_at, follower:users!follows_follower_id_fkey(username, avatar_url, bio)", { count: "exact" })
+    .eq("following_id", currentUserId)
+    .eq("status", "pending")
+    .order("created_at", { ascending: false });
+
+  const requests: FollowRequest[] = (follows ?? []).map((f) => {
+    const follower = Array.isArray(f.follower) ? f.follower[0] : f.follower;
+    return {
+      id: f.id,
+      follower_id: f.follower_id,
+      username: follower?.username ?? "",
+      avatar_url: follower?.avatar_url ?? null,
+      bio: follower?.bio ?? null,
+      created_at: f.created_at,
+    };
+  });
+
+  return { requests, total: count ?? 0 };
+}
+
+// Get count of pending requests (for badge)
+export async function getPendingRequestCount(): Promise<number> {
+  noStore();
+  const currentUserId = await getCurrentUserId();
+  if (!currentUserId) return 0;
+
+  const supabase = createAdminClient();
+
+  const { count } = await supabase
+    .from("follows")
+    .select("*", { count: "exact", head: true })
+    .eq("following_id", currentUserId)
+    .eq("status", "pending");
+
+  return count ?? 0;
+}
+
+// Accept a follow request
+export async function acceptFollowRequest(
+  followerId: string
+): Promise<{ error?: string; success?: boolean }> {
+  const currentUserId = await getCurrentUserId();
+  if (!currentUserId) return { error: "Not authenticated" };
+
+  const supabase = createAdminClient();
+
+  const { error } = await supabase
+    .from("follows")
+    .update({ status: "active" })
+    .eq("follower_id", followerId)
+    .eq("following_id", currentUserId)
+    .eq("status", "pending");
+
+  if (error) {
+    console.error("[acceptFollowRequest] Error:", error);
+    return { error: "Failed to accept request" };
+  }
+
+  return { success: true };
+}
+
+// Reject a follow request
+export async function rejectFollowRequest(
+  followerId: string
+): Promise<{ error?: string; success?: boolean }> {
+  const currentUserId = await getCurrentUserId();
+  if (!currentUserId) return { error: "Not authenticated" };
+
+  const supabase = createAdminClient();
+
+  const { error } = await supabase
+    .from("follows")
+    .delete()
+    .eq("follower_id", followerId)
+    .eq("following_id", currentUserId)
+    .eq("status", "pending");
+
+  if (error) {
+    console.error("[rejectFollowRequest] Error:", error);
+    return { error: "Failed to reject request" };
+  }
+
+  return { success: true };
+}
+
+// Remove an existing follower
+export async function removeFollower(
+  followerId: string
+): Promise<{ error?: string; success?: boolean }> {
+  const currentUserId = await getCurrentUserId();
+  if (!currentUserId) return { error: "Not authenticated" };
+
+  const supabase = createAdminClient();
+
+  const { error } = await supabase
+    .from("follows")
+    .delete()
+    .eq("follower_id", followerId)
+    .eq("following_id", currentUserId);
+
+  if (error) {
+    console.error("[removeFollower] Error:", error);
+    return { error: "Failed to remove follower" };
+  }
+
+  return { success: true };
+}
+
+// Cancel a pending follow request (as the requester)
+export async function cancelFollowRequest(
+  targetUserId: string
+): Promise<{ error?: string; success?: boolean }> {
+  const currentUserId = await getCurrentUserId();
+  if (!currentUserId) return { error: "Not authenticated" };
+
+  const supabase = createAdminClient();
+
+  const { error } = await supabase
+    .from("follows")
+    .delete()
+    .eq("follower_id", currentUserId)
+    .eq("following_id", targetUserId)
+    .eq("status", "pending");
+
+  if (error) {
+    console.error("[cancelFollowRequest] Error:", error);
+    return { error: "Failed to cancel request" };
+  }
+
+  return { success: true };
 }
