@@ -27,12 +27,12 @@ export async function getPopularReviews(
 ): Promise<{ reviews: PopularReview[]; error?: string }> {
   const supabase = createAdminClient();
 
-  // Get reviews from last 7 days with most likes
+  // Get reviews from last 7 days with most likes (for ranking)
   const sevenDaysAgo = new Date();
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-  // First get review IDs with like counts
-  const { data: likeCounts, error: likeError } = await supabase
+  // Get recent likes for ranking (trending)
+  const { data: recentLikes, error: likeError } = await supabase
     .from("likes")
     .select("review_id")
     .gte("created_at", sevenDaysAgo.toISOString());
@@ -41,14 +41,14 @@ export async function getPopularReviews(
     return { reviews: [], error: "Failed to fetch popular reviews" };
   }
 
-  // Count likes per review
-  const reviewLikes: Record<string, number> = {};
-  for (const like of likeCounts ?? []) {
-    reviewLikes[like.review_id] = (reviewLikes[like.review_id] ?? 0) + 1;
+  // Count recent likes per review (for ranking)
+  const recentLikeCounts: Record<string, number> = {};
+  for (const like of recentLikes ?? []) {
+    recentLikeCounts[like.review_id] = (recentLikeCounts[like.review_id] ?? 0) + 1;
   }
 
-  // Get top review IDs sorted by like count
-  const sortedReviewIds = Object.entries(reviewLikes)
+  // Get top review IDs sorted by recent like count
+  const sortedReviewIds = Object.entries(recentLikeCounts)
     .sort((a, b) => b[1] - a[1])
     .slice(0, limit)
     .map(([id]) => id);
@@ -76,7 +76,18 @@ export async function getPopularReviews(
     return { reviews: [], error: "Failed to fetch reviews" };
   }
 
-  // Map, filter private users, and sort by like count
+  // Get TOTAL like counts (all time) for display
+  const { data: allLikes } = await supabase
+    .from("likes")
+    .select("review_id")
+    .in("review_id", sortedReviewIds);
+
+  const totalLikeCounts: Record<string, number> = {};
+  for (const like of allLikes ?? []) {
+    totalLikeCounts[like.review_id] = (totalLikeCounts[like.review_id] ?? 0) + 1;
+  }
+
+  // Map, filter private users, and sort by recent like count (trending)
   const popularReviews = (reviews ?? [])
     .map((r) => {
       const user = Array.isArray(r.user) ? r.user[0] : r.user;
@@ -86,15 +97,16 @@ export async function getPopularReviews(
         comment: r.comment,
         visited_at: r.visited_at,
         created_at: r.created_at,
-        like_count: reviewLikes[r.id] ?? 0,
+        like_count: totalLikeCounts[r.id] ?? 0, // Total likes for display
+        _recentLikes: recentLikeCounts[r.id] ?? 0, // Recent likes for sorting
         user: { id: user?.id, username: user?.username, avatar_url: user?.avatar_url },
         restaurant: Array.isArray(r.restaurant) ? r.restaurant[0] : r.restaurant,
         _isPrivate: user?.is_private ?? false,
       };
     })
-    .filter((r) => !r._isPrivate && r.user?.username) // Exclude private users and users without username
-    .map(({ _isPrivate, ...review }) => review) // Remove internal field
-    .sort((a, b) => b.like_count - a.like_count) as PopularReview[];
+    .filter((r) => !r._isPrivate && r.user?.username)
+    .sort((a, b) => b._recentLikes - a._recentLikes) // Sort by recent (trending)
+    .map(({ _isPrivate, _recentLikes, ...review }) => review) as PopularReview[];
 
   return { reviews: popularReviews };
 }
