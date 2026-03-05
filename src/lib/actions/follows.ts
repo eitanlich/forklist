@@ -183,6 +183,7 @@ export async function getFollowing(
 
 // Get follower and following counts for a user
 export async function getFollowCounts(userId: string): Promise<{ followers: number; following: number }> {
+  noStore();
   const supabase = createAdminClient();
 
   const [followersResult, followingResult] = await Promise.all([

@@ -1,8 +1,10 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { User } from "lucide-react";
 import { FollowButton } from "@/components/social/FollowButton";
+import { getFollowCounts } from "@/lib/actions/follows";
 import { useT } from "@/lib/i18n";
 
 interface ProfileHeaderProps {
@@ -22,8 +24,8 @@ export function ProfileHeader({
   username,
   bio,
   avatarUrl,
-  followerCount,
-  followingCount,
+  followerCount: initialFollowerCount,
+  followingCount: initialFollowingCount,
   reviewCount,
   userId,
   isFollowing = false,
@@ -31,6 +33,18 @@ export function ProfileHeader({
   isOwnProfile = false,
 }: ProfileHeaderProps) {
   const t = useT();
+  const [followerCount, setFollowerCount] = useState(initialFollowerCount);
+  const [followingCount, setFollowingCount] = useState(initialFollowingCount);
+
+  // Load fresh counts on client
+  useEffect(() => {
+    if (userId) {
+      getFollowCounts(userId).then((counts) => {
+        setFollowerCount(counts.followers);
+        setFollowingCount(counts.following);
+      });
+    }
+  }, [userId]);
 
   return (
     <div className="flex flex-col items-center space-y-4 pb-6">
