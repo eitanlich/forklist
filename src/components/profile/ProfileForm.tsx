@@ -4,7 +4,8 @@ import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { updateProfile, uploadAvatar, removeAvatar } from "@/lib/actions/profile";
 import { Camera, Loader2, Pencil, User, X, Globe2, Lock } from "lucide-react";
-import { useT } from "@/lib/i18n";
+import { useT, useI18n } from "@/lib/i18n";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
 
 interface ProfileFormProps {
   currentBio: string | null;
@@ -20,8 +21,11 @@ export function ProfileForm({
   onSuccess,
 }: ProfileFormProps) {
   const t = useT();
+  const { locale } = useI18n();
   const [bio, setBio] = useState(currentBio ?? "");
   const [isPrivate, setIsPrivate] = useState(initialPrivate);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+  const [pendingPrivacyChange, setPendingPrivacyChange] = useState<boolean | null>(null);
   const [avatarUrl, setAvatarUrl] = useState(currentAvatarUrl);
   const [pendingAvatarFile, setPendingAvatarFile] = useState<File | null>(null);
   const [pendingAvatarPreview, setPendingAvatarPreview] = useState<string | null>(null);
@@ -249,7 +253,10 @@ export function ProfileForm({
           type="button"
           role="switch"
           aria-checked={!isPrivate}
-          onClick={() => setIsPrivate(!isPrivate)}
+          onClick={() => {
+            setPendingPrivacyChange(!isPrivate);
+            setShowPrivacyModal(true);
+          }}
           className={`relative h-6 w-11 rounded-full transition-colors ${
             !isPrivate ? "bg-primary" : "bg-secondary"
           } disabled:opacity-50`}
@@ -262,6 +269,42 @@ export function ProfileForm({
           />
         </button>
       </div>
+
+      {/* Privacy Change Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showPrivacyModal}
+        onClose={() => {
+          setShowPrivacyModal(false);
+          setPendingPrivacyChange(null);
+        }}
+        onConfirm={() => {
+          if (pendingPrivacyChange !== null) {
+            setIsPrivate(pendingPrivacyChange);
+          }
+          setShowPrivacyModal(false);
+          setPendingPrivacyChange(null);
+        }}
+        title={
+          pendingPrivacyChange
+            ? locale === "es" ? "Hacer perfil privado" : "Make profile private"
+            : locale === "es" ? "Hacer perfil público" : "Make profile public"
+        }
+        message={
+          pendingPrivacyChange
+            ? locale === "es"
+              ? "Solo los seguidores aprobados podrán ver tu perfil y reviews. Los seguidores actuales mantendrán su acceso."
+              : "Only approved followers will be able to see your profile and reviews. Current followers will keep their access."
+            : locale === "es"
+              ? "Cualquiera podrá ver tu perfil y reviews. Las solicitudes de seguimiento pendientes serán aprobadas automáticamente."
+              : "Anyone will be able to see your profile and reviews. Pending follow requests will be automatically approved."
+        }
+        confirmText={
+          pendingPrivacyChange
+            ? locale === "es" ? "Hacer privado" : "Make private"
+            : locale === "es" ? "Hacer público" : "Make public"
+        }
+        cancelText={locale === "es" ? "Cancelar" : "Cancel"}
+      />
 
       {error && <p className="text-sm text-destructive">{error}</p>}
 
