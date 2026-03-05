@@ -2,7 +2,7 @@
 
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, unstable_noStore as noStore } from "next/cache";
 
 // Username validation
 const USERNAME_REGEX = /^[a-z0-9_]{3,20}$/;
@@ -327,6 +327,7 @@ export async function getPublicProfile(
   username: string,
   currentUserId?: string | null
 ): Promise<ProfileResult> {
+  noStore();
   const supabase = createAdminClient();
 
   const { data: user } = await supabase

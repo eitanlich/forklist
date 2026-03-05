@@ -1,5 +1,6 @@
 "use server";
 
+import { unstable_noStore as noStore } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentUserId } from "@/lib/actions/user";
 
@@ -91,6 +92,7 @@ export async function unfollowUser(
 
 // Check if current user follows a target user
 export async function getFollowStatus(targetUserId: string): Promise<FollowStatus> {
+  noStore();
   const currentUserId = await getCurrentUserId();
   if (!currentUserId) return { isFollowing: false, isPending: false };
 
@@ -117,6 +119,7 @@ export async function getFollowers(
   page = 1,
   limit = 20
 ): Promise<{ users: FollowUser[]; total: number }> {
+  noStore();
   const supabase = createAdminClient();
   const offset = (page - 1) * limit;
 
@@ -150,6 +153,7 @@ export async function getFollowing(
   page = 1,
   limit = 20
 ): Promise<{ users: FollowUser[]; total: number }> {
+  noStore();
   const supabase = createAdminClient();
   const offset = (page - 1) * limit;
 

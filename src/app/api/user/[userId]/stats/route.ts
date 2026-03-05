@@ -1,10 +1,15 @@
 import { NextResponse } from "next/server";
+import { unstable_noStore as noStore } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
+
+// Disable caching
+export const dynamic = "force-dynamic";
 
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ userId: string }> }
 ) {
+  noStore();
   const { userId } = await params;
   const { searchParams } = new URL(request.url);
   const period = searchParams.get("period") || "all";

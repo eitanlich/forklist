@@ -1,5 +1,6 @@
 "use server";
 
+import { unstable_noStore as noStore } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentUserId } from "@/lib/actions/user";
 
@@ -42,6 +43,7 @@ export async function toggleLike(
 }
 
 export async function hasUserLiked(reviewId: string): Promise<boolean> {
+  noStore();
   const userId = await getCurrentUserId();
   if (!userId) return false;
 
@@ -57,6 +59,7 @@ export async function hasUserLiked(reviewId: string): Promise<boolean> {
 }
 
 export async function getLikeCount(reviewId: string): Promise<number> {
+  noStore();
   const supabase = createAdminClient();
   const { count } = await supabase
     .from("likes")
@@ -69,6 +72,7 @@ export async function getLikeCount(reviewId: string): Promise<number> {
 export async function getLikeInfo(
   reviewId: string
 ): Promise<{ count: number; hasLiked: boolean }> {
+  noStore();
   const [count, hasLiked] = await Promise.all([
     getLikeCount(reviewId),
     hasUserLiked(reviewId),
@@ -80,6 +84,7 @@ export async function getLikeInfo(
 export async function getBatchLikeInfo(
   reviewIds: string[]
 ): Promise<Record<string, { count: number; hasLiked: boolean }>> {
+  noStore();
   if (reviewIds.length === 0) return {};
 
   const userId = await getCurrentUserId();
@@ -116,6 +121,7 @@ export async function getLikedBy(
   reviewId: string,
   limit = 10
 ): Promise<{ users: LikeUser[]; total: number }> {
+  noStore();
   const supabase = createAdminClient();
 
   // Get users who liked (with count in same query)
