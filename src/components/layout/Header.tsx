@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Globe, Plus, User } from "lucide-react";
+import { Globe, Plus, User, Bell } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useI18n, useT, type Locale } from "@/lib/i18n";
 import { useUser } from "@/lib/user";
+import { getNotificationCounts } from "@/lib/actions/notifications";
 
 const LANGUAGES: { code: Locale; name: string; flag: string }[] = [
   { code: "en", name: "English", flag: "🇺🇸" },
@@ -18,7 +19,17 @@ export default function Header() {
   const pathname = usePathname();
   const { user } = useUser();
   const [showLangMenu, setShowLangMenu] = useState(false);
+  const [notificationCount, setNotificationCount] = useState(0);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  // Load notification count on mount
+  useEffect(() => {
+    async function loadCounts() {
+      const counts = await getNotificationCounts();
+      setNotificationCount(counts.requestsCount);
+    }
+    loadCounts();
+  }, [pathname]); // Refresh on route change
 
   // Go to public profile if username exists, otherwise settings
   const profileHref = user?.username ? `/u/${user.username}` : "/settings/profile";
@@ -109,6 +120,24 @@ export default function Header() {
               </div>
             )}
           </div>
+
+          {/* Notifications link */}
+          <Link
+            href="/notifications"
+            className={`relative flex h-9 w-9 items-center justify-center rounded-full transition-all ${
+              pathname === "/notifications"
+                ? "bg-primary/10 text-primary"
+                : "bg-secondary text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
+            }`}
+            aria-label="Notifications"
+          >
+            <Bell size={18} />
+            {notificationCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground px-1">
+                {notificationCount > 9 ? "9+" : notificationCount}
+              </span>
+            )}
+          </Link>
 
           {/* Profile link */}
           <Link
