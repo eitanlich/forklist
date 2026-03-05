@@ -8,11 +8,13 @@ import { useI18n } from "@/lib/i18n";
 import { useUser } from "@/lib/user";
 import { deleteReview } from "@/lib/actions/reviews";
 import { ShareModal } from "@/components/share/ShareModal";
-import { LikeButton } from "@/components/ui/LikeButton";
-import { getLikeInfo, getLikedBy, type LikeUser } from "@/lib/actions/likes";
+import { toggleLike, getLikedBy, type LikeUser } from "@/lib/actions/likes";
 
 interface ReviewContentProps {
   review: any;
+  initialLikeInfo: { count: number; hasLiked: boolean };
+  initialLikedBy: LikeUser[];
+  initialTotalLikes: number;
 }
 
 function Stars({ rating, size = 16 }: { rating: number; size?: number }) {
@@ -31,33 +33,30 @@ function Stars({ rating, size = 16 }: { rating: number; size?: number }) {
   );
 }
 
-export function ReviewContent({ review }: ReviewContentProps) {
+export function ReviewContent({ 
+  review, 
+  initialLikeInfo,
+  initialLikedBy,
+  initialTotalLikes,
+}: ReviewContentProps) {
   const { locale } = useI18n();
   const { user } = useUser();
   const router = useRouter();
   const [deleting, setDeleting] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   
-  // Like state
-  const [likeInfo, setLikeInfo] = useState<{ count: number; hasLiked: boolean }>({ count: 0, hasLiked: false });
-  const [likedByUsers, setLikedByUsers] = useState<LikeUser[]>([]);
-  const [totalLikes, setTotalLikes] = useState(0);
-  const [loadingLikes, setLoadingLikes] = useState(true);
+  // Like state - initialized from server
+  const [likeCount, setLikeCount] = useState(initialLikeInfo.count);
+  const [hasLiked, setHasLiked] = useState(initialLikeInfo.hasLiked);
+  const [likedByUsers, setLikedByUsers] = useState<LikeUser[]>(initialLikedBy);
+  const [totalLikes, setTotalLikes] = useState(initialTotalLikes);
 
-  // Load like info
-  useEffect(() => {
-    async function loadLikes() {
-      const [info, likedBy] = await Promise.all([
-        getLikeInfo(review.id),
-        getLikedBy(review.id, 5),
-      ]);
-      setLikeInfo(info);
-      setLikedByUsers(likedBy.users);
-      setTotalLikes(likedBy.total);
-      setLoadingLikes(false);
-    }
-    loadLikes();
-  }, [review.id]);
+  // Refresh liked by list when like state changes
+  const refreshLikedBy = async () => {
+    const likedBy = await getLikedBy(review.id, 5);
+    setLikedByUsers(likedBy.users);
+    setTotalLikes(likedBy.total);
+  };
 
   // Check ownership on client side
   const isOwner = user?.id === review.user_id;
@@ -214,16 +213,44 @@ export function ReviewContent({ review }: ReviewContentProps) {
           {/* Likes Section */}
           <div className="mt-6 border-t border-border pt-6">
             <div className="flex items-center gap-4">
-              {/* Like Button */}
-              <LikeButton
-                reviewId={review.id}
-                initialLiked={likeInfo.hasLiked}
-                initialCount={likeInfo.count}
-                size="md"
-              />
+              {/* Like Button - inline to handle refresh */}
+              <button
+                onClick={async (e) => {
+                  e.preventDefault();
+                  const wasLiked = hasLiked;
+                  const prevCount = likeCount;
+                  
+                  // Optimistic update
+                  setHasLiked(!wasLiked);
+                  setLikeCount(wasLiked ? prevCount - 1 : prevCount + 1);
+                  
+                  const result = await toggleLike(review.id);
+                  
+                  if (result.error) {
+                    // Revert on error
+                    setHasLiked(wasLiked);
+                    setLikeCount(prevCount);
+                  } else {
+                    // Refresh liked by list
+                    await refreshLikedBy();
+                  }
+                }}
+                className={`flex items-center gap-1.5 transition-all hover:scale-105 active:scale-95 ${
+                  hasLiked ? "text-destructive" : "text-muted-foreground hover:text-destructive/70"
+                }`}
+              >
+                <Heart
+                  size={18}
+                  strokeWidth={1.5}
+                  className={hasLiked ? "fill-current" : ""}
+                />
+                {likeCount > 0 && (
+                  <span className="text-sm font-medium tabular-nums">{likeCount}</span>
+                )}
+              </button>
               
               {/* Liked by users */}
-              {!loadingLikes && totalLikes > 0 && (
+              {totalLikes > 0 && (
                 <div className="flex items-center gap-2">
                   {/* Avatar stack */}
                   <div className="flex -space-x-2">

@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getPublicReview } from "@/lib/actions/reviews";
+import { getLikeInfo, getLikedBy } from "@/lib/actions/likes";
 import { ReviewContent } from "./ReviewContent";
 
 interface Props {
@@ -54,5 +55,18 @@ export default async function PublicReviewPage({ params }: Props) {
     notFound();
   }
 
-  return <ReviewContent review={review} />;
+  // Pre-fetch like data on server
+  const [likeInfo, likedBy] = await Promise.all([
+    getLikeInfo(id),
+    getLikedBy(id, 5),
+  ]);
+
+  return (
+    <ReviewContent 
+      review={review} 
+      initialLikeInfo={likeInfo}
+      initialLikedBy={likedBy.users}
+      initialTotalLikes={likedBy.total}
+    />
+  );
 }
