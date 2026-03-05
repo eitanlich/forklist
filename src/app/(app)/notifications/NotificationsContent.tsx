@@ -156,28 +156,28 @@ function RequestsTab() {
     load();
   }, []);
 
-  const handleAccept = async (userId: string) => {
-    setProcessingIds((prev) => new Set(prev).add(userId));
-    const result = await acceptFollowRequest(userId);
+  const handleAccept = async (followerId: string) => {
+    setProcessingIds((prev) => new Set(prev).add(followerId));
+    const result = await acceptFollowRequest(followerId);
     if (result.success) {
-      setRequests((prev) => prev.filter((r) => r.id !== userId));
+      setRequests((prev) => prev.filter((r) => r.follower_id !== followerId));
     }
     setProcessingIds((prev) => {
       const next = new Set(prev);
-      next.delete(userId);
+      next.delete(followerId);
       return next;
     });
   };
 
-  const handleReject = async (userId: string) => {
-    setProcessingIds((prev) => new Set(prev).add(userId));
-    const result = await rejectFollowRequest(userId);
+  const handleReject = async (followerId: string) => {
+    setProcessingIds((prev) => new Set(prev).add(followerId));
+    const result = await rejectFollowRequest(followerId);
     if (result.success) {
-      setRequests((prev) => prev.filter((r) => r.id !== userId));
+      setRequests((prev) => prev.filter((r) => r.follower_id !== followerId));
     }
     setProcessingIds((prev) => {
       const next = new Set(prev);
-      next.delete(userId);
+      next.delete(followerId);
       return next;
     });
   };
@@ -240,20 +240,20 @@ function RequestsTab() {
           {/* Actions */}
           <div className="flex gap-2">
             <button
-              onClick={() => handleAccept(request.id)}
-              disabled={processingIds.has(request.id)}
+              onClick={() => handleAccept(request.follower_id)}
+              disabled={processingIds.has(request.follower_id)}
               className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground hover:opacity-90 disabled:opacity-50 transition-all"
               title={locale === "es" ? "Aceptar" : "Accept"}
             >
-              {processingIds.has(request.id) ? (
+              {processingIds.has(request.follower_id) ? (
                 <Loader2 size={14} className="animate-spin" />
               ) : (
                 <Check size={16} />
               )}
             </button>
             <button
-              onClick={() => handleReject(request.id)}
-              disabled={processingIds.has(request.id)}
+              onClick={() => handleReject(request.follower_id)}
+              disabled={processingIds.has(request.follower_id)}
               className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary text-muted-foreground hover:bg-destructive/10 hover:text-destructive disabled:opacity-50 transition-all"
               title={locale === "es" ? "Rechazar" : "Reject"}
             >
