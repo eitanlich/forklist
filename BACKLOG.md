@@ -68,7 +68,7 @@
 
 | Prioridad | Feature | Esfuerzo |
 |-----------|---------|----------|
-| 1 | UI de likes clickeable (backend listo) | 1 hr |
+| ✅ | UI de likes clickeable | DONE |
 | 2 | Buscar usuarios por email (username es opcional) | 1-2 hs |
 | 3 | Mejorar feed UX | 2-3 hs |
 | 4 | Filtros en historial | 2-3 hs |
@@ -76,7 +76,7 @@
 | 6 | Notificaciones (follow/like) | 3-4 hs |
 
 ### 🟡 Fase 5 - Engagement
-- [ ] UI de likes clickeable
+- [x] UI de likes clickeable ✅ (2026-03-05)
 - [ ] Comentarios en reviews
 - [ ] Discovery avanzado (popular, cercanos)
 - [ ] Fotos propias

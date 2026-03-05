@@ -33,14 +33,19 @@ export async function getCurrentUserId(): Promise<string | null> {
     
     if (clerkUser) {
       const email = clerkUser.emailAddresses[0]?.emailAddress ?? "";
-      const username = clerkUser.username ?? null;
+      // Generate username from Clerk or email prefix
+      let username = clerkUser.username;
+      if (!username && email) {
+        // Use email prefix as username (e.g., "john" from "john@example.com")
+        username = email.split("@")[0].toLowerCase().replace(/[^a-z0-9._-]/g, "");
+      }
       
       const { data: newUser, error } = await supabase
         .from("users")
         .insert({
           clerk_id: clerkId,
           email,
-          username,
+          username: username || `user_${Date.now()}`, // Fallback to unique id
         })
         .select("id")
         .single();
