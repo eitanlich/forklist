@@ -81,34 +81,38 @@ export async function getLists(): Promise<
 
   if (!user) return { success: true, lists: [] };
 
+  // Get lists
   const { data: lists, error } = await supabase
     .from("lists")
-    .select("*, list_items(count)")
+    .select("*")
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });
 
   if (error) return { error: "Failed to fetch lists" };
 
-  const listsWithCount: ListWithCount[] = (lists || []).map((list) => {
-    // Supabase returns count as [{ count: number }] when using select with (count)
-    const listItems = list.list_items as { count: number }[] | { count: number } | null;
-    let itemCount = 0;
-    if (Array.isArray(listItems) && listItems.length > 0) {
-      itemCount = listItems[0]?.count ?? 0;
-    } else if (listItems && typeof listItems === "object" && "count" in listItems) {
-      itemCount = listItems.count;
-    }
-    return {
-      id: list.id,
-      user_id: list.user_id,
-      name: list.name,
-      description: list.description,
-      is_public: list.is_public,
-      created_at: list.created_at,
-      updated_at: list.updated_at,
-      item_count: itemCount,
-    };
-  });
+  // Get item counts for all lists in a single query
+  const listIds = (lists || []).map((l) => l.id);
+  const { data: itemCounts } = await supabase
+    .from("list_items")
+    .select("list_id")
+    .in("list_id", listIds);
+
+  // Count items per list
+  const countMap: Record<string, number> = {};
+  for (const item of itemCounts || []) {
+    countMap[item.list_id] = (countMap[item.list_id] || 0) + 1;
+  }
+
+  const listsWithCount: ListWithCount[] = (lists || []).map((list) => ({
+    id: list.id,
+    user_id: list.user_id,
+    name: list.name,
+    description: list.description,
+    is_public: list.is_public,
+    created_at: list.created_at,
+    updated_at: list.updated_at,
+    item_count: countMap[list.id] || 0,
+  }));
 
   return { success: true, lists: listsWithCount };
 }
@@ -258,7 +262,7 @@ export async function getPublicListsForUser(
 
   let query = supabase
     .from("lists")
-    .select("*, list_items(count)")
+    .select("*")
     .eq("user_id", userId)
     .order("created_at", { ascending: false });
 
@@ -270,26 +274,29 @@ export async function getPublicListsForUser(
 
   if (error) return { error: "Failed to fetch lists" };
 
-  const listsWithCount: ListWithCount[] = (lists || []).map((list) => {
-    // Supabase returns count as [{ count: number }] when using select with (count)
-    const listItems = list.list_items as { count: number }[] | { count: number } | null;
-    let itemCount = 0;
-    if (Array.isArray(listItems) && listItems.length > 0) {
-      itemCount = listItems[0]?.count ?? 0;
-    } else if (listItems && typeof listItems === "object" && "count" in listItems) {
-      itemCount = listItems.count;
-    }
-    return {
-      id: list.id,
-      user_id: list.user_id,
-      name: list.name,
-      description: list.description,
-      is_public: list.is_public,
-      created_at: list.created_at,
-      updated_at: list.updated_at,
-      item_count: itemCount,
-    };
-  });
+  // Get item counts for all lists in a single query
+  const listIds = (lists || []).map((l) => l.id);
+  const { data: itemCounts } = await supabase
+    .from("list_items")
+    .select("list_id")
+    .in("list_id", listIds);
+
+  // Count items per list
+  const countMap: Record<string, number> = {};
+  for (const item of itemCounts || []) {
+    countMap[item.list_id] = (countMap[item.list_id] || 0) + 1;
+  }
+
+  const listsWithCount: ListWithCount[] = (lists || []).map((list) => ({
+    id: list.id,
+    user_id: list.user_id,
+    name: list.name,
+    description: list.description,
+    is_public: list.is_public,
+    created_at: list.created_at,
+    updated_at: list.updated_at,
+    item_count: countMap[list.id] || 0,
+  }));
 
   return { success: true, lists: listsWithCount };
 }
