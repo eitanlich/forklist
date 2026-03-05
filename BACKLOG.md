@@ -67,6 +67,18 @@
 - [x] Cancel pending request (como solicitante)
 - [x] Búsqueda muestra usuarios privados con candado
 
+### Fase 5 - Notifications & UX Polish ✅ (2026-03-05)
+- [x] Página /notifications con tabs (Activity / Requests)
+- [x] Activity tab: likes en reviews + nuevos followers
+- [x] Requests tab: solicitudes pendientes (solo si privado)
+- [x] Icono campana en navbar con badge
+- [x] Badge cuenta notificaciones desde last_notifications_seen_at
+- [x] Badge se resetea en tiempo real al ver /notifications
+- [x] Instagram-style modals para: remove follower, unfollow privado, sign out, delete account
+- [x] Privacy toggle consistente con listas (iconos Globe2/Lock)
+- [x] Modal de confirmación al cambiar privacidad del perfil
+- [x] Fix: reviews de usuarios privados visibles a followers aprobados
+
 ---
 
 ## Bugs Conocidos
@@ -81,29 +93,28 @@
 
 ## Pendiente
 
-### 🔴 Fase 5 - Polish & Growth (ACTUAL)
+### 🔴 Fase 6 - Polish & Growth (ACTUAL)
 
 | Prioridad | Feature | Esfuerzo |
 |-----------|---------|----------|
-| 1 | Buscar usuarios por email (username es opcional) | 1-2 hs |
-| 2 | Mejorar feed UX | 2-3 hs |
-| 3 | Filtros en historial | 2-3 hs |
-| 4 | Onboarding nuevos usuarios | 2 hs |
-| 5 | Notificaciones (follow/like) | 3-4 hs |
+| 1 | Mejorar feed UX | 2-3 hs |
+| 2 | Filtros en historial | 2-3 hs |
+| 3 | Onboarding nuevos usuarios | 2 hs |
+| 4 | Auto-aprobar pending requests al hacer perfil público | 1 hs |
 
-### 🟡 Fase 6 - Engagement
+### 🟡 Fase 7 - Engagement
 - [ ] Comentarios en reviews
 - [ ] Push notifications para follow requests
 - [ ] Email notifications para follow requests
 - [ ] Discovery avanzado (popular, cercanos)
 - [ ] Fotos propias
 
-### 🟡 Fase 7 - Features Avanzados
+### 🟡 Fase 8 - Features Avanzados
 - [ ] Mapa de restaurantes
 - [ ] Stats avanzados / Year in Review
 - [ ] Gamification (badges, streaks)
 
-### 🟢 Fase 8 - Monetización
+### 🟢 Fase 9 - Monetización
 - [ ] Freemium
 - [ ] Reservas
 - [ ] B2B dashboard
@@ -128,6 +139,18 @@
 - Usuarios sin username reciben uno automático: `email.split("@")[0]`
 - Aplicado en `getCurrentUserId()` y webhook de Clerk
 - Evita inconsistencias en contadores de likes vs avatares mostrados
+
+### Notifications system (2026-03-05)
+- Columna `last_notifications_seen_at` en tabla `users`
+- Badge cuenta likes + followers + requests desde ese timestamp
+- Al entrar a /notifications se actualiza el timestamp y emite evento `notifications-seen`
+- Header escucha ese evento para resetear badge en tiempo real
+- Requests tab solo visible si usuario es privado
+
+### Private profiles (2026-03-05)
+- `getPublicReview()` verifica si viewer es owner o follower aprobado
+- Reviews de usuarios privados solo visibles a followers aprobados
+- Modal de confirmación al cambiar privacidad (ambas direcciones)
 
 ### i18n
 - Archivos en `src/lib/i18n/`
