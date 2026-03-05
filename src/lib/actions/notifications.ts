@@ -56,7 +56,7 @@ export async function getActivityNotifications(limit = 50): Promise<{
       reviews!inner (
         id,
         user_id,
-        places (
+        restaurants (
           name
         )
       ),
@@ -106,7 +106,7 @@ export async function getActivityNotifications(limit = 50): Promise<{
     createdAt: like.created_at,
     review: {
       id: like.review_id,
-      placeName: like.reviews?.places?.name || "Unknown place",
+      placeName: like.reviews?.restaurants?.name || "Unknown place",
     },
     user: {
       id: like.users?.id || like.user_id,
