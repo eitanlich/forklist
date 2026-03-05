@@ -4,6 +4,10 @@ import { getPublicReview } from "@/lib/actions/reviews";
 import { getLikeInfo, getLikedBy } from "@/lib/actions/likes";
 import { ReviewContent } from "./ReviewContent";
 
+// Disable caching to always show fresh like counts
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 interface Props {
   params: Promise<{ id: string }>;
 }
