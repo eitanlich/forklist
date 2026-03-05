@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useTransition } from "react";
+import { useState, useEffect } from "react";
 import { Heart } from "lucide-react";
 import { toggleLike } from "@/lib/actions/likes";
 import { cn } from "@/lib/utils";
@@ -25,9 +25,9 @@ export function LikeButton({
   const [liked, setLiked] = useState(initialLiked);
   const [count, setCount] = useState(initialCount);
   const [isAnimating, setIsAnimating] = useState(false);
-  const [isPending, startTransition] = useTransition();
+  const [isPending, setIsPending] = useState(false);
 
-  // Sync with props when they change (e.g., after server fetch)
+  // Sync with props when they change
   useEffect(() => {
     setLiked(initialLiked);
     setCount(initialCount);
@@ -35,9 +35,11 @@ export function LikeButton({
 
   const iconSize = size === "sm" ? 14 : 18;
 
-  const handleClick = (e: React.MouseEvent) => {
+  const handleClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    if (isPending) return;
 
     // Optimistic update
     const wasLiked = liked;
@@ -45,30 +47,36 @@ export function LikeButton({
     
     setLiked(!wasLiked);
     setCount(wasLiked ? prevCount - 1 : prevCount + 1);
+    setIsPending(true);
     
-    // Trigger animation on like
+    // Animation on like
     if (!wasLiked) {
       setIsAnimating(true);
       setTimeout(() => setIsAnimating(false), 300);
     }
 
-    startTransition(async () => {
+    try {
       const result = await toggleLike(reviewId);
       
-      // Revert on error
       if (result.error) {
+        // Revert on error
+        console.error("Like error:", result.error);
         setLiked(wasLiked);
         setCount(prevCount);
-      } else if (result.liked !== !wasLiked) {
-        // Server state differs from optimistic, sync it
-        setLiked(result.liked);
-        setCount(result.liked ? prevCount + 1 : prevCount - 1);
       }
-    });
+    } catch (err) {
+      // Revert on exception
+      console.error("Like exception:", err);
+      setLiked(wasLiked);
+      setCount(prevCount);
+    } finally {
+      setIsPending(false);
+    }
   };
 
   return (
     <button
+      type="button"
       onClick={handleClick}
       disabled={isPending}
       className={cn(

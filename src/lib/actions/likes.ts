@@ -6,18 +6,27 @@ import { getCurrentUserId } from "@/lib/actions/user";
 export async function toggleLike(
   reviewId: string
 ): Promise<{ liked: boolean; error?: string }> {
+  console.log("[toggleLike] Called with reviewId:", reviewId);
+  
   const userId = await getCurrentUserId();
-  if (!userId) return { liked: false, error: "Not authenticated" };
+  console.log("[toggleLike] userId:", userId);
+  
+  if (!userId) {
+    console.log("[toggleLike] Not authenticated");
+    return { liked: false, error: "Not authenticated" };
+  }
 
   const supabase = createAdminClient();
 
   // Check if already liked
-  const { data: existingLike } = await supabase
+  const { data: existingLike, error: checkError } = await supabase
     .from("likes")
     .select("id")
     .eq("user_id", userId)
     .eq("review_id", reviewId)
     .single();
+
+  console.log("[toggleLike] existingLike:", existingLike, "checkError:", checkError?.message);
 
   if (existingLike) {
     // Unlike
@@ -27,6 +36,7 @@ export async function toggleLike(
       .eq("user_id", userId)
       .eq("review_id", reviewId);
 
+    console.log("[toggleLike] Unlike result, error:", error?.message);
     if (error) return { liked: true, error: "Failed to unlike" };
     return { liked: false };
   } else {
@@ -36,6 +46,7 @@ export async function toggleLike(
       review_id: reviewId,
     });
 
+    console.log("[toggleLike] Like result, error:", error?.message);
     if (error) return { liked: false, error: "Failed to like" };
     return { liked: true };
   }
