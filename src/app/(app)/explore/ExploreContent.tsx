@@ -5,6 +5,7 @@ import { Search, Users, TrendingUp, Loader2 } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { searchUsers, type SearchUser } from "@/lib/actions/users";
 import { getPopularReviews, type PopularReview } from "@/lib/actions/explore";
+import { getBatchLikeInfo } from "@/lib/actions/likes";
 import { UserListItem } from "@/components/social/UserListItem";
 import { PopularReviewCard } from "@/components/explore/PopularReviewCard";
 
@@ -13,6 +14,7 @@ export function ExploreContent() {
   const [query, setQuery] = useState("");
   const [users, setUsers] = useState<SearchUser[]>([]);
   const [popularReviews, setPopularReviews] = useState<PopularReview[]>([]);
+  const [likeInfo, setLikeInfo] = useState<Record<string, { count: number; hasLiked: boolean }>>({});
   const [isSearching, startSearch] = useTransition();
   const [isLoadingReviews, setIsLoadingReviews] = useState(true);
 
@@ -38,6 +40,14 @@ export function ExploreContent() {
     async function loadReviews() {
       const result = await getPopularReviews(10);
       setPopularReviews(result.reviews);
+      
+      // Fetch like info (hasLiked) for current user
+      if (result.reviews.length > 0) {
+        const reviewIds = result.reviews.map((r) => r.id);
+        const likes = await getBatchLikeInfo(reviewIds);
+        setLikeInfo(likes);
+      }
+      
       setIsLoadingReviews(false);
     }
     loadReviews();
@@ -91,6 +101,7 @@ export function ExploreContent() {
                   key={user.id}
                   id={user.id}
                   username={user.username}
+                  email={user.email}
                   bio={user.bio}
                   avatarUrl={user.avatar_url}
                   showFollowButton
@@ -119,7 +130,11 @@ export function ExploreContent() {
           ) : (
             <div className="space-y-3">
               {popularReviews.map((review) => (
-                <PopularReviewCard key={review.id} review={review} />
+                <PopularReviewCard
+                  key={review.id}
+                  review={review}
+                  hasLiked={likeInfo[review.id]?.hasLiked ?? false}
+                />
               ))}
             </div>
           )}

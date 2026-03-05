@@ -3,19 +3,22 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, MapPin, Globe, Trash2, List } from "lucide-react";
+import { ArrowLeft, MapPin, Globe, Trash2, List, Lock, Globe2 } from "lucide-react";
 import type { ListWithItems } from "@/lib/actions/lists";
-import { removeFromList } from "@/lib/actions/lists";
+import { removeFromList, updateListPrivacy } from "@/lib/actions/lists";
 import { useT } from "@/lib/i18n";
 
 interface ListDetailContentProps {
   list: ListWithItems;
+  isOwner?: boolean;
 }
 
-export default function ListDetailContent({ list }: ListDetailContentProps) {
+export default function ListDetailContent({ list, isOwner = false }: ListDetailContentProps) {
   const t = useT();
   const router = useRouter();
   const [removingId, setRemovingId] = useState<string | null>(null);
+  const [isPublic, setIsPublic] = useState(list.is_public);
+  const [updatingPrivacy, setUpdatingPrivacy] = useState(false);
 
   const handleRemove = async (itemId: string) => {
     if (removingId) return;
@@ -30,6 +33,20 @@ export default function ListDetailContent({ list }: ListDetailContentProps) {
     setRemovingId(null);
   };
 
+  const handlePrivacyToggle = async () => {
+    if (updatingPrivacy) return;
+    setUpdatingPrivacy(true);
+
+    const newValue = !isPublic;
+    const result = await updateListPrivacy(list.id, newValue);
+    
+    if ("success" in result) {
+      setIsPublic(newValue);
+    }
+    
+    setUpdatingPrivacy(false);
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -40,7 +57,7 @@ export default function ListDetailContent({ list }: ListDetailContentProps) {
         >
           <ArrowLeft size={18} />
         </Link>
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <h1 className="font-serif text-2xl font-semibold tracking-tight">
             {list.name}
           </h1>
@@ -54,6 +71,42 @@ export default function ListDetailContent({ list }: ListDetailContentProps) {
           </p>
         </div>
       </div>
+
+      {/* Privacy Toggle - Only visible to owner */}
+      {isOwner && (
+        <div className="flex items-center justify-between rounded-xl border border-border bg-card p-4">
+          <div className="flex items-center gap-3">
+            {isPublic ? (
+              <Globe2 size={18} className="text-primary" />
+            ) : (
+              <Lock size={18} className="text-muted-foreground" />
+            )}
+            <div>
+              <p className="text-sm font-medium">
+                {isPublic ? t("publicList") : t("privateList")}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {isPublic ? t("publicListHint") : t("privateListHint")}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={handlePrivacyToggle}
+            disabled={updatingPrivacy}
+            className={`relative h-6 w-11 rounded-full transition-colors ${
+              isPublic ? "bg-primary" : "bg-secondary"
+            } disabled:opacity-50`}
+            aria-label={isPublic ? t("makePrivate") : t("makePublic")}
+          >
+            <span
+              className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
+                isPublic ? "left-[22px]" : "left-0.5"
+              }`}
+            />
+          </button>
+        </div>
+      )}
 
       {/* Items */}
       {list.items.length === 0 ? (

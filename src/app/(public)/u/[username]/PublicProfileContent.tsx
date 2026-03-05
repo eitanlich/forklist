@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Grid3X3, List, Settings, Lock, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { ProfileHeader, PublicReviewCard, ProfileStats } from "@/components/profile";
 import { useT, useI18n } from "@/lib/i18n";
+import { getBatchLikeInfo } from "@/lib/actions/likes";
 import type { ListWithCount } from "@/lib/actions/lists";
 
 
@@ -39,6 +40,19 @@ function ProfileContent({
   const t = useT();
   const { locale } = useI18n();
   const [viewMode, setViewMode] = useState<ViewMode>("list");
+  const [likeInfo, setLikeInfo] = useState<Record<string, { count: number; hasLiked: boolean }>>({});
+
+  // Fetch like info for all reviews
+  useEffect(() => {
+    async function loadLikeInfo() {
+      if (profile.reviews.length > 0) {
+        const reviewIds = profile.reviews.map((r) => r.id);
+        const likes = await getBatchLikeInfo(reviewIds);
+        setLikeInfo(likes);
+      }
+    }
+    loadLikeInfo();
+  }, [profile.reviews]);
 
   return (
     <div className="bg-background">
@@ -122,7 +136,12 @@ function ProfileContent({
         ) : viewMode === "list" ? (
           <div className="space-y-3">
             {profile.reviews.map((review) => (
-              <PublicReviewCard key={review.id} review={review as any} />
+              <PublicReviewCard
+                key={review.id}
+                review={review as any}
+                likeCount={likeInfo[review.id]?.count ?? 0}
+                hasLiked={likeInfo[review.id]?.hasLiked ?? false}
+              />
             ))}
           </div>
         ) : (
@@ -131,6 +150,58 @@ function ProfileContent({
               <GridReviewCard key={review.id} review={review} />
             ))}
           </div>
+        )}
+
+        {/* Lists Section */}
+        {lists.length > 0 && (
+          <>
+            {/* Divider */}
+            <div className="my-6 border-t border-border" />
+
+            {/* Lists Header */}
+            <div className="my-4">
+              <h2 className="font-serif text-xl font-medium text-foreground">
+                {t("lists")}
+              </h2>
+            </div>
+
+            {/* Lists */}
+            <div className="space-y-3">
+              {lists.map((list) => (
+                <Link
+                  key={list.id}
+                  href={`/lists/${list.id}`}
+                  className="group flex items-center justify-between rounded-2xl border border-border bg-card p-4 transition-all duration-200 hover:border-primary/20 hover:bg-card/80"
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-serif text-base font-semibold tracking-tight">
+                        {list.name}
+                      </h3>
+                      {!list.is_public && (
+                        <span className="flex items-center gap-1 rounded-full bg-secondary px-2 py-0.5 text-xs text-muted-foreground">
+                          <Lock size={10} />
+                          {t("privateList")}
+                        </span>
+                      )}
+                    </div>
+                    {list.description && (
+                      <p className="mt-1 text-sm text-muted-foreground line-clamp-1">
+                        {list.description}
+                      </p>
+                    )}
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {list.item_count} {list.item_count === 1 ? t("place") : t("placesCount")}
+                    </p>
+                  </div>
+                  <ChevronRight
+                    size={18}
+                    className="text-muted-foreground transition-transform group-hover:translate-x-1"
+                  />
+                </Link>
+              ))}
+            </div>
+          </>
         )}
 
         {/* Footer */}

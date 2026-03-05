@@ -2,13 +2,16 @@
 
 import { useState, useEffect } from "react";
 import { getFeedReviews, type FeedReview } from "@/lib/actions/follows";
+import { getBatchLikeInfo } from "@/lib/actions/likes";
 import { useT } from "@/lib/i18n";
 import { Loader2, Star, MapPin, Users } from "lucide-react";
 import Link from "next/link";
+import { LikeButton } from "@/components/ui/LikeButton";
 
 export function FeedContent() {
   const t = useT();
   const [reviews, setReviews] = useState<FeedReview[]>([]);
+  const [likeInfo, setLikeInfo] = useState<Record<string, { count: number; hasLiked: boolean }>>({});
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
@@ -22,6 +25,14 @@ export function FeedContent() {
     setLoading(true);
     const result = await getFeedReviews(1, 10);
     setReviews(result.reviews);
+    
+    // Fetch like info for all reviews
+    if (result.reviews.length > 0) {
+      const reviewIds = result.reviews.map((r) => r.id);
+      const likes = await getBatchLikeInfo(reviewIds);
+      setLikeInfo(likes);
+    }
+    
     setHasMore(result.hasMore);
     setPage(1);
     setLoading(false);
@@ -32,6 +43,14 @@ export function FeedContent() {
     const nextPage = page + 1;
     const result = await getFeedReviews(nextPage, 10);
     setReviews([...reviews, ...result.reviews]);
+    
+    // Fetch like info for new reviews
+    if (result.reviews.length > 0) {
+      const reviewIds = result.reviews.map((r) => r.id);
+      const likes = await getBatchLikeInfo(reviewIds);
+      setLikeInfo((prev) => ({ ...prev, ...likes }));
+    }
+    
     setHasMore(result.hasMore);
     setPage(nextPage);
     setLoadingMore(false);
@@ -158,6 +177,15 @@ export function FeedContent() {
                     </div>
                   </div>
                 </Link>
+
+                {/* Actions */}
+                <div className="flex items-center border-t border-border px-5 py-3">
+                  <LikeButton
+                    reviewId={review.id}
+                    initialLiked={likeInfo[review.id]?.hasLiked ?? false}
+                    initialCount={likeInfo[review.id]?.count ?? 0}
+                  />
+                </div>
               </article>
             ))}
           </div>

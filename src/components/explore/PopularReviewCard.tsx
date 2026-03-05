@@ -48,7 +48,7 @@ export function PopularReviewCard({ review, hasLiked = false }: PopularReviewCar
         )}
       </div>
 
-      {/* Rating and comment */}
+      {/* Rating and likes */}
       <div className="flex items-center gap-2">
         <div className="flex items-center gap-1 rounded-lg bg-primary/10 px-2 py-1">
           <Star size={14} className="fill-primary text-primary" />
@@ -56,12 +56,12 @@ export function PopularReviewCard({ review, hasLiked = false }: PopularReviewCar
             {rating_overall.toFixed(1)}
           </span>
         </div>
-        {like_count > 0 && (
-          <div className="flex items-center gap-1 text-muted-foreground">
-            <Heart size={14} className="fill-destructive text-destructive" />
-            <span className="text-sm">{like_count}</span>
-          </div>
-        )}
+        <LikeButton
+          reviewId={review.id}
+          initialLiked={hasLiked}
+          initialCount={like_count}
+          size="sm"
+        />
       </div>
 
       {/* Comment preview */}

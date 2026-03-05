@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { auth } from "@clerk/nextjs/server";
 import { getPublicProfile } from "@/lib/actions/profile";
 import { getFollowStatus } from "@/lib/actions/follows";
+import { getPublicListsForUser } from "@/lib/actions/lists";
 
 import { createAdminClient } from "@/lib/supabase/admin";
 import { PublicProfileContent } from "./PublicProfileContent";
@@ -89,12 +90,17 @@ export default async function PublicProfilePage({ params }: Props) {
     }
   }
 
+  // Fetch lists - if own profile, include private lists
+  const listsResult = await getPublicListsForUser(profile.id, isOwnProfile);
+  const lists = "success" in listsResult ? listsResult.lists : [];
+
   return (
     <PublicProfileContent
       profile={profile}
       isOwnProfile={isOwnProfile}
       isFollowing={followStatus.isFollowing}
       isPending={followStatus.isPending}
+      lists={lists}
     />
   );
 }

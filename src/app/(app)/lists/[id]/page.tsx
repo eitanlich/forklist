@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { getList } from "@/lib/actions/lists";
 import { redirect } from "next/navigation";
+import { createAdminClient } from "@/lib/supabase/admin";
 import ListDetailContent from "./ListDetailContent";
 
 export const dynamic = "force-dynamic";
@@ -23,5 +24,15 @@ export default async function ListDetailPage({ params }: PageProps) {
     redirect("/lists");
   }
 
-  return <ListDetailContent list={result.list} />;
+  // Check if current user is the owner
+  const supabase = createAdminClient();
+  const { data: currentUser } = await supabase
+    .from("users")
+    .select("id")
+    .eq("clerk_id", clerkId)
+    .single();
+
+  const isOwner = currentUser?.id === result.list.user_id;
+
+  return <ListDetailContent list={result.list} isOwner={isOwner} />;
 }

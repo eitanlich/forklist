@@ -156,9 +156,11 @@ export const translations = {
     // Explore
     explore: "Explore",
     exploreSubtitle: "Discover foodies and trending reviews",
-    searchUsersPlaceholder: "Search users...",
+    searchUsersPlaceholder: "Search by username or email...",
     users: "Users",
     noUsersFound: "No users found",
+    noUsernameYet: "No username set yet",
+    unknownUser: "Unknown user",
     trendingReviews: "Trending Reviews",
     
     // Profile Stats
@@ -169,6 +171,11 @@ export const translations = {
     statsTopOccasion: "Top Occasion", 
     statsLikes: "Likes",
     statsLikesReceived: "Likes",
+    
+    // Like actions
+    like: "Like",
+    unlike: "Unlike",
+    liked: "Liked",
     
     // Followers/Following
     noFollowersYet: "No followers yet",
@@ -248,6 +255,12 @@ export const translations = {
     createAndAdd: "Create & add",
     done: "Done",
     searchAndAddToList: "Find restaurants to add to your lists",
+    privateList: "Private",
+    publicList: "Public",
+    privateListHint: "Only you can see this list",
+    publicListHint: "Anyone can see this list on your profile",
+    makePrivate: "Make private",
+    makePublic: "Make public",
   },
   
   es: {
@@ -407,9 +420,11 @@ export const translations = {
     // Explore
     explore: "Explorar",
     exploreSubtitle: "Descubrí foodies y reviews populares",
-    searchUsersPlaceholder: "Buscar usuarios...",
+    searchUsersPlaceholder: "Buscar por username o email...",
     users: "Usuarios",
     noUsersFound: "No se encontraron usuarios",
+    noUsernameYet: "Sin username todavía",
+    unknownUser: "Usuario desconocido",
     trendingReviews: "Reviews populares",
     
     // Profile Stats
@@ -420,6 +435,11 @@ export const translations = {
     statsTopOccasion: "Ocasión top",
     statsLikes: "Likes",
     statsLikesReceived: "Likes",
+    
+    // Like actions
+    like: "Me gusta",
+    unlike: "Ya no me gusta",
+    liked: "Te gustó",
     
     // Followers/Following
     noFollowersYet: "Sin seguidores todavía",
@@ -499,6 +519,12 @@ export const translations = {
     createAndAdd: "Crear y agregar",
     done: "Listo",
     searchAndAddToList: "Buscá restaurantes para agregar a tus listas",
+    privateList: "Privada",
+    publicList: "Pública",
+    privateListHint: "Solo vos podés ver esta lista",
+    publicListHint: "Cualquiera puede ver esta lista en tu perfil",
+    makePrivate: "Hacer privada",
+    makePublic: "Hacer pública",
   },
 } as const;
 
