@@ -57,7 +57,23 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function PublicProfilePage({ params }: Props) {
   const { username } = await params;
-  const result = await getPublicProfile(username);
+  
+  // First check if current user is the owner (before privacy check)
+  const { userId: clerkId } = await auth();
+  let currentUserId: string | null = null;
+  
+  if (clerkId) {
+    const supabase = createAdminClient();
+    const { data: currentUser } = await supabase
+      .from("users")
+      .select("id")
+      .eq("clerk_id", clerkId)
+      .single();
+    currentUserId = currentUser?.id ?? null;
+  }
+  
+  // Get profile, passing current user ID to bypass privacy for own profile
+  const result = await getPublicProfile(username, currentUserId);
 
   if (result.status === "not_found") {
     notFound();
@@ -68,26 +84,12 @@ export default async function PublicProfilePage({ params }: Props) {
   }
 
   const profile = result.profile;
-
-  // Check if current user is viewing their own profile
-  const { userId: clerkId } = await auth();
-  let isOwnProfile = false;
+  const isOwnProfile = currentUserId === profile.id;
+  
+  // Get follow status if not own profile
   let followStatus = { isFollowing: false, isPending: false };
-
-  if (clerkId) {
-    const supabase = createAdminClient();
-    const { data: currentUser } = await supabase
-      .from("users")
-      .select("id")
-      .eq("clerk_id", clerkId)
-      .single();
-
-    if (currentUser) {
-      isOwnProfile = currentUser.id === profile.id;
-      if (!isOwnProfile) {
-        followStatus = await getFollowStatus(profile.id);
-      }
-    }
+  if (!isOwnProfile) {
+    followStatus = await getFollowStatus(profile.id);
   }
 
   // Fetch lists - if own profile, include private lists

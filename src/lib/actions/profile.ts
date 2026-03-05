@@ -288,7 +288,10 @@ interface PublicProfile {
   reviews: any[];
 }
 
-export async function getPublicProfile(username: string): Promise<ProfileResult> {
+export async function getPublicProfile(
+  username: string,
+  currentUserId?: string | null
+): Promise<ProfileResult> {
   const supabase = createAdminClient();
 
   const { data: user } = await supabase
@@ -299,7 +302,10 @@ export async function getPublicProfile(username: string): Promise<ProfileResult>
 
   if (!user) return { status: "not_found" };
   
-  if (user.is_private) {
+  // Allow owner to view their own private profile
+  const isOwner = currentUserId && currentUserId === user.id;
+  
+  if (user.is_private && !isOwner) {
     return { status: "private", username: user.username };
   }
 
