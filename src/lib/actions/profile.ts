@@ -151,12 +151,12 @@ export async function uploadAvatar(
   // Generate unique filename
   const ext = file.name.split(".").pop() ?? "jpg";
   const fileName = `${user.id}-${Date.now()}.${ext}`;
-  const filePath = `avatars/${fileName}`;
+  const filePath = fileName;
 
   // Upload to Supabase Storage
   const arrayBuffer = await file.arrayBuffer();
   const { error: uploadError } = await supabase.storage
-    .from("public")
+    .from("avatars")
     .upload(filePath, arrayBuffer, {
       contentType: file.type,
       upsert: true,
@@ -169,16 +169,17 @@ export async function uploadAvatar(
 
   // Get public URL
   const { data: urlData } = supabase.storage
-    .from("public")
+    .from("avatars")
     .getPublicUrl(filePath);
 
   const avatarUrl = urlData.publicUrl;
 
   // Delete old avatar if exists
   if (user.avatar_url) {
-    const oldPath = user.avatar_url.split("/public/public/")[1];
+    // Extract filename from URL like .../avatars/uuid-timestamp.jpg
+    const oldPath = user.avatar_url.split("/avatars/")[1];
     if (oldPath) {
-      await supabase.storage.from("public").remove([oldPath]);
+      await supabase.storage.from("avatars").remove([oldPath]);
     }
   }
 
