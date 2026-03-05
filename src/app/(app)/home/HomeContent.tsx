@@ -67,13 +67,22 @@ export default function HomeContent({ firstName, stats, followingCount }: HomeCo
           <h1 className="font-serif text-3xl font-semibold tracking-tight">{firstName}</h1>
         </div>
 
-        <Link
-          href="/add"
-          className="group flex items-center gap-3 rounded-xl border border-border bg-secondary/50 px-4 py-3 text-muted-foreground transition-all hover:border-primary/30 hover:bg-secondary"
-        >
-          <Search size={18} />
-          <span className="text-sm">{t("searchForRestaurant")}...</span>
-        </Link>
+        <div className="flex gap-2">
+          <Link
+            href="/add"
+            className="group flex flex-1 items-center gap-3 rounded-xl border border-border bg-secondary/50 px-4 py-3 text-muted-foreground transition-all hover:border-primary/30 hover:bg-secondary"
+          >
+            <Search size={18} />
+            <span className="text-sm">{t("searchForRestaurant")}...</span>
+          </Link>
+          <Link
+            href="/explore"
+            className="flex items-center justify-center rounded-xl border border-border bg-secondary/50 px-4 py-3 text-muted-foreground transition-all hover:border-primary/30 hover:bg-secondary"
+            title={t("discoverPeople")}
+          >
+            <Users size={18} />
+          </Link>
+        </div>
       </div>
 
       {/* Tabs */}
