@@ -4,15 +4,15 @@ import { auth } from "@clerk/nextjs/server";
 import { getPublicProfile } from "@/lib/actions/profile";
 import { getFollowStatus } from "@/lib/actions/follows";
 import { getPublicListsForUser } from "@/lib/actions/lists";
-import { getBatchLikeInfo } from "@/lib/actions/likes";
 
 import { createAdminClient } from "@/lib/supabase/admin";
 import { PublicProfileContent } from "./PublicProfileContent";
 import { PrivateProfileContent } from "./PrivateProfileContent";
 
-// Disable caching to always show fresh like counts
+// Disable ALL caching
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
+export const fetchCache = "force-no-store";
 
 interface Props {
   params: Promise<{ username: string }>;
@@ -101,10 +101,7 @@ export default async function PublicProfilePage({ params }: Props) {
   const listsResult = await getPublicListsForUser(profile.id, isOwnProfile);
   const lists = "success" in listsResult ? listsResult.lists : [];
 
-  // Pre-fetch like info for all reviews
-  const reviewIds = profile.reviews.map((r: any) => r.id);
-  const likeInfo = reviewIds.length > 0 ? await getBatchLikeInfo(reviewIds) : {};
-
+  // DON'T pre-fetch likes - let client load them fresh every time
   return (
     <PublicProfileContent
       profile={profile}
@@ -112,7 +109,6 @@ export default async function PublicProfilePage({ params }: Props) {
       isFollowing={followStatus.isFollowing}
       isPending={followStatus.isPending}
       lists={lists}
-      initialLikeInfo={likeInfo}
     />
   );
 }

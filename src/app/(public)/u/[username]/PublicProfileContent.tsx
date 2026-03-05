@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Grid3X3, List, Settings, Lock, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { ProfileHeader, PublicReviewCard, ProfileStats } from "@/components/profile";
 import { useT, useI18n } from "@/lib/i18n";
+import { getBatchLikeInfo } from "@/lib/actions/likes";
 import type { ListWithCount } from "@/lib/actions/lists";
 
 
@@ -25,7 +26,6 @@ interface PublicProfileContentProps {
   isFollowing: boolean;
   isPending: boolean;
   lists?: ListWithCount[];
-  initialLikeInfo?: Record<string, { count: number; hasLiked: boolean }>;
 }
 
 type ViewMode = "list" | "grid";
@@ -36,14 +36,25 @@ function ProfileContent({
   isFollowing,
   isPending,
   lists = [],
-  initialLikeInfo = {},
 }: PublicProfileContentProps) {
   const t = useT();
   const { locale } = useI18n();
   const [viewMode, setViewMode] = useState<ViewMode>("list");
-  
-  // Use server-provided like info directly
-  const likeInfo = initialLikeInfo;
+  const [likeInfo, setLikeInfo] = useState<Record<string, { count: number; hasLiked: boolean }>>({});
+  const [likesLoaded, setLikesLoaded] = useState(false);
+
+  // Load likes on client - NO CACHING
+  useEffect(() => {
+    async function loadLikes() {
+      if (profile.reviews.length > 0) {
+        const reviewIds = profile.reviews.map((r) => r.id);
+        const likes = await getBatchLikeInfo(reviewIds);
+        setLikeInfo(likes);
+      }
+      setLikesLoaded(true);
+    }
+    loadLikes();
+  }, [profile.reviews]);
 
   return (
     <div className="bg-background">
