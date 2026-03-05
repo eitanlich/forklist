@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import { getCurrentUserProfile } from "@/lib/actions/profile";
+import { getPendingRequestCount } from "@/lib/actions/follows";
 import { ProfileSettingsContent } from "./ProfileSettingsContent";
 import { ProfilePageHeader } from "./ProfilePageHeader";
 
@@ -13,7 +14,10 @@ export default async function ProfileSettingsPage() {
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
 
-  const profile = await getCurrentUserProfile();
+  const [profile, pendingRequestCount] = await Promise.all([
+    getCurrentUserProfile(),
+    getPendingRequestCount(),
+  ]);
 
   return (
     <div className="space-y-8">
@@ -24,6 +28,7 @@ export default async function ProfileSettingsPage() {
         bio={profile?.bio ?? null}
         avatarUrl={profile?.avatar_url ?? null}
         isPrivate={profile?.is_private ?? false}
+        pendingRequestCount={pendingRequestCount}
       />
     </div>
   );

@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useClerk } from "@clerk/nextjs";
 import { UsernameForm, ProfileForm } from "@/components/profile";
-import { ExternalLink, Share2, Copy, Check, Trash2, Loader2, LogOut } from "lucide-react";
+import { ExternalLink, Share2, Copy, Check, Trash2, Loader2, LogOut, UserPlus, ChevronRight } from "lucide-react";
 import { useT, useI18n } from "@/lib/i18n";
 import { deleteAccount } from "@/lib/actions/profile";
 
@@ -13,6 +14,7 @@ interface ProfileSettingsContentProps {
   bio: string | null;
   avatarUrl: string | null;
   isPrivate: boolean;
+  pendingRequestCount?: number;
 }
 
 export function ProfileSettingsContent({
@@ -20,6 +22,7 @@ export function ProfileSettingsContent({
   bio,
   avatarUrl,
   isPrivate,
+  pendingRequestCount = 0,
 }: ProfileSettingsContentProps) {
   const router = useRouter();
   const { signOut } = useClerk();
@@ -83,6 +86,43 @@ export function ProfileSettingsContent({
 
   return (
     <div className="space-y-8">
+      {/* Follow Requests Section - show if private or has pending requests */}
+      {(isPrivate || pendingRequestCount > 0) && (
+        <Link href="/requests">
+          <section className="rounded-xl border border-border bg-card p-6 hover:bg-card/80 transition-colors">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                  <UserPlus className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <h2 className="font-serif text-lg font-medium text-foreground">
+                    {locale === "es" ? "Solicitudes de seguimiento" : "Follow Requests"}
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    {pendingRequestCount > 0
+                      ? locale === "es"
+                        ? `${pendingRequestCount} solicitud${pendingRequestCount > 1 ? "es" : ""} pendiente${pendingRequestCount > 1 ? "s" : ""}`
+                        : `${pendingRequestCount} pending request${pendingRequestCount > 1 ? "s" : ""}`
+                      : locale === "es"
+                        ? "No hay solicitudes pendientes"
+                        : "No pending requests"}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                {pendingRequestCount > 0 && (
+                  <span className="flex h-6 min-w-6 items-center justify-center rounded-full bg-primary text-xs font-medium text-primary-foreground">
+                    {pendingRequestCount}
+                  </span>
+                )}
+                <ChevronRight className="h-5 w-5 text-muted-foreground" />
+              </div>
+            </div>
+          </section>
+        </Link>
+      )}
+
       {/* Username Section */}
       <section className="rounded-xl border border-border bg-card p-6">
         <h2 className="mb-4 font-serif text-lg font-medium text-foreground">
