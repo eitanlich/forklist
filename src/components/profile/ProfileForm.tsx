@@ -23,63 +23,111 @@ export function ProfileForm({
   const [bio, setBio] = useState(currentBio ?? "");
   const [isPrivate, setIsPrivate] = useState(initialPrivate);
   const [avatarUrl, setAvatarUrl] = useState(currentAvatarUrl);
+  const [pendingAvatarFile, setPendingAvatarFile] = useState<File | null>(null);
+  const [pendingAvatarPreview, setPendingAvatarPreview] = useState<string | null>(null);
+  const [pendingRemoveAvatar, setPendingRemoveAvatar] = useState(false);
+  const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Handle file selection - just preview, don't upload yet
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setIsUploading(true);
-    setError(null);
-
-    const formData = new FormData();
-    formData.append("avatar", file);
-
-    const result = await uploadAvatar(formData);
-    setIsUploading(false);
-
-    if (result.error) {
-      setError(result.error);
-    } else if (result.url) {
-      setAvatarUrl(result.url);
+    // Validate
+    if (!file.type.startsWith("image/")) {
+      setError(t("fileMustBeImage") || "File must be an image");
+      return;
     }
+    if (file.size > 2 * 1024 * 1024) {
+      setError(t("imageTooLarge") || "Image must be less than 2MB");
+      return;
+    }
+
+    // Create preview
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setPendingAvatarPreview(e.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+
+    setPendingAvatarFile(file);
+    setPendingRemoveAvatar(false);
+    setError(null);
   };
 
-  const handleRemoveAvatar = async () => {
-    if (!avatarUrl) return;
-    
-    setIsUploading(true);
-    setError(null);
-
-    const result = await removeAvatar();
-    setIsUploading(false);
-
-    if (result.error) {
-      setError(result.error);
-    } else {
-      setAvatarUrl(null);
-    }
+  // Mark avatar for removal (don't remove yet)
+  const handleRemoveClick = () => {
+    setShowRemoveConfirm(true);
   };
+
+  const confirmRemoveAvatar = () => {
+    setPendingRemoveAvatar(true);
+    setPendingAvatarFile(null);
+    setPendingAvatarPreview(null);
+    setShowRemoveConfirm(false);
+  };
+
+  const cancelRemoveAvatar = () => {
+    setShowRemoveConfirm(false);
+  };
+
+  // Determine what to show as current avatar
+  const displayAvatarUrl = pendingRemoveAvatar 
+    ? null 
+    : (pendingAvatarPreview ?? avatarUrl);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
     setError(null);
 
-    const result = await updateProfile({ bio, is_private: isPrivate });
-    setIsSaving(false);
+    try {
+      // Handle avatar changes first
+      if (pendingRemoveAvatar && avatarUrl) {
+        const removeResult = await removeAvatar();
+        if (removeResult.error) {
+          setError(removeResult.error);
+          setIsSaving(false);
+          return;
+        }
+        setAvatarUrl(null);
+      } else if (pendingAvatarFile) {
+        const formData = new FormData();
+        formData.append("avatar", pendingAvatarFile);
+        const uploadResult = await uploadAvatar(formData);
+        if (uploadResult.error) {
+          setError(uploadResult.error);
+          setIsSaving(false);
+          return;
+        }
+        setAvatarUrl(uploadResult.url ?? null);
+      }
 
-    if (result.error) {
-      setError(result.error);
-    } else {
-      onSuccess?.();
+      // Update profile (bio, privacy)
+      const result = await updateProfile({ bio, is_private: isPrivate });
+
+      if (result.error) {
+        setError(result.error);
+      } else {
+        // Reset pending states
+        setPendingAvatarFile(null);
+        setPendingAvatarPreview(null);
+        setPendingRemoveAvatar(false);
+        onSuccess?.();
+      }
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  const hasChanges = bio !== (currentBio ?? "") || isPrivate !== initialPrivate;
+  const hasChanges = 
+    bio !== (currentBio ?? "") || 
+    isPrivate !== initialPrivate ||
+    pendingAvatarFile !== null ||
+    pendingRemoveAvatar;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -87,9 +135,9 @@ export function ProfileForm({
       <div className="flex flex-col items-center space-y-3">
         <div className="relative">
           <div className="h-24 w-24 overflow-hidden rounded-full bg-secondary">
-            {avatarUrl ? (
+            {displayAvatarUrl ? (
               <img
-                src={avatarUrl}
+                src={displayAvatarUrl}
                 alt="Avatar"
                 className="h-full w-full object-cover"
               />
@@ -99,12 +147,12 @@ export function ProfileForm({
               </div>
             )}
           </div>
-          {/* Remove button - only show if has avatar */}
-          {avatarUrl && (
+          {/* Remove button - only show if has avatar (current or pending) */}
+          {displayAvatarUrl && !showRemoveConfirm && (
             <button
               type="button"
-              onClick={handleRemoveAvatar}
-              disabled={isUploading}
+              onClick={handleRemoveClick}
+              disabled={isSaving}
               className="absolute -top-1 -right-1 rounded-full bg-destructive p-1.5 text-destructive-foreground shadow-lg transition-transform hover:scale-105 disabled:opacity-50"
               aria-label="Remove avatar"
             >
@@ -115,12 +163,10 @@ export function ProfileForm({
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            disabled={isUploading}
+            disabled={isSaving}
             className="absolute -bottom-1 -right-1 rounded-full bg-primary p-2 text-primary-foreground shadow-lg transition-transform hover:scale-105 disabled:opacity-50"
           >
-            {isUploading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : avatarUrl ? (
+            {displayAvatarUrl ? (
               <Pencil className="h-4 w-4" />
             ) : (
               <Camera className="h-4 w-4" />
@@ -135,7 +181,37 @@ export function ProfileForm({
           className="hidden"
         />
         <p className="text-xs text-muted-foreground">{t("avatarHint")}</p>
+        
+        {/* Pending change indicator */}
+        {(pendingAvatarFile || pendingRemoveAvatar) && (
+          <p className="text-xs text-primary">{t("unsavedChanges") || "Unsaved changes"}</p>
+        )}
       </div>
+
+      {/* Remove Confirmation Modal */}
+      {showRemoveConfirm && (
+        <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 space-y-3">
+          <p className="text-sm font-medium text-destructive">
+            {t("removeAvatarConfirm") || "Remove profile photo?"}
+          </p>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={cancelRemoveAvatar}
+              className="flex-1 rounded-lg border border-border py-2 text-sm font-medium transition-colors hover:bg-secondary"
+            >
+              {t("cancel")}
+            </button>
+            <button
+              type="button"
+              onClick={confirmRemoveAvatar}
+              className="flex-1 rounded-lg bg-destructive py-2 text-sm font-medium text-destructive-foreground transition-colors hover:opacity-90"
+            >
+              {t("remove") || "Remove"}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Bio */}
       <div className="space-y-2">
