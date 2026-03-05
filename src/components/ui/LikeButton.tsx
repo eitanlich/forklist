@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useEffect, useTransition } from "react";
 import { Heart } from "lucide-react";
 import { toggleLike } from "@/lib/actions/likes";
 import { cn } from "@/lib/utils";
@@ -26,6 +26,12 @@ export function LikeButton({
   const [count, setCount] = useState(initialCount);
   const [isAnimating, setIsAnimating] = useState(false);
   const [isPending, startTransition] = useTransition();
+
+  // Sync with props when they change (e.g., after server fetch)
+  useEffect(() => {
+    setLiked(initialLiked);
+    setCount(initialCount);
+  }, [initialLiked, initialCount]);
 
   const iconSize = size === "sm" ? 14 : 18;
 

@@ -1,8 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { Star, MapPin, Calendar } from "lucide-react";
-import { LikeButton } from "@/components/ui/LikeButton";
+import { Star, MapPin, Calendar, Heart } from "lucide-react";
+import { toggleLike } from "@/lib/actions/likes";
 
 interface PublicReviewCardProps {
   review: {
@@ -30,7 +31,10 @@ interface PublicReviewCardProps {
   hasLiked?: boolean;
 }
 
-export function PublicReviewCard({ review, likeCount = 0, hasLiked = false }: PublicReviewCardProps) {
+export function PublicReviewCard({ review, likeCount: initialCount = 0, hasLiked: initialLiked = false }: PublicReviewCardProps) {
+  const [liked, setLiked] = useState(initialLiked);
+  const [count, setCount] = useState(initialCount);
+  const [isAnimating, setIsAnimating] = useState(false);
   const { restaurant } = review;
   const visitDate = new Date(review.visited_at);
 
@@ -109,12 +113,42 @@ export function PublicReviewCard({ review, likeCount = 0, hasLiked = false }: Pu
 
       {/* Actions */}
       <div className="flex items-center border-t border-border px-4 py-2">
-        <LikeButton
-          reviewId={review.id}
-          initialLiked={hasLiked}
-          initialCount={likeCount}
-          size="sm"
-        />
+        <button
+          onClick={async (e) => {
+            e.preventDefault();
+            const wasLiked = liked;
+            const prevCount = count;
+            
+            // Optimistic update
+            setLiked(!wasLiked);
+            setCount(wasLiked ? prevCount - 1 : prevCount + 1);
+            
+            if (!wasLiked) {
+              setIsAnimating(true);
+              setTimeout(() => setIsAnimating(false), 300);
+            }
+            
+            const result = await toggleLike(review.id);
+            
+            if (result.error) {
+              // Revert on error
+              setLiked(wasLiked);
+              setCount(prevCount);
+            }
+          }}
+          className={`flex items-center gap-1.5 transition-all hover:scale-105 active:scale-95 ${
+            liked ? "text-destructive" : "text-muted-foreground hover:text-destructive/70"
+          }`}
+        >
+          <Heart
+            size={14}
+            strokeWidth={1.5}
+            className={`transition-all duration-200 ${liked ? "fill-current" : ""} ${isAnimating ? "animate-like-bounce" : ""}`}
+          />
+          {count > 0 && (
+            <span className="text-xs font-medium tabular-nums">{count}</span>
+          )}
+        </button>
       </div>
     </div>
   );
