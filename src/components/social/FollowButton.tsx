@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useEffect, useTransition } from "react";
 import { UserPlus, UserMinus, Clock, Loader2 } from "lucide-react";
 import { followUser, unfollowUser, cancelFollowRequest } from "@/lib/actions/follows";
 import { useT } from "@/lib/i18n";
@@ -22,6 +22,12 @@ export function FollowButton({
   const [isFollowing, setIsFollowing] = useState(initialIsFollowing);
   const [isPending, setIsPending] = useState(initialIsPending);
   const [isPendingAction, startTransition] = useTransition();
+
+  // Sync with props when they change (e.g., after batch fetch)
+  useEffect(() => {
+    setIsFollowing(initialIsFollowing);
+    setIsPending(initialIsPending);
+  }, [initialIsFollowing, initialIsPending]);
 
   const handleClick = () => {
     // Save current state for potential revert
