@@ -55,7 +55,7 @@ export async function createList(
       user_id: user.id,
       name: data.name.trim(),
       description: data.description?.trim() || null,
-      is_public: data.is_public ?? false,
+      is_public: data.is_public ?? true,
     })
     .select("id")
     .single();
