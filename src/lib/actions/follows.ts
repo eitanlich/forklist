@@ -421,6 +421,43 @@ export async function removeFollower(
   return { success: true };
 }
 
+// Get follow status for multiple users (batch)
+export async function getBatchFollowStatus(
+  userIds: string[]
+): Promise<Record<string, { isFollowing: boolean; isPending: boolean }>> {
+  noStore();
+  if (userIds.length === 0) return {};
+  
+  const currentUserId = await getCurrentUserId();
+  if (!currentUserId) {
+    // Not logged in - return all false
+    return userIds.reduce((acc, id) => {
+      acc[id] = { isFollowing: false, isPending: false };
+      return acc;
+    }, {} as Record<string, { isFollowing: boolean; isPending: boolean }>);
+  }
+
+  const supabase = createAdminClient();
+
+  const { data: follows } = await supabase
+    .from("follows")
+    .select("following_id, status")
+    .eq("follower_id", currentUserId)
+    .in("following_id", userIds);
+
+  const result: Record<string, { isFollowing: boolean; isPending: boolean }> = {};
+  
+  for (const userId of userIds) {
+    const follow = follows?.find((f) => f.following_id === userId);
+    result[userId] = {
+      isFollowing: follow?.status === "active",
+      isPending: follow?.status === "pending",
+    };
+  }
+
+  return result;
+}
+
 // Cancel a pending follow request (as the requester)
 export async function cancelFollowRequest(
   targetUserId: string

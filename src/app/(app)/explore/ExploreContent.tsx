@@ -6,6 +6,7 @@ import { useT } from "@/lib/i18n";
 import { searchUsers, type SearchUser } from "@/lib/actions/users";
 import { getPopularReviews, type PopularReview } from "@/lib/actions/explore";
 import { getBatchLikeInfo } from "@/lib/actions/likes";
+import { getBatchFollowStatus } from "@/lib/actions/follows";
 import { UserListItem } from "@/components/social/UserListItem";
 import { PopularReviewCard } from "@/components/explore/PopularReviewCard";
 
@@ -13,6 +14,7 @@ export function ExploreContent() {
   const t = useT();
   const [query, setQuery] = useState("");
   const [users, setUsers] = useState<SearchUser[]>([]);
+  const [followStatus, setFollowStatus] = useState<Record<string, { isFollowing: boolean; isPending: boolean }>>({});
   const [popularReviews, setPopularReviews] = useState<PopularReview[]>([]);
   const [likeInfo, setLikeInfo] = useState<Record<string, { count: number; hasLiked: boolean }>>({});
   const [isSearching, startSearch] = useTransition();
@@ -22,6 +24,7 @@ export function ExploreContent() {
   useEffect(() => {
     if (query.trim().length < 2) {
       setUsers([]);
+      setFollowStatus({});
       return;
     }
 
@@ -29,6 +32,13 @@ export function ExploreContent() {
       startSearch(async () => {
         const result = await searchUsers(query);
         setUsers(result.users);
+        
+        // Fetch follow status for all results
+        if (result.users.length > 0) {
+          const userIds = result.users.map((u) => u.id);
+          const status = await getBatchFollowStatus(userIds);
+          setFollowStatus(status);
+        }
       });
     }, 300);
 
@@ -105,6 +115,8 @@ export function ExploreContent() {
                   bio={user.bio}
                   avatarUrl={user.avatar_url}
                   isPrivate={user.is_private}
+                  isFollowing={followStatus[user.id]?.isFollowing ?? false}
+                  isPending={followStatus[user.id]?.isPending ?? false}
                   showFollowButton
                 />
               ))}
