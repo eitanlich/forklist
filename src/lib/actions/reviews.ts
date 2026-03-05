@@ -3,6 +3,7 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { reviewSchema, updateReviewSchema, type ReviewInput, type UpdateReviewInput } from "@/lib/validations/review";
+import { getCurrentUserId } from "./user";
 
 export async function createReview(
   data: ReviewInput
@@ -213,8 +214,36 @@ export async function getPublicReview(reviewId: string) {
     .eq("id", reviewId)
     .single();
 
-  // Don't return reviews from private users
-  if (!review || (review.user as any)?.is_private) return null;
+  if (!review) return null;
+
+  // If user is private, check if viewer is owner or approved follower
+  const user = review.user as any;
+  if (user?.is_private) {
+    const currentUserId = await getCurrentUserId();
+    
+    // Owner can always see their own reviews
+    if (currentUserId === review.user_id) {
+      return review;
+    }
+    
+    // Check if current user is an approved follower
+    if (currentUserId) {
+      const { data: follow } = await supabase
+        .from("follows")
+        .select("status")
+        .eq("follower_id", currentUserId)
+        .eq("following_id", review.user_id)
+        .eq("status", "active")
+        .single();
+      
+      if (follow) {
+        return review;
+      }
+    }
+    
+    // Not authorized to view
+    return null;
+  }
 
   return review;
 }
