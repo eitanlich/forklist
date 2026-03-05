@@ -273,7 +273,7 @@ export async function deleteAccount(): Promise<{ error?: string; success?: boole
   await supabase.from("follows").delete().eq("following_id", user.id);
   
   // Delete review likes
-  await supabase.from("review_likes").delete().eq("user_id", user.id);
+  await supabase.from("likes").delete().eq("user_id", user.id);
   
   // Delete notifications
   await supabase.from("notifications").delete().eq("user_id", user.id);

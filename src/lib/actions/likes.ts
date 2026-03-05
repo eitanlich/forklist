@@ -104,3 +104,40 @@ export async function getBatchLikeInfo(
 
   return result;
 }
+
+// Get users who liked a review (for "liked by" display)
+export interface LikeUser {
+  id: string;
+  username: string | null;
+  avatar_url: string | null;
+}
+
+export async function getLikedBy(
+  reviewId: string,
+  limit = 10
+): Promise<{ users: LikeUser[]; total: number }> {
+  const supabase = createAdminClient();
+
+  // Get total count
+  const { count } = await supabase
+    .from("likes")
+    .select("*", { count: "exact", head: true })
+    .eq("review_id", reviewId);
+
+  // Get users who liked
+  const { data: likes } = await supabase
+    .from("likes")
+    .select("user:users(id, username, avatar_url)")
+    .eq("review_id", reviewId)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  const users: LikeUser[] = (likes ?? [])
+    .map((l) => {
+      const user = Array.isArray(l.user) ? l.user[0] : l.user;
+      return user as LikeUser;
+    })
+    .filter((u) => u && u.username); // Only users with usernames
+
+  return { users, total: count ?? 0 };
+}

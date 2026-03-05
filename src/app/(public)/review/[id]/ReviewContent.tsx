@@ -3,11 +3,13 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Star, MapPin, Calendar, Globe, User, Pencil, Trash2, ArrowLeft, Share2 } from "lucide-react";
+import { Star, MapPin, Calendar, Globe, User, Pencil, Trash2, ArrowLeft, Share2, Heart } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { useUser } from "@/lib/user";
 import { deleteReview } from "@/lib/actions/reviews";
 import { ShareModal } from "@/components/share/ShareModal";
+import { LikeButton } from "@/components/ui/LikeButton";
+import { getLikeInfo, getLikedBy, type LikeUser } from "@/lib/actions/likes";
 
 interface ReviewContentProps {
   review: any;
@@ -35,6 +37,27 @@ export function ReviewContent({ review }: ReviewContentProps) {
   const router = useRouter();
   const [deleting, setDeleting] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+  
+  // Like state
+  const [likeInfo, setLikeInfo] = useState<{ count: number; hasLiked: boolean }>({ count: 0, hasLiked: false });
+  const [likedByUsers, setLikedByUsers] = useState<LikeUser[]>([]);
+  const [totalLikes, setTotalLikes] = useState(0);
+  const [loadingLikes, setLoadingLikes] = useState(true);
+
+  // Load like info
+  useEffect(() => {
+    async function loadLikes() {
+      const [info, likedBy] = await Promise.all([
+        getLikeInfo(review.id),
+        getLikedBy(review.id, 5),
+      ]);
+      setLikeInfo(info);
+      setLikedByUsers(likedBy.users);
+      setTotalLikes(likedBy.total);
+      setLoadingLikes(false);
+    }
+    loadLikes();
+  }, [review.id]);
 
   // Check ownership on client side
   const isOwner = user?.id === review.user_id;
@@ -187,6 +210,68 @@ export function ReviewContent({ review }: ReviewContentProps) {
               </p>
             </div>
           )}
+
+          {/* Likes Section */}
+          <div className="mt-6 border-t border-border pt-6">
+            <div className="flex items-center gap-4">
+              {/* Like Button */}
+              <LikeButton
+                reviewId={review.id}
+                initialLiked={likeInfo.hasLiked}
+                initialCount={likeInfo.count}
+                size="md"
+              />
+              
+              {/* Liked by users */}
+              {!loadingLikes && totalLikes > 0 && (
+                <div className="flex items-center gap-2">
+                  {/* Avatar stack */}
+                  <div className="flex -space-x-2">
+                    {likedByUsers.slice(0, 3).map((u) => (
+                      <Link
+                        key={u.id}
+                        href={`/u/${u.username}`}
+                        className="relative h-7 w-7 rounded-full border-2 border-background overflow-hidden hover:z-10 transition-transform hover:scale-110"
+                      >
+                        {u.avatar_url ? (
+                          <img src={u.avatar_url} alt={u.username || ""} className="h-full w-full object-cover" />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center bg-secondary">
+                            <User size={12} className="text-muted-foreground" />
+                          </div>
+                        )}
+                      </Link>
+                    ))}
+                  </div>
+                  
+                  {/* Names / count */}
+                  <span className="text-sm text-muted-foreground">
+                    {totalLikes === 1 && likedByUsers[0]?.username ? (
+                      <Link href={`/u/${likedByUsers[0].username}`} className="hover:text-foreground">
+                        @{likedByUsers[0].username}
+                      </Link>
+                    ) : totalLikes <= 3 ? (
+                      likedByUsers.map((u, i) => (
+                        <span key={u.id}>
+                          {i > 0 && (i === likedByUsers.length - 1 ? (locale === "es" ? " y " : " and ") : ", ")}
+                          <Link href={`/u/${u.username}`} className="hover:text-foreground">
+                            @{u.username}
+                          </Link>
+                        </span>
+                      ))
+                    ) : (
+                      <>
+                        <Link href={`/u/${likedByUsers[0]?.username}`} className="hover:text-foreground">
+                          @{likedByUsers[0]?.username}
+                        </Link>
+                        {" "}{locale === "es" ? "y" : "and"} {totalLikes - 1} {locale === "es" ? "más" : "others"}
+                      </>
+                    )}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
 
           {/* Restaurant Links */}
           {(restaurant.google_maps_url || restaurant.website) && (
