@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { updateProfile, uploadAvatar, removeAvatar } from "@/lib/actions/profile";
-import { Camera, Loader2, User, X } from "lucide-react";
+import { Camera, Loader2, Pencil, User, X } from "lucide-react";
 import { useT } from "@/lib/i18n";
 
 interface ProfileFormProps {
@@ -111,7 +111,7 @@ export function ProfileForm({
               <X className="h-3 w-3" />
             </button>
           )}
-          {/* Upload button */}
+          {/* Upload/Edit button */}
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
@@ -120,6 +120,8 @@ export function ProfileForm({
           >
             {isUploading ? (
               <Loader2 className="h-4 w-4 animate-spin" />
+            ) : avatarUrl ? (
+              <Pencil className="h-4 w-4" />
             ) : (
               <Camera className="h-4 w-4" />
             )}
