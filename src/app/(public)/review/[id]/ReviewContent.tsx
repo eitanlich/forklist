@@ -73,6 +73,7 @@ export function ReviewContent({
       friends: "Friends",
       business: "Business",
       solo: "Solo",
+      delivery: "Delivery / Take Away",
       other: "Other",
     },
     es: {
@@ -81,6 +82,7 @@ export function ReviewContent({
       friends: "Amigos",
       business: "Negocios",
       solo: "Solo",
+      delivery: "Delivery / Take Away",
       other: "Otro",
     },
   };

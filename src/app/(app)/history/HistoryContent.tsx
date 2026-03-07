@@ -44,6 +44,7 @@ function ReviewCard({ review, onShare }: { review: ReviewWithRestaurant; onShare
     friends: t("friends"),
     business: t("business"),
     solo: t("solo"),
+    delivery: t("delivery"),
     other: t("other"),
   };
 
@@ -297,6 +298,7 @@ export default function HistoryContent({ reviews }: HistoryContentProps) {
     { value: "family", label: t("family") },
     { value: "business", label: t("business") },
     { value: "solo", label: t("solo") },
+    { value: "delivery", label: t("delivery") },
     { value: "other", label: t("other") },
   ];
 

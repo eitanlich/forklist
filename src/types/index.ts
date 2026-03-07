@@ -1,4 +1,4 @@
-export type Occasion = "date" | "family" | "friends" | "business" | "solo" | "other";
+export type Occasion = "date" | "family" | "friends" | "business" | "solo" | "delivery" | "other";
 export type MealType = "breakfast" | "brunch" | "lunch" | "snack" | "dinner" | "drinks";
 
 export interface DbUser {

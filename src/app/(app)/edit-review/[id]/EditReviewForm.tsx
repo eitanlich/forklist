@@ -71,6 +71,7 @@ export default function EditReviewForm({ review }: { review: ReviewWithRestauran
     { value: "family", label: t("family") },
     { value: "business", label: t("business") },
     { value: "solo", label: t("solo") },
+    { value: "delivery", label: t("delivery") },
     { value: "other", label: t("other") },
   ];
 

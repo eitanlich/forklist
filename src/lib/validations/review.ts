@@ -21,7 +21,7 @@ export const reviewSchema = z.object({
   rating_price: z.number().int().min(1).max(5),
   comment: z.string().optional(),
   occasion: z
-    .enum(["date", "family", "friends", "business", "solo", "other"])
+    .enum(["date", "family", "friends", "business", "solo", "delivery", "other"])
     .optional(),
   meal_type: z
     .enum(["breakfast", "brunch", "lunch", "snack", "dinner", "drinks"])
@@ -40,7 +40,7 @@ export const updateReviewSchema = z.object({
   rating_price: z.number().int().min(1).max(5),
   comment: z.string().optional(),
   occasion: z
-    .enum(["date", "family", "friends", "business", "solo", "other"])
+    .enum(["date", "family", "friends", "business", "solo", "delivery", "other"])
     .optional(),
   meal_type: z
     .enum(["breakfast", "brunch", "lunch", "snack", "dinner", "drinks"])

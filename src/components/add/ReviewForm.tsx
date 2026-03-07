@@ -88,6 +88,7 @@ export default function ReviewForm({ restaurant, onBack }: ReviewFormProps) {
     { value: "family", label: t("family") },
     { value: "business", label: t("business") },
     { value: "solo", label: t("solo") },
+    { value: "delivery", label: t("delivery") },
     { value: "other", label: t("other") },
   ];
 
