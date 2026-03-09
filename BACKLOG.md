@@ -87,7 +87,7 @@
 - [x] ~~**Follow system no funciona** — usuarios de Clerk no se sincronizaban a Supabase (webhook sin configurar)~~ FIXED: auto-sync fallback agregado
 
 ### Pendientes
-- [ ] **Configurar CLERK_WEBHOOK_SECRET en Vercel** — el auto-sync funciona pero es mejor tener el webhook activo
+- [x] ~~**Configurar CLERK_WEBHOOK_SECRET en Vercel**~~ DONE (2026-03-06)
 
 ---
 
@@ -95,12 +95,12 @@
 
 ### 🔴 Fase 6 - Polish & Growth (ACTUAL)
 
-| Prioridad | Feature | Esfuerzo |
-|-----------|---------|----------|
-| 1 | Mejorar feed UX | 2-3 hs |
-| 2 | Filtros en historial | 2-3 hs |
-| 3 | Onboarding nuevos usuarios | 2 hs |
-| 4 | Auto-aprobar pending requests al hacer perfil público | 1 hs |
+| Prioridad | Feature | Esfuerzo | Estado |
+|-----------|---------|----------|--------|
+| 1 | Mejorar feed UX | 2-3 hs | |
+| 2 | Filtros en historial | 2-3 hs | |
+| 3 | Onboarding nuevos usuarios | 2 hs | |
+| ~~4~~ | ~~Auto-aprobar pending requests al hacer perfil público~~ | ~~1 hs~~ | ✅ DONE |
 
 ### 🟡 Fase 7 - Engagement
 - [ ] Comentarios en reviews
@@ -151,6 +151,12 @@
 - `getPublicReview()` verifica si viewer es owner o follower aprobado
 - Reviews de usuarios privados solo visibles a followers aprobados
 - Modal de confirmación al cambiar privacidad (ambas direcciones)
+
+### Auto-approve pending requests (2026-03-09)
+- Cuando usuario cambia de privado → público, todas las follow requests pendientes se auto-aprueban
+- Implementado en `updateProfile()` en `src/lib/actions/profile.ts`
+- Retorna `approvedCount` para feedback opcional en UI
+- El modal de confirmación ya avisa: "Pending follow requests will be automatically approved"
 
 ### i18n
 - Archivos en `src/lib/i18n/`

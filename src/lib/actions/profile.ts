@@ -93,7 +93,7 @@ export async function claimUsername(
 export async function updateProfile(data: {
   bio?: string;
   is_private?: boolean;
-}): Promise<{ error?: string; success?: boolean }> {
+}): Promise<{ error?: string; success?: boolean; approvedCount?: number }> {
   const { userId: clerkId } = await auth();
   if (!clerkId) return { error: "Not authenticated" };
 
@@ -103,6 +103,15 @@ export async function updateProfile(data: {
   if (data.bio && data.bio.length > 160) {
     return { error: "Bio must be 160 characters or less" };
   }
+
+  // Get current user to check if switching from private to public
+  const { data: currentUser } = await supabase
+    .from("users")
+    .select("id, is_private")
+    .eq("clerk_id", clerkId)
+    .single();
+
+  if (!currentUser) return { error: "User not found" };
 
   const { error } = await supabase
     .from("users")
@@ -114,8 +123,23 @@ export async function updateProfile(data: {
 
   if (error) return { error: "Failed to update profile" };
 
+  // Auto-approve pending follow requests when switching from private to public
+  let approvedCount = 0;
+  if (currentUser.is_private && data.is_private === false) {
+    const { data: approved, error: approveError } = await supabase
+      .from("follows")
+      .update({ status: "active" })
+      .eq("following_id", currentUser.id)
+      .eq("status", "pending")
+      .select("id");
+
+    if (!approveError && approved) {
+      approvedCount = approved.length;
+    }
+  }
+
   revalidatePath("/settings/profile");
-  return { success: true };
+  return { success: true, approvedCount };
 }
 
 export async function uploadAvatar(
