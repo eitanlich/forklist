@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   MapPin,
   Globe,
@@ -14,6 +15,7 @@ import {
   Plus,
   Heart,
   Loader2,
+  ArrowLeft,
 } from "lucide-react";
 import { useI18n, useT } from "@/lib/i18n";
 import { toggleLike } from "@/lib/actions/likes";
@@ -205,6 +207,7 @@ function translateHours(text: string, locale: string): string {
 }
 
 export default function RestaurantPageContent({ googlePlaceId, googleData }: Props) {
+  const router = useRouter();
   const { locale } = useI18n();
   const t = useT();
   const [showHours, setShowHours] = useState(false);
@@ -242,6 +245,16 @@ export default function RestaurantPageContent({ googlePlaceId, googleData }: Pro
 
   return (
     <div className="space-y-6">
+      {/* Back button */}
+      <button
+        type="button"
+        onClick={() => router.back()}
+        className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+      >
+        <ArrowLeft size={16} />
+        <span>{t("back")}</span>
+      </button>
+
       {/* Hero image */}
       {googleData.photo_reference && (
         <div className="relative -mx-4 -mt-4 h-48 sm:mx-0 sm:mt-0 sm:rounded-2xl sm:overflow-hidden">
