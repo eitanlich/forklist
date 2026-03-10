@@ -181,6 +181,29 @@ function ReviewCard({ review, locale, t }: { review: Review; locale: string; t: 
   );
 }
 
+// Translate day names from English to Spanish
+function translateHours(text: string, locale: string): string {
+  if (locale !== "es") return text;
+  
+  const dayTranslations: Record<string, string> = {
+    "Monday": "Lunes",
+    "Tuesday": "Martes",
+    "Wednesday": "Miércoles",
+    "Thursday": "Jueves",
+    "Friday": "Viernes",
+    "Saturday": "Sábado",
+    "Sunday": "Domingo",
+    "Closed": "Cerrado",
+    "Open 24 hours": "Abierto 24 horas",
+  };
+  
+  let translated = text;
+  for (const [en, es] of Object.entries(dayTranslations)) {
+    translated = translated.replace(en, es);
+  }
+  return translated;
+}
+
 export default function RestaurantPageContent({ googlePlaceId, googleData }: Props) {
   const { locale } = useI18n();
   const t = useT();
@@ -295,7 +318,7 @@ export default function RestaurantPageContent({ googlePlaceId, googleData }: Pro
               <div className="border-t border-border px-4 pb-4">
                 <ul className="mt-3 space-y-1.5 text-sm">
                   {googleData.opening_hours.weekday_text.map((line, i) => (
-                    <li key={i} className="text-muted-foreground">{line}</li>
+                    <li key={i} className="text-muted-foreground">{translateHours(line, locale)}</li>
                   ))}
                 </ul>
               </div>
