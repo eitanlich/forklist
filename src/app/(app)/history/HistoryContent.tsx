@@ -72,7 +72,7 @@ function ReviewCard({ review, onShare }: { review: ReviewWithRestaurant; onShare
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
             <Link
-              href={`/restaurant/${restaurant.id}`}
+              href={`/restaurant/${restaurant.google_place_id}`}
               className="font-serif text-lg font-semibold tracking-tight hover:text-primary transition-colors"
             >
               {restaurant.name}

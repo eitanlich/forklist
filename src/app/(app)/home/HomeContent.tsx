@@ -154,7 +154,7 @@ export default function HomeContent({ firstName, stats, followingCount }: HomeCo
                           {" · "}{formatDate(review.created_at)}
                         </p>
                         <Link
-                          href={`/restaurant/${review.restaurant.id}`}
+                          href={`/restaurant/${review.restaurant.google_place_id}`}
                           className="mt-1 block font-serif font-semibold truncate hover:text-primary transition-colors"
                         >
                           {review.restaurant.name}

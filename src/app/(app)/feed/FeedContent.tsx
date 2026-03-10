@@ -173,7 +173,7 @@ export function FeedContent() {
 
                   <div className="min-w-0 flex-1">
                     <Link
-                      href={`/restaurant/${review.restaurant.id}`}
+                      href={`/restaurant/${review.restaurant.google_place_id}`}
                       className="font-serif text-lg font-semibold text-foreground hover:text-primary transition-colors"
                     >
                       {review.restaurant.name}

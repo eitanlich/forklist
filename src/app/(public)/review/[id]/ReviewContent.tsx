@@ -152,7 +152,7 @@ export function ReviewContent({
         <div className="p-6">
           {/* Restaurant Name & Location */}
           <Link
-            href={`/restaurant/${restaurant.id}`}
+            href={`/restaurant/${restaurant.google_place_id}`}
             className="font-serif text-2xl font-semibold tracking-tight hover:text-primary transition-colors"
           >
             {restaurant.name}

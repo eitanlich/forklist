@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   MapPin,
@@ -13,42 +13,66 @@ import {
   ChevronUp,
   Plus,
   Heart,
-  ExternalLink,
+  Loader2,
 } from "lucide-react";
-import type { RestaurantWithReviews } from "@/lib/actions/restaurants";
-import { useT, useI18n } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n";
 import { toggleLike } from "@/lib/actions/likes";
 
+interface GoogleData {
+  google_place_id: string;
+  name: string;
+  address: string;
+  city: string | null;
+  lat: number | null;
+  lng: number | null;
+  photo_reference: string | null;
+  cuisine_type: string | null;
+  website: string | null;
+  google_maps_url: string | null;
+  phone: string | null;
+  price_level: number | null;
+  opening_hours: {
+    open_now?: boolean | null;
+    weekday_text?: string[];
+  } | null;
+  instagram: string | null;
+}
+
+interface Review {
+  id: string;
+  rating_overall: number;
+  comment: string | null;
+  visited_at: string;
+  user: {
+    id: string;
+    username: string | null;
+    avatar_url: string | null;
+  };
+  like_count: number;
+  liked_by_me: boolean;
+}
+
 interface Props {
-  restaurant: RestaurantWithReviews;
+  googlePlaceId: string;
+  googleData: GoogleData;
 }
 
 function PriceLevel({ level }: { level: number | null }) {
   if (level === null) return null;
   const symbols = ["", "$", "$$", "$$$", "$$$$"];
-  return (
-    <span className="text-muted-foreground">
-      {symbols[level] || ""}
-    </span>
-  );
+  return <span className="text-muted-foreground">{symbols[level] || ""}</span>;
 }
 
-function OpenStatus({ openingHours }: { openingHours: RestaurantWithReviews["opening_hours"] }) {
-  if (!openingHours) return null;
-  
-  const isOpen = openingHours.open_now;
-  
-  if (isOpen === null || isOpen === undefined) return null;
+function OpenStatus({ openingHours }: { openingHours: GoogleData["opening_hours"] }) {
+  if (!openingHours || openingHours.open_now === null || openingHours.open_now === undefined) {
+    return null;
+  }
   
   return (
     <div className="flex items-center gap-1.5">
-      <div
-        className={`h-2 w-2 rounded-full ${
-          isOpen ? "bg-green-500" : "bg-red-500"
-        }`}
-      />
-      <span className={isOpen ? "text-green-600" : "text-red-600"}>
-        {isOpen ? "Open now" : "Closed"}
+      <div className={`h-2 w-2 rounded-full ${openingHours.open_now ? "bg-green-500" : "bg-red-500"}`} />
+      <span className={openingHours.open_now ? "text-green-600" : "text-red-600"}>
+        {openingHours.open_now ? "Open now" : "Closed"}
       </span>
     </div>
   );
@@ -80,13 +104,7 @@ function ActionButton({
   );
 }
 
-function ReviewCard({
-  review,
-  locale,
-}: {
-  review: RestaurantWithReviews["reviews"][0];
-  locale: string;
-}) {
+function ReviewCard({ review, locale }: { review: Review; locale: string }) {
   const [liked, setLiked] = useState(review.liked_by_me);
   const [likeCount, setLikeCount] = useState(review.like_count);
   const [isLiking, setIsLiking] = useState(false);
@@ -95,15 +113,12 @@ function ReviewCard({
     if (isLiking) return;
     setIsLiking(true);
     
-    // Optimistic update
     const wasLiked = liked;
     setLiked(!wasLiked);
     setLikeCount((c) => (wasLiked ? c - 1 : c + 1));
     
     const result = await toggleLike(review.id);
-    
     if ("error" in result) {
-      // Revert on error
       setLiked(wasLiked);
       setLikeCount((c) => (wasLiked ? c + 1 : c - 1));
     }
@@ -120,10 +135,7 @@ function ReviewCard({
   return (
     <div className="rounded-xl border border-border bg-card p-4">
       <div className="flex items-start justify-between">
-        <Link
-          href={`/u/${review.user.username}`}
-          className="flex items-center gap-3"
-        >
+        <Link href={`/u/${review.user.username}`} className="flex items-center gap-3">
           {review.user.avatar_url ? (
             <img
               src={review.user.avatar_url}
@@ -148,16 +160,11 @@ function ReviewCard({
       </div>
       
       {review.comment && (
-        <p className="mt-3 text-sm text-foreground/90 line-clamp-3">
-          {review.comment}
-        </p>
+        <p className="mt-3 text-sm text-foreground/90 line-clamp-3">{review.comment}</p>
       )}
       
       <div className="mt-3 flex items-center justify-between">
-        <Link
-          href={`/review/${review.id}`}
-          className="text-xs text-primary hover:underline"
-        >
+        <Link href={`/review/${review.id}`} className="text-xs text-primary hover:underline">
           View full review
         </Link>
         
@@ -166,33 +173,57 @@ function ReviewCard({
           disabled={isLiking}
           className="flex items-center gap-1.5 text-muted-foreground transition-colors hover:text-primary disabled:opacity-50"
         >
-          <Heart
-            size={16}
-            className={liked ? "text-red-500" : ""}
-            fill={liked ? "currentColor" : "none"}
-          />
-          {likeCount > 0 && (
-            <span className="text-xs">{likeCount}</span>
-          )}
+          <Heart size={16} className={liked ? "text-red-500" : ""} fill={liked ? "currentColor" : "none"} />
+          {likeCount > 0 && <span className="text-xs">{likeCount}</span>}
         </button>
       </div>
     </div>
   );
 }
 
-export default function RestaurantPageContent({ restaurant }: Props) {
-  const t = useT();
+export default function RestaurantPageContent({ googlePlaceId, googleData }: Props) {
   const { locale } = useI18n();
   const [showHours, setShowHours] = useState(false);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [avgRating, setAvgRating] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch ForkList reviews for this restaurant
+  useEffect(() => {
+    async function fetchReviews() {
+      try {
+        const res = await fetch(`/api/restaurants/reviews?placeId=${googlePlaceId}`);
+        if (res.ok) {
+          const data = await res.json();
+          setReviews(data.reviews ?? []);
+          setAvgRating(data.avgRating ?? null);
+        }
+      } catch {
+        // No reviews or error
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchReviews();
+  }, [googlePlaceId]);
+
+  // Count action buttons to show
+  const actionButtons = [
+    googleData.instagram && { href: `https://instagram.com/${googleData.instagram}`, icon: Instagram, label: "Instagram", external: true },
+    googleData.google_maps_url && { href: googleData.google_maps_url, icon: MapPin, label: "Maps", external: true },
+    googleData.website && !googleData.website.includes("instagram.com") && { href: googleData.website, icon: Globe, label: "Website", external: true },
+    googleData.phone && { href: `tel:${googleData.phone}`, icon: Phone, label: "Call", external: false },
+    { href: `/add?placeId=${googlePlaceId}`, icon: Plus, label: "Log visit", external: false },
+  ].filter(Boolean) as { href: string; icon: any; label: string; external: boolean }[];
 
   return (
     <div className="space-y-6">
       {/* Hero image */}
-      {restaurant.photo_reference && (
+      {googleData.photo_reference && (
         <div className="relative -mx-4 -mt-4 h-48 sm:mx-0 sm:mt-0 sm:rounded-2xl sm:overflow-hidden">
           <img
-            src={`/api/places/photo?ref=${encodeURIComponent(restaurant.photo_reference)}&maxWidth=800`}
-            alt={restaurant.name}
+            src={`/api/places/photo?ref=${encodeURIComponent(googleData.photo_reference)}&maxWidth=800`}
+            alt={googleData.name}
             className="h-full w-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
@@ -202,88 +233,47 @@ export default function RestaurantPageContent({ restaurant }: Props) {
       {/* Restaurant info */}
       <div className="space-y-4">
         <div>
-          <h1 className="font-serif text-2xl font-bold">{restaurant.name}</h1>
+          <h1 className="font-serif text-2xl font-bold">{googleData.name}</h1>
           
           <div className="mt-2 flex flex-wrap items-center gap-3 text-sm">
-            {restaurant.average_rating && (
+            {avgRating && (
               <div className="flex items-center gap-1">
                 <Star size={16} className="text-primary" fill="currentColor" />
-                <span className="font-semibold">
-                  {restaurant.average_rating.toFixed(1)}
-                </span>
+                <span className="font-semibold">{avgRating.toFixed(1)}</span>
                 <span className="text-muted-foreground">
-                  ({restaurant.review_count} {restaurant.review_count === 1 ? "review" : "reviews"})
+                  ({reviews.length} {reviews.length === 1 ? "review" : "reviews"})
                 </span>
               </div>
             )}
             
-            <PriceLevel level={restaurant.price_level} />
+            <PriceLevel level={googleData.price_level} />
             
-            {restaurant.cuisine_type && (
-              <span className="capitalize text-muted-foreground">
-                {restaurant.cuisine_type}
-              </span>
+            {googleData.cuisine_type && (
+              <span className="capitalize text-muted-foreground">{googleData.cuisine_type}</span>
             )}
           </div>
           
-          {restaurant.city && (
+          {googleData.city && (
             <div className="mt-2 flex items-center gap-1.5 text-sm text-muted-foreground">
               <MapPin size={14} />
-              <span>{restaurant.city}</span>
+              <span>{googleData.city}</span>
             </div>
           )}
           
           <div className="mt-2">
-            <OpenStatus openingHours={restaurant.opening_hours} />
+            <OpenStatus openingHours={googleData.opening_hours} />
           </div>
         </div>
 
         {/* Action buttons */}
-        <div className="grid grid-cols-5 gap-2">
-          {restaurant.instagram && (
-            <ActionButton
-              href={`https://instagram.com/${restaurant.instagram}`}
-              icon={Instagram}
-              label="Instagram"
-              external
-            />
-          )}
-          
-          {restaurant.google_maps_url && (
-            <ActionButton
-              href={restaurant.google_maps_url}
-              icon={MapPin}
-              label="Maps"
-              external
-            />
-          )}
-          
-          {restaurant.website && !restaurant.website.includes("instagram.com") && (
-            <ActionButton
-              href={restaurant.website}
-              icon={Globe}
-              label="Website"
-              external
-            />
-          )}
-          
-          {restaurant.phone && (
-            <ActionButton
-              href={`tel:${restaurant.phone}`}
-              icon={Phone}
-              label="Call"
-            />
-          )}
-          
-          <ActionButton
-            href={`/add?placeId=${restaurant.google_place_id}`}
-            icon={Plus}
-            label="Log visit"
-          />
+        <div className={`grid gap-2`} style={{ gridTemplateColumns: `repeat(${Math.min(actionButtons.length, 5)}, 1fr)` }}>
+          {actionButtons.map((btn) => (
+            <ActionButton key={btn.label} {...btn} />
+          ))}
         </div>
 
         {/* Opening hours */}
-        {restaurant.opening_hours?.weekday_text && restaurant.opening_hours.weekday_text.length > 0 && (
+        {googleData.opening_hours?.weekday_text && googleData.opening_hours.weekday_text.length > 0 && (
           <div className="rounded-xl border border-border bg-card">
             <button
               onClick={() => setShowHours(!showHours)}
@@ -303,10 +293,8 @@ export default function RestaurantPageContent({ restaurant }: Props) {
             {showHours && (
               <div className="border-t border-border px-4 pb-4">
                 <ul className="mt-3 space-y-1.5 text-sm">
-                  {restaurant.opening_hours.weekday_text.map((line, i) => (
-                    <li key={i} className="text-muted-foreground">
-                      {line}
-                    </li>
+                  {googleData.opening_hours.weekday_text.map((line, i) => (
+                    <li key={i} className="text-muted-foreground">{line}</li>
                   ))}
                 </ul>
               </div>
@@ -318,26 +306,20 @@ export default function RestaurantPageContent({ restaurant }: Props) {
       {/* Reviews section */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="font-serif text-xl font-semibold">
-            Reviews on ForkList
-          </h2>
-          {restaurant.review_count === 0 && (
-            <Link
-              href={`/add?placeId=${restaurant.google_place_id}`}
-              className="text-sm text-primary hover:underline"
-            >
-              Be the first to review
-            </Link>
-          )}
+          <h2 className="font-serif text-xl font-semibold">Reviews on ForkList</h2>
         </div>
 
-        {restaurant.reviews.length === 0 ? (
+        {loading ? (
+          <div className="flex justify-center py-8">
+            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          </div>
+        ) : reviews.length === 0 ? (
           <div className="rounded-xl border border-dashed border-border bg-card/30 p-8 text-center">
             <p className="text-muted-foreground">
               No reviews yet. Be the first to share your experience!
             </p>
             <Link
-              href={`/add?placeId=${restaurant.google_place_id}`}
+              href={`/add?placeId=${googlePlaceId}`}
               className="mt-4 inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
             >
               <Plus size={16} />
@@ -346,7 +328,7 @@ export default function RestaurantPageContent({ restaurant }: Props) {
           </div>
         ) : (
           <div className="space-y-3">
-            {restaurant.reviews.map((review) => (
+            {reviews.map((review) => (
               <ReviewCard key={review.id} review={review} locale={locale} />
             ))}
           </div>

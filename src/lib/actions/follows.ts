@@ -220,6 +220,7 @@ export interface FeedReview {
   };
   restaurant: {
     id: string;
+    google_place_id: string;
     name: string;
     city: string | null;
     photo_reference: string | null;
@@ -265,7 +266,7 @@ export async function getFeedReviews(
       visited_at,
       created_at,
       user:users!reviews_user_id_fkey(id, username),
-      restaurant:restaurants!reviews_restaurant_id_fkey(id, name, city, photo_reference)
+      restaurant:restaurants!reviews_restaurant_id_fkey(id, google_place_id, name, city, photo_reference)
     `)
     .in("user_id", userIds)
     .order("created_at", { ascending: false })
