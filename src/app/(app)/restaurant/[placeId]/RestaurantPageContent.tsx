@@ -15,7 +15,7 @@ import {
   Heart,
   Loader2,
 } from "lucide-react";
-import { useI18n } from "@/lib/i18n";
+import { useI18n, useT } from "@/lib/i18n";
 import { toggleLike } from "@/lib/actions/likes";
 
 interface GoogleData {
@@ -63,7 +63,7 @@ function PriceLevel({ level }: { level: number | null }) {
   return <span className="text-muted-foreground">{symbols[level] || ""}</span>;
 }
 
-function OpenStatus({ openingHours }: { openingHours: GoogleData["opening_hours"] }) {
+function OpenStatus({ openingHours, t }: { openingHours: GoogleData["opening_hours"]; t: ReturnType<typeof useT> }) {
   if (!openingHours || openingHours.open_now === null || openingHours.open_now === undefined) {
     return null;
   }
@@ -72,7 +72,7 @@ function OpenStatus({ openingHours }: { openingHours: GoogleData["opening_hours"
     <div className="flex items-center gap-1.5">
       <div className={`h-2 w-2 rounded-full ${openingHours.open_now ? "bg-green-500" : "bg-red-500"}`} />
       <span className={openingHours.open_now ? "text-green-600" : "text-red-600"}>
-        {openingHours.open_now ? "Open now" : "Closed"}
+        {openingHours.open_now ? t("openNow") : t("closed")}
       </span>
     </div>
   );
@@ -104,7 +104,7 @@ function ActionButton({
   );
 }
 
-function ReviewCard({ review, locale }: { review: Review; locale: string }) {
+function ReviewCard({ review, locale, t }: { review: Review; locale: string; t: ReturnType<typeof useT> }) {
   const [liked, setLiked] = useState(review.liked_by_me);
   const [likeCount, setLikeCount] = useState(review.like_count);
   const [isLiking, setIsLiking] = useState(false);
@@ -165,7 +165,7 @@ function ReviewCard({ review, locale }: { review: Review; locale: string }) {
       
       <div className="mt-3 flex items-center justify-between">
         <Link href={`/review/${review.id}`} className="text-xs text-primary hover:underline">
-          View full review
+          {t("viewFullReview")}
         </Link>
         
         <button
@@ -183,6 +183,7 @@ function ReviewCard({ review, locale }: { review: Review; locale: string }) {
 
 export default function RestaurantPageContent({ googlePlaceId, googleData }: Props) {
   const { locale } = useI18n();
+  const t = useT();
   const [showHours, setShowHours] = useState(false);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [avgRating, setAvgRating] = useState<number | null>(null);
@@ -210,10 +211,10 @@ export default function RestaurantPageContent({ googlePlaceId, googleData }: Pro
   // Count action buttons to show
   const actionButtons = [
     googleData.instagram && { href: `https://instagram.com/${googleData.instagram}`, icon: Instagram, label: "Instagram", external: true },
-    googleData.google_maps_url && { href: googleData.google_maps_url, icon: MapPin, label: "Maps", external: true },
-    googleData.website && !googleData.website.includes("instagram.com") && { href: googleData.website, icon: Globe, label: "Website", external: true },
-    googleData.phone && { href: `tel:${googleData.phone}`, icon: Phone, label: "Call", external: false },
-    { href: `/add?placeId=${googlePlaceId}`, icon: Plus, label: "Log visit", external: false },
+    googleData.google_maps_url && { href: googleData.google_maps_url, icon: MapPin, label: t("maps"), external: true },
+    googleData.website && !googleData.website.includes("instagram.com") && { href: googleData.website, icon: Globe, label: t("website"), external: true },
+    googleData.phone && { href: `tel:${googleData.phone}`, icon: Phone, label: t("call"), external: false },
+    { href: `/add?placeId=${googlePlaceId}`, icon: Plus, label: t("logAVisit"), external: false },
   ].filter(Boolean) as { href: string; icon: any; label: string; external: boolean }[];
 
   return (
@@ -241,7 +242,7 @@ export default function RestaurantPageContent({ googlePlaceId, googleData }: Pro
                 <Star size={16} className="text-primary" fill="currentColor" />
                 <span className="font-semibold">{avgRating.toFixed(1)}</span>
                 <span className="text-muted-foreground">
-                  ({reviews.length} {reviews.length === 1 ? "review" : "reviews"})
+                  ({reviews.length} {reviews.length === 1 ? t("review") : t("reviews")})
                 </span>
               </div>
             )}
@@ -261,7 +262,7 @@ export default function RestaurantPageContent({ googlePlaceId, googleData }: Pro
           )}
           
           <div className="mt-2">
-            <OpenStatus openingHours={googleData.opening_hours} />
+            <OpenStatus openingHours={googleData.opening_hours} t={t} />
           </div>
         </div>
 
@@ -281,7 +282,7 @@ export default function RestaurantPageContent({ googlePlaceId, googleData }: Pro
             >
               <div className="flex items-center gap-2">
                 <Clock size={16} className="text-muted-foreground" />
-                <span className="font-medium">Hours</span>
+                <span className="font-medium">{t("hours")}</span>
               </div>
               {showHours ? (
                 <ChevronUp size={16} className="text-muted-foreground" />
@@ -306,7 +307,7 @@ export default function RestaurantPageContent({ googlePlaceId, googleData }: Pro
       {/* Reviews section */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="font-serif text-xl font-semibold">Reviews on ForkList</h2>
+          <h2 className="font-serif text-xl font-semibold">{t("reviewsOnForkList")}</h2>
         </div>
 
         {loading ? (
@@ -316,20 +317,20 @@ export default function RestaurantPageContent({ googlePlaceId, googleData }: Pro
         ) : reviews.length === 0 ? (
           <div className="rounded-xl border border-dashed border-border bg-card/30 p-8 text-center">
             <p className="text-muted-foreground">
-              No reviews yet. Be the first to share your experience!
+              {t("noReviewsYetRestaurant")}
             </p>
             <Link
               href={`/add?placeId=${googlePlaceId}`}
               className="mt-4 inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
             >
               <Plus size={16} />
-              Log a visit
+              {t("logAVisit")}
             </Link>
           </div>
         ) : (
           <div className="space-y-3">
             {reviews.map((review) => (
-              <ReviewCard key={review.id} review={review} locale={locale} />
+              <ReviewCard key={review.id} review={review} locale={locale} t={t} />
             ))}
           </div>
         )}

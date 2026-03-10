@@ -269,6 +269,17 @@ export const translations = {
     publicListHint: "Anyone can see this list on your profile",
     makePrivate: "Make private",
     makePublic: "Make public",
+    
+    // Restaurant page
+    openNow: "Open now",
+    closed: "Closed",
+    hours: "Hours",
+    call: "Call",
+    reviewsOnForkList: "Reviews on ForkList",
+    noReviewsYetRestaurant: "No reviews yet. Be the first to share your experience!",
+    beFirstToReview: "Be the first to review",
+    viewFullReview: "View full review",
+    review: "review",
   },
   
   es: {
@@ -541,6 +552,17 @@ export const translations = {
     publicListHint: "Cualquiera puede ver esta lista en tu perfil",
     makePrivate: "Hacer privada",
     makePublic: "Hacer pública",
+    
+    // Restaurant page
+    openNow: "Abierto",
+    closed: "Cerrado",
+    hours: "Horarios",
+    call: "Llamar",
+    reviewsOnForkList: "Reviews en ForkList",
+    noReviewsYetRestaurant: "No hay reviews todavía. ¡Sé el primero en compartir tu experiencia!",
+    beFirstToReview: "Sé el primero en hacer una review",
+    viewFullReview: "Ver review completa",
+    review: "review",
   },
 } as const;
 

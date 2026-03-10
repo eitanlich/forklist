@@ -254,10 +254,9 @@ export default function RestaurantSearch({ onSelect }: RestaurantSearchProps) {
         {showDropdown && suggestions.length > 0 && !showResults && (
           <div className="absolute z-10 mt-1 w-full overflow-hidden rounded-xl border border-border bg-card shadow-xl">
             {suggestions.map((s) => (
-              <button
+              <Link
                 key={s.placeId}
-                type="button"
-                onClick={() => handleSelect(s.placeId)}
+                href={`/restaurant/${s.placeId}`}
                 className="flex w-full items-start gap-3 px-4 py-3 text-left transition-colors duration-150 hover:bg-secondary"
               >
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
@@ -269,7 +268,7 @@ export default function RestaurantSearch({ onSelect }: RestaurantSearchProps) {
                     {s.address}
                   </p>
                 </div>
-              </button>
+              </Link>
             ))}
             {/* Hint to press Enter */}
             <div className="border-t border-border px-4 py-2 text-center text-xs text-muted-foreground">
