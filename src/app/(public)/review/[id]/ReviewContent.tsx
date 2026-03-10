@@ -256,53 +256,71 @@ export function ReviewContent({
               </button>
               
               {/* Liked by users - only show if we have displayable users */}
-              {likedByUsers.length > 0 && (
-                <div className="flex items-center gap-2">
-                  {/* Avatar stack */}
-                  <div className="flex -space-x-2">
-                    {likedByUsers.slice(0, 3).map((u) => (
-                      <Link
-                        key={u.id}
-                        href={u.username ? `/u/${u.username}` : "#"}
-                        className="relative h-7 w-7 rounded-full border-2 border-background overflow-hidden hover:z-10 transition-transform hover:scale-110"
-                      >
-                        {u.avatar_url ? (
-                          <img src={u.avatar_url} alt={u.username || ""} className="h-full w-full object-cover" />
-                        ) : (
-                          <div className="flex h-full w-full items-center justify-center bg-secondary">
-                            <User size={12} className="text-muted-foreground" />
-                          </div>
-                        )}
-                      </Link>
-                    ))}
-                  </div>
-                  
-                  {/* Names / count - use likedByUsers.length for consistency */}
-                  <span className="text-sm text-muted-foreground">
-                    {likedByUsers.length === 1 && likedByUsers[0]?.username ? (
-                      <Link href={`/u/${likedByUsers[0].username}`} className="hover:text-foreground">
-                        @{likedByUsers[0].username}
-                      </Link>
-                    ) : likedByUsers.length <= 3 ? (
-                      likedByUsers.filter(u => u.username).map((u, i, arr) => (
-                        <span key={u.id}>
-                          {i > 0 && (i === arr.length - 1 ? (locale === "es" ? " y " : " and ") : ", ")}
-                          <Link href={`/u/${u.username}`} className="hover:text-foreground">
-                            @{u.username}
-                          </Link>
-                        </span>
-                      ))
-                    ) : (
-                      <>
-                        <Link href={`/u/${likedByUsers[0]?.username}`} className="hover:text-foreground">
-                          @{likedByUsers[0]?.username}
+              {likedByUsers.length > 0 && (() => {
+                // Sort: put current user first if they liked
+                const currentUserId = user?.id;
+                const sortedUsers = [...likedByUsers].sort((a, b) => {
+                  if (a.id === currentUserId) return -1;
+                  if (b.id === currentUserId) return 1;
+                  return 0;
+                });
+                const youText = locale === "es" ? "Yo" : "You";
+                const andText = locale === "es" ? "y" : "and";
+                const othersText = locale === "es" ? "más" : "others";
+                
+                const renderUserName = (u: LikeUser) => {
+                  if (u.id === currentUserId) {
+                    return <span className="font-medium">{youText}</span>;
+                  }
+                  return (
+                    <Link href={`/u/${u.username}`} className="hover:text-foreground">
+                      @{u.username}
+                    </Link>
+                  );
+                };
+                
+                return (
+                  <div className="flex items-center gap-2">
+                    {/* Avatar stack */}
+                    <div className="flex -space-x-2">
+                      {sortedUsers.slice(0, 3).map((u) => (
+                        <Link
+                          key={u.id}
+                          href={u.username ? `/u/${u.username}` : "#"}
+                          className="relative h-7 w-7 rounded-full border-2 border-background overflow-hidden hover:z-10 transition-transform hover:scale-110"
+                        >
+                          {u.avatar_url ? (
+                            <img src={u.avatar_url} alt={u.username || ""} className="h-full w-full object-cover" />
+                          ) : (
+                            <div className="flex h-full w-full items-center justify-center bg-secondary">
+                              <User size={12} className="text-muted-foreground" />
+                            </div>
+                          )}
                         </Link>
-                        {" "}{locale === "es" ? "y" : "and"} {likedByUsers.length - 1} {locale === "es" ? "más" : "others"}
-                      </>
-                    )}
-                  </span>
-                </div>
-              )}
+                      ))}
+                    </div>
+                    
+                    {/* Names / count */}
+                    <span className="text-sm text-muted-foreground">
+                      {sortedUsers.length === 1 && sortedUsers[0]?.username ? (
+                        renderUserName(sortedUsers[0])
+                      ) : sortedUsers.length <= 3 ? (
+                        sortedUsers.filter(u => u.username).map((u, i, arr) => (
+                          <span key={u.id}>
+                            {i > 0 && (i === arr.length - 1 ? ` ${andText} ` : ", ")}
+                            {renderUserName(u)}
+                          </span>
+                        ))
+                      ) : (
+                        <>
+                          {renderUserName(sortedUsers[0])}
+                          {" "}{andText} {sortedUsers.length - 1} {othersText}
+                        </>
+                      )}
+                    </span>
+                  </div>
+                );
+              })()}
             </div>
           </div>
 
