@@ -31,16 +31,16 @@ export default function BottomNav() {
           <span className="text-xs">{t("home")}</span>
         </Link>
 
-        {/* Explore */}
+        {/* Search */}
         <Link
-          href="/explore"
+          href="/search"
           className={`flex flex-col items-center gap-1 transition-colors duration-200 ${
-            pathname.startsWith("/explore")
+            pathname.startsWith("/search")
               ? "text-primary"
               : "text-muted-foreground hover:text-foreground"
           }`}
         >
-          <Search size={20} strokeWidth={pathname.startsWith("/explore") ? 2 : 1.5} />
+          <Search size={20} strokeWidth={pathname.startsWith("/search") ? 2 : 1.5} />
           <span className="text-xs">{t("explore")}</span>
         </Link>
 

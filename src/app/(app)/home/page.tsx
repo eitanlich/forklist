@@ -5,13 +5,7 @@ import HomeContent from "./HomeContent";
 
 export const dynamic = "force-dynamic";
 
-interface UserStats {
-  totalReviews: number;
-  uniqueRestaurants: number;
-  avgRating: number | null;
-}
-
-async function getUserData(clerkId: string) {
+async function getFollowingCount(clerkId: string) {
   const supabase = createAdminClient();
   
   // Get user
@@ -22,11 +16,7 @@ async function getUserData(clerkId: string) {
     .single();
 
   if (!dbUser) {
-    return { 
-      userId: null, 
-      followingCount: 0, 
-      stats: { totalReviews: 0, uniqueRestaurants: 0, avgRating: null } 
-    };
+    return 0;
   }
 
   // Get following count
@@ -36,23 +26,7 @@ async function getUserData(clerkId: string) {
     .eq("follower_id", dbUser.id)
     .eq("status", "active");
 
-  // Get user stats
-  const { data: reviews } = await supabase
-    .from("reviews")
-    .select("rating_overall, restaurant_id")
-    .eq("user_id", dbUser.id);
-
-  const totalReviews = reviews?.length ?? 0;
-  const uniqueRestaurants = new Set(reviews?.map((r) => r.restaurant_id)).size;
-  const avgRating = totalReviews > 0
-    ? reviews!.reduce((sum, r) => sum + r.rating_overall, 0) / totalReviews
-    : null;
-
-  return {
-    userId: dbUser.id,
-    followingCount: followingCount ?? 0,
-    stats: { totalReviews, uniqueRestaurants, avgRating },
-  };
+  return followingCount ?? 0;
 }
 
 export default async function HomePage() {
@@ -60,14 +34,11 @@ export default async function HomePage() {
   const user = await currentUser();
   const firstName = user?.firstName ?? "there";
 
-  const { userId, followingCount, stats } = clerkId 
-    ? await getUserData(clerkId)
-    : { userId: null, followingCount: 0, stats: { totalReviews: 0, uniqueRestaurants: 0, avgRating: null } };
+  const followingCount = clerkId ? await getFollowingCount(clerkId) : 0;
 
   return (
     <HomeContent 
       firstName={firstName} 
-      stats={stats}
       followingCount={followingCount}
     />
   );

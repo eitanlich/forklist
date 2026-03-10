@@ -270,6 +270,9 @@ export const translations = {
     makePrivate: "Make private",
     makePublic: "Make public",
     
+    // Search
+    restaurants: "Restaurants",
+    
     // Restaurant page
     openNow: "Open now",
     closed: "Closed",
@@ -552,6 +555,9 @@ export const translations = {
     publicListHint: "Cualquiera puede ver esta lista en tu perfil",
     makePrivate: "Hacer privada",
     makePublic: "Hacer pública",
+    
+    // Search
+    restaurants: "Restaurantes",
     
     // Restaurant page
     openNow: "Abierto",

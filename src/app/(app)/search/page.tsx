@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import SearchContent from "./SearchContent";
+import SearchPageContent from "./SearchPageContent";
 
 export const metadata: Metadata = {
-  title: "Search - ForkList",
+  title: "Search — ForkList",
 };
 
 export default function SearchPage() {
-  return <SearchContent />;
+  return <SearchPageContent />;
 }
