@@ -11,6 +11,7 @@ export interface LocationState {
   lat?: number;
   lng?: number;
   country?: string;
+  countryName?: string;
   displayName: string;
 }
 
@@ -216,6 +217,7 @@ export default function LocationFilter({ value, onChange }: LocationFilterProps)
       onChange({
         mode: "country",
         country: code,
+        countryName: country.name,
         displayName: `${country.flag} ${country.name}`,
       });
     }

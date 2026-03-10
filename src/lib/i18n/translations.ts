@@ -272,6 +272,10 @@ export const translations = {
     
     // Search
     restaurants: "Restaurants",
+    searchRestaurantsPlaceholder: "Search restaurants...",
+    searchPeoplePlaceholder: "Search people...",
+    startTypingRestaurants: "Start typing to search for a restaurant",
+    startTypingPeople: "Start typing to search for people",
     
     // Restaurant page
     openNow: "Open now",
@@ -558,6 +562,10 @@ export const translations = {
     
     // Search
     restaurants: "Restaurantes",
+    searchRestaurantsPlaceholder: "Buscar restaurantes...",
+    searchPeoplePlaceholder: "Buscar personas...",
+    startTypingRestaurants: "Empezá a escribir para buscar un restaurante",
+    startTypingPeople: "Empezá a escribir para buscar personas",
     
     // Restaurant page
     openNow: "Abierto",

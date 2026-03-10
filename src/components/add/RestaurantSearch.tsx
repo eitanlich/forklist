@@ -115,8 +115,8 @@ export default function RestaurantSearch({ onSelect }: RestaurantSearchProps) {
       if (location.mode === "nearby" && location.lat && location.lng) {
         params.set("lat", location.lat.toString());
         params.set("lng", location.lng.toString());
-      } else if (location.mode === "country" && location.country) {
-        params.set("country", location.country);
+      } else if (location.mode === "country" && location.countryName) {
+        params.set("country", location.countryName);
       }
       
       if (pageToken) {

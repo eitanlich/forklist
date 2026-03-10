@@ -72,8 +72,8 @@ export default function SearchPageContent() {
       if (location.mode === "nearby" && location.lat && location.lng) {
         params.set("lat", location.lat.toString());
         params.set("lng", location.lng.toString());
-      } else if (location.mode === "country" && location.country) {
-        params.set("country", location.country);
+      } else if (location.mode === "country" && location.countryName) {
+        params.set("country", location.countryName);
       }
       
       if (pageToken) {
@@ -170,7 +170,7 @@ export default function SearchPageContent() {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder={t("searchPlaceholder")}
+          placeholder={activeTab === "restaurants" ? t("searchRestaurantsPlaceholder") : t("searchPeoplePlaceholder")}
           className="w-full rounded-xl border border-border bg-secondary py-3 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
         />
         {isLoading && (
@@ -211,7 +211,7 @@ export default function SearchPageContent() {
       <div className="space-y-3">
         {query.trim().length < 2 ? (
           <p className="py-8 text-center text-sm text-muted-foreground">
-            {t("startTyping")}
+            {activeTab === "restaurants" ? t("startTypingRestaurants") : t("startTypingPeople")}
           </p>
         ) : isLoading && (activeTab === "restaurants" ? restaurants.length === 0 : people.length === 0) ? (
           <div className="flex justify-center py-12">
