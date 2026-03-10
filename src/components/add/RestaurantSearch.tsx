@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
 import { Search, Loader2, MapPin, Star, ChevronLeft, ChevronRight, Bookmark } from "lucide-react";
 import AddToListModal from "@/components/lists/AddToListModal";
 import type { PlaceSuggestion } from "@/types";
@@ -307,16 +308,13 @@ export default function RestaurantSearch({ onSelect }: RestaurantSearchProps) {
           ) : (
             <div className="space-y-3">
               {searchResults.map((result) => (
-                <div
+                <Link
                   key={result.placeId}
+                  href={`/restaurant/${result.placeId}`}
                   className="group flex w-full gap-4 rounded-2xl border border-border bg-card p-4 text-left transition-all duration-200 hover:border-primary/30 hover:bg-card/80"
                 >
-                  {/* Photo - clickable */}
-                  <button
-                    type="button"
-                    onClick={() => handleSelect(result.placeId)}
-                    className="shrink-0"
-                  >
+                  {/* Photo */}
+                  <div className="shrink-0">
                     {result.photoReference ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
@@ -329,15 +327,11 @@ export default function RestaurantSearch({ onSelect }: RestaurantSearchProps) {
                         <MapPin className="h-6 w-6 text-muted-foreground" />
                       </div>
                     )}
-                  </button>
+                  </div>
 
-                  {/* Info - clickable */}
-                  <button
-                    type="button"
-                    onClick={() => handleSelect(result.placeId)}
-                    className="min-w-0 flex-1 text-left"
-                  >
-                    <h3 className="font-serif text-lg font-semibold tracking-tight">
+                  {/* Info */}
+                  <div className="min-w-0 flex-1">
+                    <h3 className="font-serif text-lg font-semibold tracking-tight group-hover:text-primary transition-colors">
                       {result.name}
                     </h3>
                     <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
@@ -356,12 +350,13 @@ export default function RestaurantSearch({ onSelect }: RestaurantSearchProps) {
                         )}
                       </div>
                     )}
-                  </button>
+                  </div>
 
                   {/* Add to list button */}
                   <button
                     type="button"
                     onClick={(e) => {
+                      e.preventDefault();
                       e.stopPropagation();
                       handleAddToList(result);
                     }}
@@ -375,7 +370,7 @@ export default function RestaurantSearch({ onSelect }: RestaurantSearchProps) {
                       <Bookmark className="h-5 w-5" />
                     )}
                   </button>
-                </div>
+                </Link>
               ))}
             </div>
           )}
