@@ -53,6 +53,11 @@ export async function createReview(
         cuisine_type: parsed.data.restaurant_cuisine_type ?? null,
         website: parsed.data.restaurant_website ?? null,
         google_maps_url: parsed.data.restaurant_google_maps_url ?? null,
+        // New fields
+        instagram: parsed.data.restaurant_instagram ?? null,
+        phone: parsed.data.restaurant_phone ?? null,
+        price_level: parsed.data.restaurant_price_level ?? null,
+        opening_hours: parsed.data.restaurant_opening_hours ?? null,
       },
       { onConflict: "google_place_id" }
     )

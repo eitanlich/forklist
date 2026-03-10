@@ -126,23 +126,24 @@ export default function HomeContent({ firstName, stats, followingCount }: HomeCo
           ) : (
             <>
               {feedReviews.map((review) => (
-                <Link
+                <div
                   key={review.id}
-                  href={`/review/${review.id}`}
                   className="flex gap-4 rounded-xl border border-border bg-card p-4 transition-all hover:border-primary/20"
                 >
                   {/* Photo */}
-                  {review.restaurant.photo_reference ? (
-                    <img
-                      src={`/api/places/photo?ref=${encodeURIComponent(review.restaurant.photo_reference)}`}
-                      alt={review.restaurant.name}
-                      className="h-16 w-16 shrink-0 rounded-lg object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg bg-secondary">
-                      <MapPin className="h-5 w-5 text-muted-foreground" />
-                    </div>
-                  )}
+                  <Link href={`/review/${review.id}`}>
+                    {review.restaurant.photo_reference ? (
+                      <img
+                        src={`/api/places/photo?ref=${encodeURIComponent(review.restaurant.photo_reference)}`}
+                        alt={review.restaurant.name}
+                        className="h-16 w-16 shrink-0 rounded-lg object-cover transition-opacity hover:opacity-80"
+                      />
+                    ) : (
+                      <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg bg-secondary">
+                        <MapPin className="h-5 w-5 text-muted-foreground" />
+                      </div>
+                    )}
+                  </Link>
 
                   {/* Content */}
                   <div className="min-w-0 flex-1">
@@ -152,22 +153,27 @@ export default function HomeContent({ firstName, stats, followingCount }: HomeCo
                           <span className="font-medium text-foreground">@{review.user.username}</span>
                           {" · "}{formatDate(review.created_at)}
                         </p>
-                        <h3 className="mt-1 font-serif font-semibold truncate">
+                        <Link
+                          href={`/restaurant/${review.restaurant.id}`}
+                          className="mt-1 block font-serif font-semibold truncate hover:text-primary transition-colors"
+                        >
                           {review.restaurant.name}
-                        </h3>
+                        </Link>
                       </div>
                       <div className="flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5">
                         <Star size={12} className="text-primary" fill="currentColor" />
                         <span className="text-xs font-medium text-primary">{review.rating_overall}</span>
                       </div>
                     </div>
-                    {review.comment && (
-                      <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
-                        {review.comment}
-                      </p>
-                    )}
+                    <Link href={`/review/${review.id}`}>
+                      {review.comment && (
+                        <p className="mt-1 text-sm text-muted-foreground line-clamp-2 hover:text-foreground transition-colors">
+                          {review.comment}
+                        </p>
+                      )}
+                    </Link>
                   </div>
-                </Link>
+                </div>
               ))}
 
               {hasMore && (

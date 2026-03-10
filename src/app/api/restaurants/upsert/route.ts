@@ -21,6 +21,11 @@ export async function POST(request: Request) {
       cuisine_type,
       website,
       google_maps_url,
+      // New fields
+      instagram,
+      phone,
+      price_level,
+      opening_hours,
     } = body;
 
     if (!google_place_id || !name) {
@@ -46,6 +51,11 @@ export async function POST(request: Request) {
           cuisine_type: cuisine_type ?? null,
           website: website ?? null,
           google_maps_url: google_maps_url ?? null,
+          // New fields
+          instagram: instagram ?? null,
+          phone: phone ?? null,
+          price_level: price_level ?? null,
+          opening_hours: opening_hours ?? null,
         },
         { onConflict: "google_place_id" }
       )

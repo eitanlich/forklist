@@ -151,9 +151,12 @@ export function ReviewContent({
 
         <div className="p-6">
           {/* Restaurant Name & Location */}
-          <h1 className="font-serif text-2xl font-semibold tracking-tight">
+          <Link
+            href={`/restaurant/${restaurant.id}`}
+            className="font-serif text-2xl font-semibold tracking-tight hover:text-primary transition-colors"
+          >
             {restaurant.name}
-          </h1>
+          </Link>
           {restaurant.city && (
             <div className="mt-1 flex items-center gap-1.5 text-muted-foreground">
               <MapPin size={14} strokeWidth={1.5} />

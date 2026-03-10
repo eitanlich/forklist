@@ -179,6 +179,11 @@ export default function RestaurantSearch({ onSelect }: RestaurantSearchProps) {
           cuisine_type: details.cuisine_type,
           website: details.website,
           google_maps_url: details.google_maps_url,
+          // New fields
+          instagram: details.instagram,
+          phone: details.phone,
+          price_level: details.price_level,
+          opening_hours: details.opening_hours,
         }),
       });
       

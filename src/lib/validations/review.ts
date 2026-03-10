@@ -12,6 +12,15 @@ export const reviewSchema = z.object({
   restaurant_cuisine_type: z.string().nullish(),
   restaurant_website: z.string().nullish(),
   restaurant_google_maps_url: z.string().nullish(),
+  // New restaurant fields
+  restaurant_instagram: z.string().nullish(),
+  restaurant_phone: z.string().nullish(),
+  restaurant_price_level: z.number().int().min(0).max(4).nullish(),
+  restaurant_opening_hours: z.object({
+    open_now: z.boolean().nullish(),
+    weekday_text: z.array(z.string()).optional(),
+    periods: z.array(z.any()).optional(),
+  }).nullish(),
 
   // Review fields — 1-5 star scale
   rating_overall: z.number().int().min(1).max(5),

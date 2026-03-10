@@ -134,6 +134,11 @@ export default function ReviewForm({ restaurant, onBack }: ReviewFormProps) {
       restaurant_cuisine_type: restaurant.cuisine_type,
       restaurant_website: restaurant.website,
       restaurant_google_maps_url: restaurant.google_maps_url,
+      // New fields
+      restaurant_instagram: restaurant.instagram,
+      restaurant_phone: restaurant.phone,
+      restaurant_price_level: restaurant.price_level,
+      restaurant_opening_hours: restaurant.opening_hours,
       rating_overall: ratings.overall,
       rating_food: ratings.food,
       rating_service: ratings.service,

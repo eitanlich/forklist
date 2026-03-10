@@ -156,37 +156,42 @@ export function FeedContent() {
                 </div>
 
                 {/* Restaurant Info */}
-                <Link href={`/review/${review.id}`} className="block">
-                  <div className="flex gap-4 p-5">
+                <div className="flex gap-4 p-5">
+                  <Link href={`/review/${review.id}`}>
                     {review.restaurant.photo_reference ? (
                       <img
                         src={`/api/places/photo?ref=${encodeURIComponent(review.restaurant.photo_reference)}`}
                         alt={review.restaurant.name}
-                        className="h-20 w-20 shrink-0 rounded-xl object-cover"
+                        className="h-20 w-20 shrink-0 rounded-xl object-cover transition-opacity hover:opacity-80"
                       />
                     ) : (
                       <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-xl bg-secondary">
                         <MapPin className="h-6 w-6 text-muted-foreground" />
                       </div>
                     )}
+                  </Link>
 
-                    <div className="min-w-0 flex-1">
-                      <h3 className="font-serif text-lg font-semibold text-foreground">
-                        {review.restaurant.name}
-                      </h3>
-                      {review.restaurant.city && (
-                        <p className="mt-1 text-sm text-muted-foreground">
-                          {review.restaurant.city}
-                        </p>
-                      )}
+                  <div className="min-w-0 flex-1">
+                    <Link
+                      href={`/restaurant/${review.restaurant.id}`}
+                      className="font-serif text-lg font-semibold text-foreground hover:text-primary transition-colors"
+                    >
+                      {review.restaurant.name}
+                    </Link>
+                    {review.restaurant.city && (
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {review.restaurant.city}
+                      </p>
+                    )}
+                    <Link href={`/review/${review.id}`}>
                       {review.comment && (
-                        <p className="mt-2 text-sm text-muted-foreground line-clamp-2 italic">
+                        <p className="mt-2 text-sm text-muted-foreground line-clamp-2 italic hover:text-foreground transition-colors">
                           &ldquo;{review.comment}&rdquo;
                         </p>
                       )}
-                    </div>
+                    </Link>
                   </div>
-                </Link>
+                </div>
 
                 {/* Actions */}
                 <div className="flex items-center border-t border-border px-5 py-3">

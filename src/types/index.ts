@@ -9,6 +9,12 @@ export interface DbUser {
   created_at: string;
 }
 
+export interface OpeningHours {
+  open_now?: boolean | null;
+  weekday_text?: string[];
+  periods?: any[];
+}
+
 export interface Restaurant {
   id: string;
   google_place_id: string;
@@ -22,6 +28,9 @@ export interface Restaurant {
   website: string | null;
   google_maps_url: string | null;
   instagram: string | null;
+  phone: string | null;
+  price_level: number | null;
+  opening_hours: OpeningHours | null;
   created_at: string;
 }
 
@@ -58,4 +67,9 @@ export interface PlaceSuggestion {
   cuisine_type?: string;
   website?: string;
   google_maps_url?: string;
+  // New fields
+  instagram?: string | null;
+  phone?: string | null;
+  price_level?: number | null;
+  opening_hours?: OpeningHours | null;
 }

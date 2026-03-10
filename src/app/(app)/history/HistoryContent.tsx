@@ -71,7 +71,12 @@ function ReviewCard({ review, onShare }: { review: ReviewWithRestaurant; onShare
 
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
-            <h2 className="font-serif text-lg font-semibold tracking-tight">{restaurant.name}</h2>
+            <Link
+              href={`/restaurant/${restaurant.id}`}
+              className="font-serif text-lg font-semibold tracking-tight hover:text-primary transition-colors"
+            >
+              {restaurant.name}
+            </Link>
             
             <div className="flex items-center gap-1 md:opacity-0 md:transition-opacity md:duration-200 md:group-hover:opacity-100">
               <button
