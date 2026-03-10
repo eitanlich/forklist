@@ -1,6 +1,6 @@
 # ForkList Backlog
 
-> Última actualización: 2026-03-09
+> Última actualización: 2026-03-10
 > Product Owner: Ori 🤖
 
 ## Leyenda
@@ -59,6 +59,32 @@
 - [x] Página /notifications con tabs (Activity / Requests)
 - [x] Badge de notificaciones en tiempo real
 - [x] Auto-aprobar pending requests al cambiar a público
+
+### Fase 5 - Restaurant Pages & Search UX (2026-03-10)
+- [x] **Página de restaurante** (`/restaurant/[placeId]`)
+  - Info de Google Places: nombre, foto, dirección, horarios, teléfono, precio
+  - Extracción automática de Instagram desde website
+  - Botones de acción: Instagram, Maps, Web, Call, Log visit
+  - Horarios expandibles con traducción de días (EN/ES)
+  - Reviews de ForkList agregadas con rating promedio
+  - Funciona con cualquier restaurante del mundo (no requiere estar en DB)
+- [x] **Búsqueda unificada** (`/search`)
+  - Tabs: Restaurants / People
+  - Placeholder y hints dinámicos según tab activo
+  - Filtro de ubicación (nearby, country, global)
+  - Fix: país ahora usa nombre completo ("Israel" no "IL")
+- [x] **Mejoras de navegación**
+  - Click en nombre de restaurante → página del restaurante (Feed, Home, History, Review)
+  - Autocomplete → página del restaurante (no directo a review)
+  - Search results → página del restaurante
+  - Navbar search → /search
+  - "Log a Visit" sigue siendo fast path → /add
+- [x] **Home simplificado**
+  - Removido tab de Stats (se rediseñará el feed)
+  - Solo muestra Feed
+- [x] **UX polish**
+  - Back button en página de restaurante
+  - "You/Yo" en lista de likes cuando el usuario actual dio like
 
 ---
 
@@ -221,22 +247,23 @@
 
 **Próximas 2 semanas:**
 1. ✅ Auto-approve pending requests (DONE)
-2. Onboarding flow
-3. Empty states mejorados
-4. Sugerencias "a quién seguir"
+2. ✅ Restaurant pages + Search UX (DONE)
+3. Onboarding flow
+4. Empty states mejorados
+5. Sugerencias "a quién seguir"
 
 **Siguiente iteración:**
-5. Comentarios en reviews
-6. Filtros en historial
-7. Feed mejorado
+6. Comentarios en reviews
+7. Filtros en historial
+8. Feed mejorado (rediseño)
 
 **Q2 2026:**
-8. Fotos en reviews
-9. Push notifications
-10. Trending/Popular
+9. Fotos en reviews
+10. Push notifications
+11. Trending/Popular
 
 **Q4 2026:**
-11. Year in Review (para diciembre!)
+12. Year in Review (para diciembre!)
 
 ---
 
@@ -266,8 +293,21 @@
 - Privado → público: auto-aprueba todas las pending requests
 - Implementado en `updateProfile()` en `src/lib/actions/profile.ts`
 
-### i18n
-- Archivos en `src/lib/i18n/`
+### Restaurant page (2026-03-10)
+- Ruta: `/restaurant/[placeId]` (Google Place ID, no DB ID)
+- Datos de Google Places: nombre, foto, dirección, horarios, teléfono, precio
+- Instagram: extraído automáticamente del website via scraping
+- Reviews: se buscan en DB por `google_place_id`, no requiere que exista el restaurante
+- Traducción de horarios: días de la semana EN→ES en cliente
+
+### Search unificado (2026-03-10)
+- Ruta: `/search` con tabs Restaurants/People
+- Filtro de ubicación: usa `countryName` (no código) para evitar confusión (Israel vs Illinois)
+- Endpoint `/api/users/search` para buscar usuarios
+
+### i18n - IMPORTANTE
+- **Siempre agregar traducciones** cuando se crean páginas/componentes nuevos
+- Archivos en `src/lib/i18n/translations.ts`
 - `useT()` hook en client components
 
 ### iOS Safari
