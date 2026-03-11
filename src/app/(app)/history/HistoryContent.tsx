@@ -2,7 +2,8 @@
 
 import { useState, useMemo } from "react";
 import type { ReviewWithRestaurant, Occasion, MealType } from "@/types";
-import { BookOpen, MapPin, Calendar, Star, Globe, Pencil, Trash2, Filter, ChevronLeft, ChevronRight, ArrowUpDown, Share2 } from "lucide-react";
+import { BookOpen, MapPin, Calendar, Star, Globe, Pencil, Trash2, Filter, ChevronLeft, ChevronRight, ArrowUpDown, Share2, UtensilsCrossed } from "lucide-react";
+import { EmptyState } from "@/components/ui/EmptyState";
 import Link from "next/link";
 import { useT, useI18n } from "@/lib/i18n";
 import { ShareModal } from "@/components/share";
@@ -585,21 +586,15 @@ export default function HistoryContent({ reviews }: HistoryContentProps) {
 
       {/* Content */}
       {reviews.length === 0 ? (
-        <div className="flex flex-col items-center gap-5 py-24 text-center">
-          <BookOpen className="h-12 w-12 text-muted-foreground/30" strokeWidth={1.5} />
-          <div className="space-y-2">
-            <p className="text-lg font-medium">{t("noReviewsYet")}</p>
-            <p className="text-base text-muted-foreground">
-              {t("startLogging")}
-            </p>
-          </div>
-          <Link
-            href="/add"
-            className="mt-2 rounded-2xl bg-primary px-8 py-4 text-base font-semibold text-primary-foreground transition-all duration-300 hover:opacity-90 hover:scale-[1.02]"
-          >
-            {t("logFirstVisit")}
-          </Link>
-        </div>
+        <EmptyState
+          icon={UtensilsCrossed}
+          title={t("emptyHistoryTitle")}
+          description={t("emptyHistoryDesc")}
+          illustration="food"
+          actions={[
+            { label: t("emptyHistoryCTA"), href: "/add", variant: "primary" },
+          ]}
+        />
       ) : filteredReviews.length === 0 ? (
         <div className="flex flex-col items-center gap-4 py-16 text-center">
           <Filter className="h-10 w-10 text-muted-foreground/30" strokeWidth={1.5} />

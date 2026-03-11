@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import { getFeedReviews, type FeedReview } from "@/lib/actions/follows";
 import { getBatchLikeInfo } from "@/lib/actions/likes";
 import { useT } from "@/lib/i18n";
-import { Loader2, Star, MapPin, Users, Search } from "lucide-react";
+import { Loader2, Star, MapPin, Users, Search, UtensilsCrossed } from "lucide-react";
+import { EmptyState } from "@/components/ui/EmptyState";
 import Link from "next/link";
 import { LikeButton } from "@/components/ui/LikeButton";
 
@@ -104,21 +105,16 @@ export function FeedContent() {
 
       {/* Empty State */}
       {reviews.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-border bg-card/30 p-12 text-center">
-          <Users className="mx-auto h-12 w-12 text-muted-foreground/50" />
-          <h3 className="mt-4 font-serif text-lg font-medium text-foreground">
-            {t("emptyFeed")}
-          </h3>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {t("emptyFeedHint")}
-          </p>
-          <Link
-            href="/explore"
-            className="mt-6 inline-block rounded-xl bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-all hover:opacity-90"
-          >
-            {t("discoverPeople")}
-          </Link>
-        </div>
+        <EmptyState
+          icon={UtensilsCrossed}
+          title={t("emptyFeedTitle")}
+          description={t("emptyFeedDesc")}
+          illustration="food"
+          actions={[
+            { label: t("emptyFeedCTA"), href: "/add", variant: "primary" },
+            { label: t("emptyFeedCTASecondary"), href: "/explore", variant: "secondary" },
+          ]}
+        />
       ) : (
         <>
           {/* Feed Items */}

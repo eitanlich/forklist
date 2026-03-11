@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Search, Star, MapPin, Users, Loader2 } from "lucide-react";
+import { Search, Star, MapPin, Users, Loader2, UtensilsCrossed } from "lucide-react";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { useT } from "@/lib/i18n";
 import { getFeedReviews, type FeedReview } from "@/lib/actions/follows";
 
@@ -84,18 +85,16 @@ export default function HomeContent({ firstName, followingCount }: HomeContentPr
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : feedReviews.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-border bg-card/30 p-8 text-center">
-            <Users className="mx-auto h-10 w-10 text-muted-foreground/50" />
-            <p className="mt-4 text-muted-foreground">{t("emptyFeedHint")}</p>
-            {followingCount === 0 && (
-              <Link
-                href="/search?tab=people"
-                className="mt-4 inline-block rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
-              >
-                {t("discoverPeople")}
-              </Link>
-            )}
-          </div>
+          <EmptyState
+            icon={UtensilsCrossed}
+            title={t("emptyFeedTitle")}
+            description={t("emptyFeedDesc")}
+            illustration="food"
+            actions={[
+              { label: t("emptyFeedCTA"), href: "/add", variant: "primary" },
+              { label: t("emptyFeedCTASecondary"), href: "/search?tab=people", variant: "secondary" },
+            ]}
+          />
         ) : (
           <>
             {feedReviews.map((review) => (

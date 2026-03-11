@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { List, Plus, ChevronRight } from "lucide-react";
+import { List, Plus, ChevronRight, Bookmark } from "lucide-react";
+import { EmptyState } from "@/components/ui/EmptyState";
 import type { ListWithCount } from "@/lib/actions/lists";
 import { useT } from "@/lib/i18n";
 
@@ -30,20 +31,19 @@ export default function ListsContent({ lists }: ListsContentProps) {
 
       {/* Content */}
       {lists.length === 0 ? (
-        <div className="flex flex-col items-center gap-5 py-24 text-center">
-          <List className="h-12 w-12 text-muted-foreground/30" strokeWidth={1.5} />
-          <div className="space-y-2">
-            <p className="text-lg font-medium">{t("noListsYet")}</p>
-            <p className="text-base text-muted-foreground">
-              {t("createFirstList")}
-            </p>
-          </div>
-          <Link
-            href="/lists/new"
-            className="mt-2 rounded-2xl bg-primary px-8 py-4 text-base font-semibold text-primary-foreground transition-all duration-300 hover:opacity-90 hover:scale-[1.02]"
-          >
-            {t("createList")}
-          </Link>
+        <div className="space-y-4">
+          <EmptyState
+            icon={Bookmark}
+            title={t("emptyListsTitle")}
+            description={t("emptyListsDesc")}
+            illustration="list"
+            actions={[
+              { label: t("emptyListsCTA"), href: "/lists/new", variant: "primary" },
+            ]}
+          />
+          <p className="text-center text-sm text-muted-foreground">
+            {t("emptyListsExamples")}
+          </p>
         </div>
       ) : (
         <div className="space-y-3">
