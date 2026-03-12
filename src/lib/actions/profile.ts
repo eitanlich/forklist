@@ -34,6 +34,7 @@ export async function checkUsernameAvailable(
     .maybeSingle();
   
   // If this is the user's current username, it's available
+  console.log("[checkUsername] currentUser:", currentUser?.username, "normalized:", normalized, "match:", currentUser?.username === normalized);
   if (currentUser?.username === normalized) {
     return { available: true };
   }
