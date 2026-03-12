@@ -29,7 +29,15 @@ export async function getCurrentUserId(): Promise<string | null> {
   try {
     const { clerkClient } = await import("@clerk/nextjs/server");
     const client = await clerkClient();
-    const clerkUser = await client.users.getUser(clerkId);
+    let clerkUser;
+    try {
+      clerkUser = await client.users.getUser(clerkId);
+    } catch (clerkErr: unknown) {
+      // User doesn't exist in Clerk either - account was fully deleted
+      // Return null so the app can redirect to sign-out
+      console.log("[getCurrentUserId] User not found in Clerk either, likely deleted account");
+      return null;
+    }
     
     if (clerkUser) {
       const email = clerkUser.emailAddresses[0]?.emailAddress ?? "";
