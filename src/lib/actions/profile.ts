@@ -22,27 +22,39 @@ export async function checkUsernameAvailable(
   }
 
   const { userId: clerkId } = await auth();
+  if (!clerkId) return { available: false, error: "Not authenticated" };
+  
   const supabase = createAdminClient();
   
-  // Check if username exists
-  const { data } = await supabase
+  // First, get the current user's ID
+  const { data: currentUser } = await supabase
     .from("users")
-    .select("id, clerk_id")
-    .eq("username", normalized)
+    .select("id, username")
+    .eq("clerk_id", clerkId)
     .maybeSingle();
-
-  console.log("[checkUsername]", { normalized, clerkId, dataClerkId: data?.clerk_id, match: data?.clerk_id === clerkId });
-
-  // If no one has this username, it's available
-  if (!data) return { available: true };
   
-  // If current user has this username, it's available (they can keep it)
-  if (clerkId && data.clerk_id === clerkId) {
+  // If this is the user's current username, it's available
+  if (currentUser?.username === normalized) {
     return { available: true };
   }
   
-  // Someone else has it
-  return { available: false };
+  // Check if username exists for someone else
+  const { data: existingUser } = await supabase
+    .from("users")
+    .select("id")
+    .eq("username", normalized)
+    .maybeSingle();
+
+  // If no one has this username, it's available
+  if (!existingUser) return { available: true };
+  
+  // If someone else has it, or it exists but isn't ours
+  if (currentUser && existingUser.id !== currentUser.id) {
+    return { available: false };
+  }
+  
+  // Edge case: existingUser.id === currentUser.id means it's ours
+  return { available: true };
 }
 
 export async function claimUsername(
