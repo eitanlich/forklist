@@ -284,6 +284,10 @@ export const translations = {
     checklistList: "Create your first list",
     checklistShare: "Share a review",
     completed: "completed",
+    hideChecklist: "Hide progress?",
+    hideChecklistDesc: "You can always complete these steps later from your profile. Completing them helps you get the most out of ForkList!",
+    hideAnyway: "Hide anyway",
+    keepIt: "Keep it",
     
     // Lists
     myLists: "My Lists",
@@ -617,6 +621,10 @@ export const translations = {
     checklistList: "Crear tu primera lista",
     checklistShare: "Compartir una review",
     completed: "completados",
+    hideChecklist: "¿Ocultar progreso?",
+    hideChecklistDesc: "Siempre podés completar estos pasos desde tu perfil. ¡Completarlos te ayuda a aprovechar ForkList al máximo!",
+    hideAnyway: "Ocultar igual",
+    keepIt: "Mantener",
     
     // Lists
     myLists: "Mis listas",
