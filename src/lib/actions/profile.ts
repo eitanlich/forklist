@@ -417,3 +417,19 @@ export async function completeOnboarding(): Promise<{ error?: string; success?: 
 
   return { success: true };
 }
+
+export async function markFirstShare(): Promise<{ success?: boolean }> {
+  const { userId: clerkId } = await auth();
+  if (!clerkId) return {};
+
+  const supabase = createAdminClient();
+
+  // Only update if first_share_at is null
+  await supabase
+    .from("users")
+    .update({ first_share_at: new Date().toISOString() })
+    .eq("clerk_id", clerkId)
+    .is("first_share_at", null);
+
+  return { success: true };
+}

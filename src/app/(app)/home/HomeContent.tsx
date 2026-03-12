@@ -4,16 +4,28 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Search, Star, MapPin, Users, Loader2, UtensilsCrossed } from "lucide-react";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { OnboardingChecklist } from "@/components/home/OnboardingChecklist";
 import { useT } from "@/lib/i18n";
 import { getFeedReviews, type FeedReview } from "@/lib/actions/follows";
+
+interface ChecklistData {
+  hasReviews: boolean;
+  hasLists: boolean;
+  hasShared: boolean;
+  lastReviewId: string | null;
+  lastRestaurantName: string | null;
+  isNewUser: boolean;
+}
 
 interface HomeContentProps {
   firstName: string;
   followingCount: number;
+  checklistData: ChecklistData;
 }
 
-export default function HomeContent({ firstName, followingCount }: HomeContentProps) {
+export default function HomeContent({ firstName, followingCount, checklistData }: HomeContentProps) {
   const t = useT();
+  const [showChecklist, setShowChecklist] = useState(true);
   const [feedReviews, setFeedReviews] = useState<FeedReview[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(false);
@@ -75,6 +87,18 @@ export default function HomeContent({ firstName, followingCount }: HomeContentPr
           </Link>
         </div>
       </div>
+
+      {/* Onboarding Checklist */}
+      {showChecklist && (
+        <OnboardingChecklist
+          hasReviews={checklistData.hasReviews}
+          hasLists={checklistData.hasLists}
+          hasShared={checklistData.hasShared}
+          lastReviewId={checklistData.lastReviewId}
+          lastRestaurantName={checklistData.lastRestaurantName}
+          onDismiss={() => setShowChecklist(false)}
+        />
+      )}
 
       {/* Feed */}
       <div className="space-y-4">

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { X, Link2, MessageCircle, Share2, Check } from "lucide-react";
 import { useT } from "@/lib/i18n";
+import { markFirstShare } from "@/lib/actions/profile";
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -20,6 +21,13 @@ export function ShareModal({ isOpen, onClose, reviewId, restaurantName }: ShareM
     // Check if Web Share API is available
     setCanShare(typeof navigator !== "undefined" && !!navigator.share);
   }, []);
+
+  // Mark first share when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      markFirstShare();
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     if (copied) {

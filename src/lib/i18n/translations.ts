@@ -274,6 +274,15 @@ export const translations = {
     firstReviewCTA: "Log my last visit",
     firstReviewHint: "It only takes 30 seconds",
     
+    // Checklist
+    checklistTitle: "Get started with ForkList",
+    checklistAccount: "Create account",
+    checklistUsername: "Choose username",
+    checklistReview: "Log your first review",
+    checklistList: "Create your first list",
+    checklistShare: "Share a review",
+    completed: "completed",
+    
     // Lists
     myLists: "My Lists",
     lists: "Lists",
@@ -595,6 +604,15 @@ export const translations = {
     firstReviewDesc: "Ese sushi increíble, la pizza del viernes, el café de la esquina... Guardalo antes de que se te olvide.",
     firstReviewCTA: "Cargar mi última visita",
     firstReviewHint: "Solo toma 30 segundos",
+    
+    // Checklist
+    checklistTitle: "Empezá con ForkList",
+    checklistAccount: "Crear cuenta",
+    checklistUsername: "Elegir username",
+    checklistReview: "Cargar tu primera review",
+    checklistList: "Crear tu primera lista",
+    checklistShare: "Compartir una review",
+    completed: "completados",
     
     // Lists
     myLists: "Mis listas",
