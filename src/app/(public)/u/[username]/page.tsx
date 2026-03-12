@@ -128,6 +128,27 @@ export default async function PublicProfilePage({ params }: Props) {
   const listsResult = await getPublicListsForUser(profile.id, isOwnProfile);
   const lists = "success" in listsResult ? listsResult.lists : [];
 
+  // Get checklist data if own profile
+  let checklistData = null;
+  if (isOwnProfile) {
+    const supabase = createAdminClient();
+    const [reviewsResult, lastReviewResult] = await Promise.all([
+      supabase.from("reviews").select("*", { count: "exact", head: true }).eq("user_id", profile.id),
+      supabase.from("reviews").select("id, restaurant:restaurants!reviews_restaurant_id_fkey(name)").eq("user_id", profile.id).order("created_at", { ascending: false }).limit(1).maybeSingle(),
+    ]);
+    
+    // Get first_share_at from user
+    const { data: userData } = await supabase.from("users").select("first_share_at").eq("id", profile.id).single();
+    const lastReview = lastReviewResult.data as { id: string; restaurant: { name: string } | null } | null;
+    
+    checklistData = {
+      hasReviews: (reviewsResult.count ?? 0) > 0,
+      hasShared: !!userData?.first_share_at,
+      lastReviewId: lastReview?.id ?? null,
+      lastRestaurantName: lastReview?.restaurant?.name ?? null,
+    };
+  }
+
   // DON'T pre-fetch likes - let client load them fresh every time
   return (
     <PublicProfileContent
@@ -136,6 +157,7 @@ export default async function PublicProfilePage({ params }: Props) {
       isFollowing={followStatus.isFollowing}
       isPending={followStatus.isPending}
       lists={lists}
+      checklistData={checklistData}
     />
   );
 }

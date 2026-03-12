@@ -4,9 +4,17 @@ import { useState, useEffect } from "react";
 import { Grid3X3, List, Settings, Lock, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { ProfileHeader, PublicReviewCard, ProfileStats } from "@/components/profile";
+import { OnboardingChecklist } from "@/components/home/OnboardingChecklist";
 import { useT, useI18n } from "@/lib/i18n";
 import { getBatchLikeInfo } from "@/lib/actions/likes";
 import type { ListWithCount } from "@/lib/actions/lists";
+
+interface ChecklistData {
+  hasReviews: boolean;
+  hasShared: boolean;
+  lastReviewId: string | null;
+  lastRestaurantName: string | null;
+}
 
 
 
@@ -27,6 +35,7 @@ interface PublicProfileContentProps {
   isFollowing: boolean;
   isPending: boolean;
   lists?: ListWithCount[];
+  checklistData?: ChecklistData | null;
 }
 
 type ViewMode = "list" | "grid";
@@ -37,7 +46,9 @@ function ProfileContent({
   isFollowing,
   isPending,
   lists = [],
+  checklistData,
 }: PublicProfileContentProps) {
+  const [showChecklist, setShowChecklist] = useState(true);
   const t = useT();
   const { locale } = useI18n();
   const [viewMode, setViewMode] = useState<ViewMode>("list");
@@ -70,6 +81,19 @@ function ProfileContent({
               <Settings size={16} />
               {locale === "es" ? "Configuración" : "Settings"}
             </Link>
+          </div>
+        )}
+
+        {/* Onboarding Checklist for own profile */}
+        {isOwnProfile && checklistData && showChecklist && (
+          <div className="mb-6">
+            <OnboardingChecklist
+              hasReviews={checklistData.hasReviews}
+              hasShared={checklistData.hasShared}
+              lastReviewId={checklistData.lastReviewId}
+              lastRestaurantName={checklistData.lastRestaurantName}
+              onDismiss={() => setShowChecklist(false)}
+            />
           </div>
         )}
 
