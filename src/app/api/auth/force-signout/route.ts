@@ -1,12 +1,10 @@
 import { NextResponse } from "next/server";
 
-export async function GET() {
-  // Redirect to Clerk's sign-out then back to home
-  // This clears the Clerk session cookie
-  const signOutUrl = `/sign-in?redirect_url=${encodeURIComponent("/")}`;
+export async function GET(request: Request) {
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || new URL(request.url).origin;
   
-  // Create response that clears any session cookies and redirects
-  const response = NextResponse.redirect(new URL(signOutUrl, process.env.NEXT_PUBLIC_APP_URL || "https://forklist.app"));
+  // Clear Clerk session cookies and redirect to home
+  const response = NextResponse.redirect(new URL("/", baseUrl));
   
   // Clear Clerk session cookies
   response.cookies.delete("__session");
