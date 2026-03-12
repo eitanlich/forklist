@@ -31,6 +31,8 @@ export async function checkUsernameAvailable(
     .eq("username", normalized)
     .maybeSingle();
 
+  console.log("[checkUsername]", { normalized, clerkId, dataClerkId: data?.clerk_id, match: data?.clerk_id === clerkId });
+
   // If no one has this username, it's available
   if (!data) return { available: true };
   

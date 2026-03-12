@@ -42,18 +42,21 @@ export function UsernameStep({ onComplete, initialUsername }: UsernameStepProps)
   const handleUsernameChange = async (value: string) => {
     const normalized = value.toLowerCase().replace(/[^a-z0-9._]/g, "");
     setUsername(normalized);
+    // Reset both states
     setError(null);
     setIsAvailable(null);
 
     if (normalized.length < 3) {
       if (normalized.length > 0) {
         setError(t("usernameTooShort"));
+        setIsAvailable(false);
       }
       return;
     }
 
     if (normalized.length > 20) {
       setError(t("usernameTooLong"));
+      setIsAvailable(false);
       return;
     }
 
@@ -61,14 +64,16 @@ export function UsernameStep({ onComplete, initialUsername }: UsernameStepProps)
     const result = await checkUsernameAvailable(normalized);
     setIsChecking(false);
 
+    // Always set both states together to avoid inconsistency
     if (result.error) {
       setError(result.error);
       setIsAvailable(false);
+    } else if (result.available) {
+      setError(null);
+      setIsAvailable(true);
     } else {
-      setIsAvailable(result.available);
-      if (!result.available) {
-        setError(t("usernameTaken"));
-      }
+      setError(t("usernameTaken"));
+      setIsAvailable(false);
     }
   };
 
