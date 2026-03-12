@@ -36,7 +36,15 @@ export function UsernameStep({ onComplete, initialUsername }: UsernameStepProps)
   const handleUsernameChange = async (value: string) => {
     const normalized = value.toLowerCase().replace(/[^a-z0-9._]/g, "");
     setUsername(normalized);
-    // Reset both states
+    
+    // If this is the user's initial username from server, it's already theirs - skip check
+    if (initialUsername && normalized === initialUsername.toLowerCase()) {
+      setError(null);
+      setIsAvailable(true);
+      return;
+    }
+    
+    // Reset states for new input
     setError(null);
     setIsAvailable(null);
 
@@ -58,7 +66,6 @@ export function UsernameStep({ onComplete, initialUsername }: UsernameStepProps)
     const result = await checkUsernameAvailable(normalized);
     setIsChecking(false);
 
-    // Always set both states together to avoid inconsistency
     if (result.error) {
       setError(result.error);
       setIsAvailable(false);
