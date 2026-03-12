@@ -40,6 +40,8 @@ interface PublicProfileContentProps {
 
 type ViewMode = "list" | "grid";
 
+const CHECKLIST_DISMISSED_KEY = "forklist_checklist_dismissed";
+
 function ProfileContent({
   profile,
   isOwnProfile,
@@ -48,7 +50,15 @@ function ProfileContent({
   lists = [],
   checklistData,
 }: PublicProfileContentProps) {
-  const [showChecklist, setShowChecklist] = useState(true);
+  const [showChecklistInProfile, setShowChecklistInProfile] = useState(false);
+
+  useEffect(() => {
+    // Only show in profile if it was dismissed from home
+    const dismissed = localStorage.getItem(CHECKLIST_DISMISSED_KEY);
+    if (dismissed === "true") {
+      setShowChecklistInProfile(true);
+    }
+  }, []);
   const t = useT();
   const { locale } = useI18n();
   const [viewMode, setViewMode] = useState<ViewMode>("list");
@@ -84,15 +94,15 @@ function ProfileContent({
           </div>
         )}
 
-        {/* Onboarding Checklist for own profile */}
-        {isOwnProfile && checklistData && showChecklist && (
+        {/* Onboarding Checklist - only shows here after dismissed from home */}
+        {isOwnProfile && checklistData && showChecklistInProfile && (
           <div className="mb-6">
             <OnboardingChecklist
               hasReviews={checklistData.hasReviews}
               hasShared={checklistData.hasShared}
               lastReviewId={checklistData.lastReviewId}
               lastRestaurantName={checklistData.lastRestaurantName}
-              onDismiss={() => setShowChecklist(false)}
+              onDismiss={() => setShowChecklistInProfile(false)}
             />
           </div>
         )}

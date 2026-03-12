@@ -4,16 +4,41 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Search, Star, MapPin, Users, Loader2, UtensilsCrossed } from "lucide-react";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { OnboardingChecklist } from "@/components/home/OnboardingChecklist";
 import { useT } from "@/lib/i18n";
+
+const CHECKLIST_DISMISSED_KEY = "forklist_checklist_dismissed";
 import { getFeedReviews, type FeedReview } from "@/lib/actions/follows";
+
+interface ChecklistData {
+  hasReviews: boolean;
+  hasShared: boolean;
+  lastReviewId: string | null;
+  lastRestaurantName: string | null;
+}
 
 interface HomeContentProps {
   firstName: string;
   followingCount: number;
+  checklistData: ChecklistData;
 }
 
-export default function HomeContent({ firstName, followingCount }: HomeContentProps) {
+export default function HomeContent({ firstName, followingCount, checklistData }: HomeContentProps) {
   const t = useT();
+  const [showChecklistInHome, setShowChecklistInHome] = useState(true);
+  
+  useEffect(() => {
+    // If checklist was dismissed, don't show in home
+    const dismissed = localStorage.getItem(CHECKLIST_DISMISSED_KEY);
+    if (dismissed === "true") {
+      setShowChecklistInHome(false);
+    }
+  }, []);
+
+  const handleDismissChecklist = () => {
+    localStorage.setItem(CHECKLIST_DISMISSED_KEY, "true");
+    setShowChecklistInHome(false);
+  };
   const [feedReviews, setFeedReviews] = useState<FeedReview[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(false);
@@ -76,7 +101,18 @@ export default function HomeContent({ firstName, followingCount }: HomeContentPr
         </div>
       </div>
 
-{/* Feed */}
+{/* Onboarding Checklist - shows until dismissed */}
+      {showChecklistInHome && (
+        <OnboardingChecklist
+          hasReviews={checklistData.hasReviews}
+          hasShared={checklistData.hasShared}
+          lastReviewId={checklistData.lastReviewId}
+          lastRestaurantName={checklistData.lastRestaurantName}
+          onDismiss={handleDismissChecklist}
+        />
+      )}
+
+      {/* Feed */}
       <div className="space-y-4">
         <h2 className="font-serif text-lg font-semibold">{t("feed")}</h2>
         

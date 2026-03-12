@@ -22,6 +22,7 @@ interface ChecklistItem {
   href?: string;
   action?: "share";
   emoji: string;
+  disabled?: boolean;
 }
 
 interface OnboardingChecklistProps {
@@ -67,32 +68,18 @@ export function OnboardingChecklist({
       labelKey: "checklistShare",
       completed: hasShared,
       action: hasReviews ? "share" : undefined,
-      href: hasReviews ? undefined : "/add",
-      emoji: "📤",
+      disabled: !hasReviews,
+      emoji: "🔗",
     },
   ];
 
   const [showDismissConfirm, setShowDismissConfirm] = useState(false);
-  const [isDismissed, setIsDismissed] = useState(false);
-
-  useEffect(() => {
-    const dismissed = localStorage.getItem(CHECKLIST_DISMISSED_KEY);
-    if (dismissed === "true") {
-      setIsDismissed(true);
-    }
-  }, []);
-
-  const handleDismiss = () => {
-    localStorage.setItem(CHECKLIST_DISMISSED_KEY, "true");
-    setIsDismissed(true);
-    onDismiss();
-  };
   
   const completedCount = items.filter((i) => i.completed).length;
   const allCompleted = completedCount === items.length;
   const progress = (completedCount / items.length) * 100;
 
-  if (allCompleted || isDismissed) {
+  if (allCompleted) {
     return null;
   }
 
@@ -138,6 +125,13 @@ export function OnboardingChecklist({
                     </div>
                     <span className="text-sm line-through">{t(item.labelKey)}</span>
                     <Check size={14} className="text-primary ml-auto" />
+                  </div>
+                ) : item.disabled ? (
+                  <div className="flex items-center gap-3 py-2 text-muted-foreground/50 cursor-not-allowed">
+                    <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-dashed border-muted-foreground/20">
+                      <span className="text-xs opacity-50">{item.emoji}</span>
+                    </div>
+                    <span className="text-sm">{t(item.labelKey)}</span>
                   </div>
                 ) : item.action === "share" ? (
                   <button
@@ -222,7 +216,7 @@ export function OnboardingChecklist({
                 <button
                   onClick={() => {
                     setShowDismissConfirm(false);
-                    handleDismiss();
+                    onDismiss();
                   }}
                   className="flex-1 rounded-xl bg-primary px-4 py-3 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90"
                 >

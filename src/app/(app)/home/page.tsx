@@ -5,24 +5,61 @@ import HomeContent from "./HomeContent";
 
 export const dynamic = "force-dynamic";
 
-async function getFollowingCount(clerkId: string): Promise<number> {
+interface HomeData {
+  followingCount: number;
+  hasReviews: boolean;
+  hasShared: boolean;
+  lastReviewId: string | null;
+  lastRestaurantName: string | null;
+}
+
+async function getHomeData(clerkId: string): Promise<HomeData> {
   const supabase = createAdminClient();
   
   const { data: dbUser } = await supabase
     .from("users")
-    .select("id")
+    .select("id, first_share_at")
     .eq("clerk_id", clerkId)
     .single();
 
-  if (!dbUser) return 0;
+  if (!dbUser) {
+    return {
+      followingCount: 0,
+      hasReviews: false,
+      hasShared: false,
+      lastReviewId: null,
+      lastRestaurantName: null,
+    };
+  }
 
-  const { count } = await supabase
-    .from("follows")
-    .select("*", { count: "exact", head: true })
-    .eq("follower_id", dbUser.id)
-    .eq("status", "active");
+  const [followsResult, reviewsResult, lastReviewResult] = await Promise.all([
+    supabase
+      .from("follows")
+      .select("*", { count: "exact", head: true })
+      .eq("follower_id", dbUser.id)
+      .eq("status", "active"),
+    supabase
+      .from("reviews")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", dbUser.id),
+    supabase
+      .from("reviews")
+      .select("id, restaurant:restaurants!reviews_restaurant_id_fkey(name)")
+      .eq("user_id", dbUser.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+  ]);
 
-  return count ?? 0;
+  const lastReview = lastReviewResult.data as { id: string; restaurant: { name: string } | null } | null;
+
+  return {
+    followingCount: followsResult.count ?? 0,
+    hasReviews: (reviewsResult.count ?? 0) > 0,
+    hasShared: !!dbUser.first_share_at,
+    lastReviewId: lastReview?.id ?? null,
+    lastRestaurantName: lastReview?.restaurant?.name ?? null,
+  };
 }
 
 export default async function HomePage() {
@@ -30,12 +67,19 @@ export default async function HomePage() {
   const user = await currentUser();
   const firstName = user?.firstName ?? "there";
 
-  const followingCount = clerkId ? await getFollowingCount(clerkId) : 0;
+  const homeData = clerkId ? await getHomeData(clerkId) : {
+    followingCount: 0,
+    hasReviews: false,
+    hasShared: false,
+    lastReviewId: null,
+    lastRestaurantName: null,
+  };
 
   return (
     <HomeContent 
       firstName={firstName} 
-      followingCount={followingCount}
+      followingCount={homeData.followingCount}
+      checklistData={homeData}
     />
   );
 }
