@@ -272,60 +272,39 @@ export async function deleteAccount(): Promise<{ error?: string; success?: boole
   const { userId: clerkId } = await auth();
   if (!clerkId) return { error: "Not authenticated" };
 
-  const supabase = createAdminClient();
-
-  // Get user
-  const { data: user } = await supabase
-    .from("users")
-    .select("id")
-    .eq("clerk_id", clerkId)
-    .single();
-
-  if (!user) return { error: "User not found" };
-
-  // Delete all user data (cascades will handle related tables)
-  // Order matters: delete from tables that reference users first
-  
-  // Delete reviews
-  await supabase.from("reviews").delete().eq("user_id", user.id);
-  
-  // Delete list items (via list cascade)
-  await supabase.from("lists").delete().eq("user_id", user.id);
-  
-  // Delete follows
-  await supabase.from("follows").delete().eq("follower_id", user.id);
-  await supabase.from("follows").delete().eq("following_id", user.id);
-  
-  // Delete review likes
-  await supabase.from("likes").delete().eq("user_id", user.id);
-  
-  // Delete notifications
-  await supabase.from("notifications").delete().eq("user_id", user.id);
-  await supabase.from("notifications").delete().eq("actor_id", user.id);
-  
-  // Delete comments
-  await supabase.from("review_comments").delete().eq("user_id", user.id);
-  
-  // Finally delete the user from Supabase
-  const { error: deleteError } = await supabase
-    .from("users")
-    .delete()
-    .eq("id", user.id);
-
-  if (deleteError) {
-    console.error("Delete error:", deleteError);
-    return { error: "Failed to delete account" };
-  }
-
-  // Delete user from Clerk
+  // Best practice: Delete from Clerk FIRST
+  // The user.deleted webhook will handle Supabase cleanup
+  // This ensures we never have orphaned Clerk sessions
   try {
     const { clerkClient } = await import("@clerk/nextjs/server");
     const client = await clerkClient();
     await client.users.deleteUser(clerkId);
   } catch (err) {
     console.error("Error deleting from Clerk:", err);
-    // Don't fail the whole operation - Supabase data is already deleted
-    // The webhook will clean up if user tries to sign in again
+    return { error: "Failed to delete account" };
+  }
+
+  // Backup: Also delete from Supabase directly in case webhook is slow/fails
+  // This is idempotent - webhook will just find nothing to delete
+  const supabase = createAdminClient();
+  
+  const { data: user } = await supabase
+    .from("users")
+    .select("id")
+    .eq("clerk_id", clerkId)
+    .maybeSingle();
+
+  if (user) {
+    // Delete all user data
+    await supabase.from("reviews").delete().eq("user_id", user.id);
+    await supabase.from("lists").delete().eq("user_id", user.id);
+    await supabase.from("follows").delete().eq("follower_id", user.id);
+    await supabase.from("follows").delete().eq("following_id", user.id);
+    await supabase.from("likes").delete().eq("user_id", user.id);
+    await supabase.from("notifications").delete().eq("user_id", user.id);
+    await supabase.from("notifications").delete().eq("actor_id", user.id);
+    await supabase.from("review_comments").delete().eq("user_id", user.id);
+    await supabase.from("users").delete().eq("id", user.id);
   }
 
   return { success: true };
