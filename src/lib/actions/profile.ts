@@ -27,15 +27,15 @@ export async function checkUsernameAvailable(
   const supabase = createAdminClient();
   
   // First, get the current user's ID
-  const { data: currentUser } = await supabase
+  const { data: dbUser } = await supabase
     .from("users")
     .select("id, username")
     .eq("clerk_id", clerkId)
     .maybeSingle();
   
   // If this is the user's current username, it's available
-  console.log("[checkUsername] currentUser:", currentUser?.username, "normalized:", normalized, "match:", currentUser?.username === normalized);
-  if (currentUser?.username === normalized) {
+  console.log("[checkUsername] currentUser:", dbUser?.username, "normalized:", normalized, "match:", dbUser?.username === normalized);
+  if (dbUser?.username === normalized) {
     console.log("[checkUsername] RETURNING AVAILABLE TRUE");
     return { available: true };
   }
@@ -51,11 +51,11 @@ export async function checkUsernameAvailable(
   if (!existingUser) return { available: true };
   
   // If someone else has it, or it exists but isn't ours
-  if (currentUser && existingUser.id !== currentUser.id) {
+  if (dbUser && existingUser.id !== dbUser.id) {
     return { available: false };
   }
   
-  // Edge case: existingUser.id === currentUser.id means it's ours
+  // Edge case: existingUser.id === dbUser.id means it's ours
   return { available: true };
 }
 
@@ -75,27 +75,34 @@ export async function claimUsername(
 
   const supabase = createAdminClient();
 
-  // Check if username is taken
+  // Get current user first
+  const { data: dbUser } = await supabase
+    .from("users")
+    .select("id, username")
+    .eq("clerk_id", clerkId)
+    .maybeSingle();
+
+  // If user already has this username, just return success
+  if (dbUser?.username === normalized) {
+    return { success: true };
+  }
+
+  // Check if username is taken by someone else
   const { data: existing } = await supabase
     .from("users")
     .select("id")
     .eq("username", normalized)
-    .single();
+    .maybeSingle();
 
-  if (existing) return { error: "Username is already taken" };
+  if (existing && existing.id !== dbUser?.id) {
+    return { error: "Username is already taken" };
+  }
 
-  // Find or create user
-  let { data: user } = await supabase
-    .from("users")
-    .select("id")
-    .eq("clerk_id", clerkId)
-    .single();
+  if (!dbUser) {
+    const clerkUserData = await currentUser();
+    if (!clerkUserData) return { error: "Not authenticated" };
 
-  if (!user) {
-    const clerkUser = await currentUser();
-    if (!clerkUser) return { error: "Not authenticated" };
-
-    const email = clerkUser.emailAddresses[0]?.emailAddress ?? "";
+    const email = clerkUserData.emailAddresses[0]?.emailAddress ?? "";
     const { data: newUser, error: createError } = await supabase
       .from("users")
       .insert({ clerk_id: clerkId, email, username: normalized })
@@ -103,7 +110,7 @@ export async function claimUsername(
       .single();
 
     if (createError) return { error: "Failed to create profile" };
-    user = newUser;
+    
   } else {
     // Update existing user
     const { error: updateError } = await supabase
@@ -133,13 +140,13 @@ export async function updateProfile(data: {
   }
 
   // Get current user to check if switching from private to public
-  const { data: currentUser } = await supabase
+  const { data: dbUser } = await supabase
     .from("users")
     .select("id, is_private")
     .eq("clerk_id", clerkId)
     .single();
 
-  if (!currentUser) return { error: "User not found" };
+  if (!dbUser) return { error: "User not found" };
 
   const { error } = await supabase
     .from("users")
@@ -153,11 +160,11 @@ export async function updateProfile(data: {
 
   // Auto-approve pending follow requests when switching from private to public
   let approvedCount = 0;
-  if (currentUser.is_private && data.is_private === false) {
+  if (dbUser.is_private && data.is_private === false) {
     const { data: approved, error: approveError } = await supabase
       .from("follows")
       .update({ status: "active" })
-      .eq("following_id", currentUser.id)
+      .eq("following_id", dbUser.id)
       .eq("status", "pending")
       .select("id");
 
