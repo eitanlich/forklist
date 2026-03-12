@@ -117,7 +117,7 @@ export function TourSlides({ onComplete }: TourSlidesProps) {
       <motion.div 
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="absolute top-6 left-6 z-10"
+        className="absolute top-6 left-6 z-50"
       >
         <span className="font-serif text-xl font-medium text-foreground">ForkList</span>
       </motion.div>
@@ -127,7 +127,7 @@ export function TourSlides({ onComplete }: TourSlidesProps) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         onClick={onComplete}
-        className="absolute top-6 right-6 z-10 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        className="absolute top-6 right-6 z-50 text-sm text-muted-foreground hover:text-foreground transition-colors"
       >
         {t("skip")}
       </motion.button>

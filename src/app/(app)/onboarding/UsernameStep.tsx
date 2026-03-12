@@ -110,7 +110,7 @@ export function UsernameStep({ onComplete, initialUsername }: UsernameStepProps)
       <motion.div 
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="absolute top-6 left-6 z-10"
+        className="absolute top-6 left-6 z-50"
       >
         <span className="font-serif text-xl font-medium text-foreground">ForkList</span>
       </motion.div>

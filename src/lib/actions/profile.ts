@@ -24,19 +24,20 @@ export async function checkUsernameAvailable(
   const { userId: clerkId } = await auth();
   const supabase = createAdminClient();
   
-  // Check if username is taken by someone else (not current user)
-  let query = supabase
+  // Check if username exists
+  const { data } = await supabase
     .from("users")
     .select("id, clerk_id")
-    .eq("username", normalized);
-  
-  const { data } = await query.maybeSingle();
+    .eq("username", normalized)
+    .maybeSingle();
 
   // If no one has this username, it's available
   if (!data) return { available: true };
   
   // If current user has this username, it's available (they can keep it)
-  if (clerkId && data.clerk_id === clerkId) return { available: true };
+  if (clerkId && data.clerk_id === clerkId) {
+    return { available: true };
+  }
   
   // Someone else has it
   return { available: false };
