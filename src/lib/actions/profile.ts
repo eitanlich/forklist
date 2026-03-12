@@ -21,14 +21,25 @@ export async function checkUsernameAvailable(
     };
   }
 
+  const { userId: clerkId } = await auth();
   const supabase = createAdminClient();
-  const { data } = await supabase
+  
+  // Check if username is taken by someone else (not current user)
+  let query = supabase
     .from("users")
-    .select("id")
-    .eq("username", normalized)
-    .single();
+    .select("id, clerk_id")
+    .eq("username", normalized);
+  
+  const { data } = await query.maybeSingle();
 
-  return { available: !data };
+  // If no one has this username, it's available
+  if (!data) return { available: true };
+  
+  // If current user has this username, it's available (they can keep it)
+  if (clerkId && data.clerk_id === clerkId) return { available: true };
+  
+  // Someone else has it
+  return { available: false };
 }
 
 export async function claimUsername(
