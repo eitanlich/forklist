@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { UtensilsCrossed, Sparkles } from "lucide-react";
 import Link from "next/link";
@@ -30,10 +31,18 @@ const itemVariants = {
 
 export function FirstReviewStep({ onSkip }: FirstReviewStepProps) {
   const t = useT();
+  const [isSkipping, setIsSkipping] = useState(false);
 
   const handleSkip = async () => {
-    await completeOnboarding();
-    onSkip();
+    if (isSkipping) return;
+    setIsSkipping(true);
+    try {
+      await completeOnboarding();
+      onSkip();
+    } catch (err) {
+      console.error("Error skipping:", err);
+      setIsSkipping(false);
+    }
   };
 
   const handleAddReview = async () => {
@@ -104,9 +113,10 @@ export function FirstReviewStep({ onSkip }: FirstReviewStepProps) {
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5 }}
         onClick={handleSkip}
-        className="absolute top-6 right-6 z-10 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        disabled={isSkipping}
+        className="absolute top-6 right-6 z-10 text-sm text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
       >
-        {t("skipForNow")}
+        {isSkipping ? "..." : t("skipForNow")}
       </motion.button>
 
       {/* Content */}
