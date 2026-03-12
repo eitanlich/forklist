@@ -1,19 +1,24 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
-// Public routes that don't require authentication
-const isPublicRoute = createRouteMatcher([
-  "/",
-  "/sign-in(.*)",
-  "/sign-up(.*)",
-  "/api/webhooks(.*)",
-  "/api/user/(.*)/stats",
-  "/api/places/photo(.*)",
-  "/u/(.*)",
-  "/review/(.*)/public",
+// Routes that require authentication (app routes)
+const isProtectedRoute = createRouteMatcher([
+  "/home(.*)",
+  "/history(.*)",
+  "/add(.*)",
+  "/lists(.*)",
+  "/search(.*)",
+  "/explore(.*)",
+  "/notifications(.*)",
+  "/requests(.*)",
+  "/settings(.*)",
+  "/edit-review(.*)",
+  "/delete-review(.*)",
+  "/restaurant(.*)",
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
-  if (!isPublicRoute(req)) {
+  // Only protect specific app routes - everything else is public (including 404)
+  if (isProtectedRoute(req)) {
     await auth.protect();
   }
 });
