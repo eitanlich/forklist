@@ -28,9 +28,8 @@ export default function DeleteReviewForm({ review }: { review: ReviewWithRestaur
         return;
       }
       
-      // Success - navigate
-      router.push("/history");
-      router.refresh();
+      // Success - force full navigation
+      window.location.href = "/history";
     } catch {
       setError("Failed to delete review");
       setIsDeleting(false);
