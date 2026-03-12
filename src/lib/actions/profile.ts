@@ -36,6 +36,7 @@ export async function checkUsernameAvailable(
   // If this is the user's current username, it's available
   console.log("[checkUsername] currentUser:", currentUser?.username, "normalized:", normalized, "match:", currentUser?.username === normalized);
   if (currentUser?.username === normalized) {
+    console.log("[checkUsername] RETURNING AVAILABLE TRUE");
     return { available: true };
   }
   
