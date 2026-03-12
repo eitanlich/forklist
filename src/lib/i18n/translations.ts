@@ -7,6 +7,7 @@ export const translations = {
     
     // Home page
     welcomeBack: "Welcome back",
+    welcomeNew: "Welcome",
     searchForRestaurant: "Search for a restaurant",
     places: "Places",
     visits: "visits",
@@ -343,6 +344,7 @@ export const translations = {
     
     // Home page
     welcomeBack: "Hola de nuevo",
+    welcomeNew: "Bienvenido",
     searchForRestaurant: "Buscar un restaurante",
     places: "Lugares",
     visits: "visitas",

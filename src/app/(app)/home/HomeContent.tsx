@@ -21,9 +21,10 @@ interface HomeContentProps {
   firstName: string;
   followingCount: number;
   checklistData: ChecklistData;
+  isNewUser: boolean;
 }
 
-export default function HomeContent({ firstName, followingCount, checklistData }: HomeContentProps) {
+export default function HomeContent({ firstName, followingCount, checklistData, isNewUser }: HomeContentProps) {
   const t = useT();
   const [showChecklistInHome, setShowChecklistInHome] = useState(true);
   
@@ -79,7 +80,9 @@ export default function HomeContent({ firstName, followingCount, checklistData }
       {/* Greeting + Search */}
       <div className="space-y-4">
         <div>
-          <p className="text-sm text-muted-foreground">{t("welcomeBack")},</p>
+          <p className="text-sm text-muted-foreground">
+            {isNewUser ? t("welcomeNew") : t("welcomeBack")},
+          </p>
           <h1 className="font-serif text-3xl font-semibold tracking-tight">{firstName}</h1>
         </div>
 

@@ -11,6 +11,7 @@ interface HomeData {
   hasShared: boolean;
   lastReviewId: string | null;
   lastRestaurantName: string | null;
+  isNewUser: boolean;
 }
 
 async function getHomeData(clerkId: string): Promise<HomeData> {
@@ -18,7 +19,7 @@ async function getHomeData(clerkId: string): Promise<HomeData> {
   
   const { data: dbUser } = await supabase
     .from("users")
-    .select("id, first_share_at")
+    .select("id, first_share_at, onboarding_completed")
     .eq("clerk_id", clerkId)
     .single();
 
@@ -29,6 +30,7 @@ async function getHomeData(clerkId: string): Promise<HomeData> {
       hasShared: false,
       lastReviewId: null,
       lastRestaurantName: null,
+      isNewUser: true,
     };
   }
 
@@ -53,12 +55,15 @@ async function getHomeData(clerkId: string): Promise<HomeData> {
 
   const lastReview = lastReviewResult.data as { id: string; restaurant: { name: string } | null } | null;
 
+  const hasReviews = (reviewsResult.count ?? 0) > 0;
+  
   return {
     followingCount: followsResult.count ?? 0,
-    hasReviews: (reviewsResult.count ?? 0) > 0,
+    hasReviews,
     hasShared: !!dbUser.first_share_at,
     lastReviewId: lastReview?.id ?? null,
     lastRestaurantName: lastReview?.restaurant?.name ?? null,
+    isNewUser: !dbUser.onboarding_completed || !hasReviews,
   };
 }
 
@@ -73,6 +78,7 @@ export default async function HomePage() {
     hasShared: false,
     lastReviewId: null,
     lastRestaurantName: null,
+    isNewUser: true,
   };
 
   return (
@@ -80,6 +86,7 @@ export default async function HomePage() {
       firstName={firstName} 
       followingCount={homeData.followingCount}
       checklistData={homeData}
+      isNewUser={homeData.isNewUser}
     />
   );
 }
