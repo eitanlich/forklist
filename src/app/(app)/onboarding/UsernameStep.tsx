@@ -7,11 +7,12 @@ import { checkUsernameAvailable, claimUsername } from "@/lib/actions/profile";
 
 interface UsernameStepProps {
   onComplete: () => void;
+  initialUsername?: string | null;
 }
 
-export function UsernameStep({ onComplete }: UsernameStepProps) {
+export function UsernameStep({ onComplete, initialUsername }: UsernameStepProps) {
   const t = useT();
-  const [username, setUsername] = useState("");
+  const [username, setUsername] = useState(initialUsername || "");
   const [isChecking, setIsChecking] = useState(false);
   const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);

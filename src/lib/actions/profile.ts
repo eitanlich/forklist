@@ -398,3 +398,22 @@ export async function getPublicProfile(
     },
   };
 }
+
+export async function completeOnboarding(): Promise<{ error?: string; success?: boolean }> {
+  const { userId: clerkId } = await auth();
+  if (!clerkId) return { error: "Not authenticated" };
+
+  const supabase = createAdminClient();
+
+  const { error } = await supabase
+    .from("users")
+    .update({ onboarding_completed: true })
+    .eq("clerk_id", clerkId);
+
+  if (error) {
+    console.error("Error completing onboarding:", error);
+    return { error: "Failed to complete onboarding" };
+  }
+
+  return { success: true };
+}

@@ -8,7 +8,11 @@ import { FirstReviewStep } from "./FirstReviewStep";
 
 type Step = "tour" | "username" | "first-review";
 
-export function OnboardingFlow() {
+interface OnboardingFlowProps {
+  initialUsername?: string | null;
+}
+
+export function OnboardingFlow({ initialUsername }: OnboardingFlowProps) {
   const router = useRouter();
   const [step, setStep] = useState<Step>("tour");
 
@@ -34,7 +38,10 @@ export function OnboardingFlow() {
         <TourSlides onComplete={handleTourComplete} />
       )}
       {step === "username" && (
-        <UsernameStep onComplete={handleUsernameComplete} />
+        <UsernameStep 
+          onComplete={handleUsernameComplete} 
+          initialUsername={initialUsername}
+        />
       )}
       {step === "first-review" && (
         <FirstReviewStep 

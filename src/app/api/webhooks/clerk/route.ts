@@ -42,11 +42,17 @@ export async function POST(req: Request) {
     const { id, email_addresses, username } = evt.data;
     const email = email_addresses[0]?.email_address ?? "";
     
-    // Only use username if explicitly set in Clerk, otherwise leave null for onboarding
+    // Generate username from Clerk or email prefix
+    let finalUsername = username;
+    if (!finalUsername && email) {
+      finalUsername = email.split("@")[0].toLowerCase().replace(/[^a-z0-9._-]/g, "");
+    }
+
     const { error } = await supabase.from("users").insert({
       clerk_id: id,
       email,
-      username: username || null,
+      username: finalUsername || `user_${Date.now()}`,
+      onboarding_completed: false,
     });
 
     if (error) {

@@ -3,6 +3,7 @@
 import { useT } from "@/lib/i18n";
 import { UtensilsCrossed } from "lucide-react";
 import Link from "next/link";
+import { completeOnboarding } from "@/lib/actions/profile";
 
 interface FirstReviewStepProps {
   onComplete: () => void;
@@ -11,6 +12,15 @@ interface FirstReviewStepProps {
 
 export function FirstReviewStep({ onSkip }: FirstReviewStepProps) {
   const t = useT();
+
+  const handleSkip = async () => {
+    await completeOnboarding();
+    onSkip();
+  };
+
+  const handleAddReview = async () => {
+    await completeOnboarding();
+  };
 
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center px-6">
@@ -21,7 +31,7 @@ export function FirstReviewStep({ onSkip }: FirstReviewStepProps) {
 
       {/* Skip button */}
       <button
-        onClick={onSkip}
+        onClick={handleSkip}
         className="absolute top-6 right-6 text-sm text-muted-foreground hover:text-foreground transition-colors"
       >
         {t("skipForNow")}
@@ -50,6 +60,7 @@ export function FirstReviewStep({ onSkip }: FirstReviewStepProps) {
         {/* CTA */}
         <Link
           href="/add?onboarding=true"
+          onClick={handleAddReview}
           className="w-full rounded-2xl bg-primary px-8 py-4 text-base font-semibold text-primary-foreground transition-all hover:opacity-90 active:scale-95 text-center"
         >
           {t("firstReviewCTA")}

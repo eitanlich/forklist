@@ -9,17 +9,17 @@ export default async function OnboardingPage() {
 
   const supabase = createAdminClient();
   
-  // Check if user already has username (completed onboarding)
+  // Check if user already completed onboarding
   const { data: user } = await supabase
     .from("users")
-    .select("username")
+    .select("onboarding_completed, username")
     .eq("clerk_id", clerkId)
     .maybeSingle();
 
-  // If user has username, they've completed onboarding
-  if (user?.username) {
+  // If user completed onboarding, go to home
+  if (user?.onboarding_completed) {
     redirect("/home");
   }
 
-  return <OnboardingFlow />;
+  return <OnboardingFlow initialUsername={user?.username} />;
 }
