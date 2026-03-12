@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Loader2, AlertTriangle, MapPin, Star } from "lucide-react";
 import type { ReviewWithRestaurant } from "@/types";
@@ -11,22 +11,30 @@ export default function DeleteReviewForm({ review }: { review: ReviewWithRestaur
   const router = useRouter();
   const t = useT();
   const { locale } = useI18n();
-  const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
-  function handleDelete() {
-    setError(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-    startTransition(async () => {
+  async function handleDelete() {
+    setError(null);
+    setIsDeleting(true);
+
+    try {
       const result = await deleteReview(review.id);
 
       if ("error" in result) {
         setError(result.error);
-      } else {
-        router.push("/history");
-        router.refresh();
+        setIsDeleting(false);
+        return;
       }
-    });
+      
+      // Success - navigate
+      router.push("/history");
+      router.refresh();
+    } catch {
+      setError("Failed to delete review");
+      setIsDeleting(false);
+    }
   }
 
   const { restaurant } = review;
@@ -114,10 +122,10 @@ export default function DeleteReviewForm({ review }: { review: ReviewWithRestaur
         <button
           type="button"
           onClick={handleDelete}
-          disabled={isPending}
+          disabled={isDeleting}
           className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-destructive py-4 text-sm font-semibold text-destructive-foreground transition-opacity duration-200 disabled:opacity-40"
         >
-          {isPending ? (
+          {isDeleting ? (
             <>
               <Loader2 size={16} className="animate-spin" />
               {t("deleting")}
