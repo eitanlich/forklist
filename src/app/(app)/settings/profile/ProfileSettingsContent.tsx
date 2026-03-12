@@ -75,8 +75,9 @@ export function ProfileSettingsContent({
     const result = await deleteAccount();
     
     if (result.success) {
-      // Redirect to home, Clerk will handle sign out
-      window.location.href = "/";
+      // Sign out via Clerk (clears session properly)
+      await signOut({ redirectUrl: "/" });
+      return;
     } else {
       setIsDeleting(false);
       setShowDeleteModal(false);
