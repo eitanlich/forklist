@@ -92,7 +92,6 @@ export default function HomeContent({ firstName, followingCount, checklistData }
       {showChecklist && (
         <OnboardingChecklist
           hasReviews={checklistData.hasReviews}
-          hasLists={checklistData.hasLists}
           hasShared={checklistData.hasShared}
           lastReviewId={checklistData.lastReviewId}
           lastRestaurantName={checklistData.lastRestaurantName}

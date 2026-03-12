@@ -192,7 +192,7 @@ export function TourSlides({ onComplete }: TourSlidesProps) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
-        className="relative z-10 pb-12 px-6"
+        className="relative z-10 pb-28 px-6"
       >
         <div className="flex items-center justify-between max-w-md mx-auto">
           {/* Dots */}

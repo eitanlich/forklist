@@ -1,17 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Check, ChevronRight, Share2, X } from "lucide-react";
+import { Check, ChevronRight, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useT } from "@/lib/i18n";
 import { ShareModal } from "@/components/share";
+
+const CHECKLIST_DISMISSED_KEY = "forklist_checklist_dismissed";
 
 type ChecklistLabelKey = 
   | "checklistAccount"
   | "checklistUsername"
   | "checklistReview"
-  | "checklistList"
   | "checklistShare";
 
 interface ChecklistItem {
@@ -20,11 +21,11 @@ interface ChecklistItem {
   completed: boolean;
   href?: string;
   action?: "share";
+  emoji: string;
 }
 
 interface OnboardingChecklistProps {
   hasReviews: boolean;
-  hasLists: boolean;
   hasShared: boolean;
   lastReviewId?: string | null;
   lastRestaurantName?: string | null;
@@ -33,7 +34,6 @@ interface OnboardingChecklistProps {
 
 export function OnboardingChecklist({
   hasReviews,
-  hasLists,
   hasShared,
   lastReviewId,
   lastRestaurantName,
@@ -47,23 +47,20 @@ export function OnboardingChecklist({
       id: "account",
       labelKey: "checklistAccount",
       completed: true,
+      emoji: "✓",
     },
     {
       id: "username",
       labelKey: "checklistUsername",
       completed: true,
+      emoji: "👤",
     },
     {
       id: "review",
       labelKey: "checklistReview",
       completed: hasReviews,
       href: "/add",
-    },
-    {
-      id: "list",
-      labelKey: "checklistList",
-      completed: hasLists,
-      href: "/lists/new",
+      emoji: "📝",
     },
     {
       id: "share",
@@ -71,16 +68,31 @@ export function OnboardingChecklist({
       completed: hasShared,
       action: hasReviews ? "share" : undefined,
       href: hasReviews ? undefined : "/add",
+      emoji: "📤",
     },
   ];
 
   const [showDismissConfirm, setShowDismissConfirm] = useState(false);
+  const [isDismissed, setIsDismissed] = useState(false);
+
+  useEffect(() => {
+    const dismissed = localStorage.getItem(CHECKLIST_DISMISSED_KEY);
+    if (dismissed === "true") {
+      setIsDismissed(true);
+    }
+  }, []);
+
+  const handleDismiss = () => {
+    localStorage.setItem(CHECKLIST_DISMISSED_KEY, "true");
+    setIsDismissed(true);
+    onDismiss();
+  };
   
   const completedCount = items.filter((i) => i.completed).length;
   const allCompleted = completedCount === items.length;
   const progress = (completedCount / items.length) * 100;
 
-  if (allCompleted) {
+  if (allCompleted || isDismissed) {
     return null;
   }
 
@@ -122,9 +134,10 @@ export function OnboardingChecklist({
                 {item.completed ? (
                   <div className="flex items-center gap-3 py-2 text-muted-foreground">
                     <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/20">
-                      <Check size={14} className="text-primary" />
+                      <span className="text-xs">{item.emoji}</span>
                     </div>
                     <span className="text-sm line-through">{t(item.labelKey)}</span>
+                    <Check size={14} className="text-primary ml-auto" />
                   </div>
                 ) : item.action === "share" ? (
                   <button
@@ -132,7 +145,7 @@ export function OnboardingChecklist({
                     className="flex w-full items-center gap-3 py-2 group"
                   >
                     <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-dashed border-primary/50 group-hover:border-primary transition-colors">
-                      <Share2 size={12} className="text-primary/50 group-hover:text-primary" />
+                      <span className="text-xs">{item.emoji}</span>
                     </div>
                     <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors flex-1 text-left">
                       {t(item.labelKey)}
@@ -144,7 +157,9 @@ export function OnboardingChecklist({
                     href={item.href}
                     className="flex items-center gap-3 py-2 group"
                   >
-                    <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-dashed border-primary/50 group-hover:border-primary transition-colors" />
+                    <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-dashed border-primary/50 group-hover:border-primary transition-colors">
+                      <span className="text-xs">{item.emoji}</span>
+                    </div>
                     <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors flex-1">
                       {t(item.labelKey)}
                     </span>
@@ -152,7 +167,9 @@ export function OnboardingChecklist({
                   </Link>
                 ) : (
                   <div className="flex items-center gap-3 py-2 text-muted-foreground">
-                    <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-dashed border-muted-foreground/30" />
+                    <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-dashed border-muted-foreground/30">
+                      <span className="text-xs">{item.emoji}</span>
+                    </div>
                     <span className="text-sm">{t(item.labelKey)}</span>
                   </div>
                 )}
@@ -205,7 +222,7 @@ export function OnboardingChecklist({
                 <button
                   onClick={() => {
                     setShowDismissConfirm(false);
-                    onDismiss();
+                    handleDismiss();
                   }}
                   className="flex-1 rounded-xl bg-primary px-4 py-3 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90"
                 >
