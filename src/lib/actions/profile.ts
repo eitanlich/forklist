@@ -5,7 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath, unstable_noStore as noStore } from "next/cache";
 
 // Username validation
-const USERNAME_REGEX = /^[a-z0-9_]{3,20}$/;
+const USERNAME_REGEX = /^[a-z0-9._]{3,20}$/;
 
 export async function checkUsernameAvailable(
   username: string
