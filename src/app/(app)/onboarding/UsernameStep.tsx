@@ -28,16 +28,10 @@ export function UsernameStep({ onComplete, initialUsername }: UsernameStepProps)
   const t = useT();
   const [username, setUsername] = useState(initialUsername || "");
   const [isChecking, setIsChecking] = useState(false);
-  const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
+  // If we have an initialUsername from the server, it's the user's own - mark as available
+  const [isAvailable, setIsAvailable] = useState<boolean | null>(initialUsername ? true : null);
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-
-  // Check initial username availability
-  useEffect(() => {
-    if (initialUsername && initialUsername.length >= 3) {
-      handleUsernameChange(initialUsername);
-    }
-  }, []);
 
   const handleUsernameChange = async (value: string) => {
     const normalized = value.toLowerCase().replace(/[^a-z0-9._]/g, "");
