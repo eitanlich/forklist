@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Check, ChevronRight, X } from "lucide-react";
+import { Check, ChevronRight, X, Share2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useT } from "@/lib/i18n";
 import { ShareModal } from "@/components/share";
@@ -21,7 +21,8 @@ interface ChecklistItem {
   completed: boolean;
   href?: string;
   action?: "share";
-  emoji: string;
+  emoji?: string;
+  icon?: React.ReactNode;
   disabled?: boolean;
 }
 
@@ -69,7 +70,7 @@ export function OnboardingChecklist({
       completed: hasShared,
       action: hasReviews ? "share" : undefined,
       disabled: !hasReviews,
-      emoji: "🔗",
+      icon: <Share2 size={12} />,
     },
   ];
 
@@ -121,7 +122,7 @@ export function OnboardingChecklist({
                 {item.completed ? (
                   <div className="flex items-center gap-3 py-2 text-muted-foreground">
                     <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/20">
-                      <span className="text-xs">{item.emoji}</span>
+                      {item.icon || <span className="text-xs">{item.emoji}</span>}
                     </div>
                     <span className="text-sm line-through">{t(item.labelKey)}</span>
                     <Check size={14} className="text-primary ml-auto" />
@@ -129,7 +130,7 @@ export function OnboardingChecklist({
                 ) : item.disabled ? (
                   <div className="flex items-center gap-3 py-2 text-muted-foreground/50 cursor-not-allowed">
                     <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-dashed border-muted-foreground/20">
-                      <span className="text-xs opacity-50">{item.emoji}</span>
+                      {item.icon || <span className="text-xs opacity-50">{item.emoji}</span>}
                     </div>
                     <span className="text-sm">{t(item.labelKey)}</span>
                   </div>
@@ -139,7 +140,7 @@ export function OnboardingChecklist({
                     className="flex w-full items-center gap-3 py-2 group"
                   >
                     <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-dashed border-primary/50 group-hover:border-primary transition-colors">
-                      <span className="text-xs">{item.emoji}</span>
+                      {item.icon || <span className="text-xs">{item.emoji}</span>}
                     </div>
                     <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors flex-1 text-left">
                       {t(item.labelKey)}
@@ -152,7 +153,7 @@ export function OnboardingChecklist({
                     className="flex items-center gap-3 py-2 group"
                   >
                     <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-dashed border-primary/50 group-hover:border-primary transition-colors">
-                      <span className="text-xs">{item.emoji}</span>
+                      {item.icon || <span className="text-xs">{item.emoji}</span>}
                     </div>
                     <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors flex-1">
                       {t(item.labelKey)}
@@ -162,7 +163,7 @@ export function OnboardingChecklist({
                 ) : (
                   <div className="flex items-center gap-3 py-2 text-muted-foreground">
                     <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-dashed border-muted-foreground/30">
-                      <span className="text-xs">{item.emoji}</span>
+                      {item.icon || <span className="text-xs">{item.emoji}</span>}
                     </div>
                     <span className="text-sm">{t(item.labelKey)}</span>
                   </div>
