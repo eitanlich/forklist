@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Loader2, Check, X, AlertCircle } from "lucide-react";
 import { useT } from "@/lib/i18n";
@@ -170,7 +170,7 @@ export function UsernameStep({ onComplete, initialUsername }: UsernameStepProps)
                     <Loader2 className="h-5 w-5 text-muted-foreground" />
                   </motion.div>
                 )}
-                {!isChecking && isAvailable === true && (
+                {!isChecking && isAvailable === true && !error && (
                   <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
@@ -179,7 +179,7 @@ export function UsernameStep({ onComplete, initialUsername }: UsernameStepProps)
                     <Check className="h-5 w-5 text-green-500" />
                   </motion.div>
                 )}
-                {!isChecking && error && (
+                {!isChecking && error && isAvailable === false && (
                   <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
