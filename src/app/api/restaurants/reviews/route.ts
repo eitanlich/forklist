@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ reviews: [], avgRating: null });
   }
 
-  // Get reviews
+  // Get reviews with user privacy info
   const { data: reviews } = await supabase
     .from("reviews")
     .select(`
@@ -31,10 +31,12 @@ export async function GET(req: NextRequest) {
       rating_overall,
       comment,
       visited_at,
+      user_id,
       user:users!reviews_user_id_fkey (
         id,
         username,
-        avatar_url
+        avatar_url,
+        is_private
       )
     `)
     .eq("restaurant_id", restaurant.id)
@@ -44,8 +46,35 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ reviews: [], avgRating: null });
   }
 
+  // Get approved follows for current user (to see private users' reviews)
+  let approvedFollowingIds = new Set<string>();
+  if (currentUserId) {
+    const { data: follows } = await supabase
+      .from("follows")
+      .select("following_id")
+      .eq("follower_id", currentUserId)
+      .eq("status", "active");
+    
+    if (follows) {
+      approvedFollowingIds = new Set(follows.map(f => f.following_id));
+    }
+  }
+
+  // Filter out private users' reviews unless viewer is owner or approved follower
+  const visibleReviews = reviews.filter((r) => {
+    const user = Array.isArray(r.user) ? r.user[0] : r.user;
+    if (!user?.is_private) return true; // Public user, always visible
+    if (currentUserId === r.user_id) return true; // Own review
+    if (approvedFollowingIds.has(r.user_id)) return true; // Approved follower
+    return false; // Private user, not authorized
+  });
+
+  if (visibleReviews.length === 0) {
+    return NextResponse.json({ reviews: [], avgRating: null });
+  }
+
   // Get like counts
-  const reviewIds = reviews.map((r) => r.id);
+  const reviewIds = visibleReviews.map((r) => r.id);
   const { data: likes } = await supabase
     .from("likes")
     .select("review_id")
@@ -72,8 +101,8 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  // Format reviews
-  const formattedReviews = reviews.map((r) => ({
+  // Format reviews (only visible ones)
+  const formattedReviews = visibleReviews.map((r) => ({
     id: r.id,
     rating_overall: r.rating_overall,
     comment: r.comment,
