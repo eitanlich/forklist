@@ -101,10 +101,10 @@ function ActionButton({
     <Component
       href={href}
       {...extraProps}
-      className="flex flex-col items-center gap-1.5 rounded-xl bg-secondary p-3 transition-colors hover:bg-secondary/80"
+      className="flex flex-col items-center justify-center gap-1.5 rounded-xl bg-secondary p-3 min-h-[72px] transition-colors hover:bg-secondary/80"
     >
       <Icon size={20} className="text-primary" />
-      <span className="text-xs text-muted-foreground">{label}</span>
+      <span className="text-xs text-muted-foreground text-center line-clamp-1">{label}</span>
     </Component>
   );
 }
@@ -260,7 +260,7 @@ export default function RestaurantPageContent({ googlePlaceId, googleData }: Pro
     googleData.google_maps_url && { href: googleData.google_maps_url, icon: MapPin, label: t("maps"), external: true },
     googleData.website && !googleData.website.includes("instagram.com") && { href: googleData.website, icon: Globe, label: t("website"), external: true },
     googleData.phone && { href: `tel:${googleData.phone}`, icon: Phone, label: t("call"), external: false },
-    { href: `/add?placeId=${googlePlaceId}`, icon: Plus, label: t("logAVisit"), external: false },
+    { href: `/add?placeId=${googlePlaceId}`, icon: Plus, label: t("review"), external: false },
   ].filter(Boolean) as { href: string; icon: any; label: string; external: boolean }[];
 
   return (
