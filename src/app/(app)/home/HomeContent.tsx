@@ -114,6 +114,7 @@ export default function HomeContent({ firstName, followingCount, checklistData, 
             { emoji: "🍔", label: "Burgers", type: "burger" },
             { emoji: "🥗", label: "Healthy", type: "salad" },
             { emoji: "🍝", label: "Pasta", type: "italian" },
+            { emoji: "🥩", label: "Parrilla", type: "steakhouse" },
           ].map((cat) => (
             <Link
               key={cat.type}

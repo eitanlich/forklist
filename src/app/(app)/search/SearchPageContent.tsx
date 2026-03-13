@@ -36,6 +36,7 @@ const TYPE_LABELS: Record<string, string> = {
   burger: "Burgers",
   salad: "Healthy & Salads",
   italian: "Italian & Pasta",
+  steakhouse: "Parrilla & Steakhouse",
 };
 
 function getTypeLabel(type: string): string {
