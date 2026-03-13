@@ -101,10 +101,10 @@ function ActionButton({
     <Component
       href={href}
       {...extraProps}
-      className="flex flex-col items-center justify-center gap-1.5 rounded-xl bg-secondary p-3 min-h-[72px] transition-colors hover:bg-secondary/80"
+      className="flex flex-col items-center justify-center gap-1.5 rounded-xl bg-secondary p-2 h-[72px] w-full transition-colors hover:bg-secondary/80"
     >
       <Icon size={20} className="text-primary" />
-      <span className="text-xs text-muted-foreground text-center line-clamp-1">{label}</span>
+      <span className="text-[11px] text-muted-foreground text-center truncate w-full px-1">{label}</span>
     </Component>
   );
 }

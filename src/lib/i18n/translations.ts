@@ -333,7 +333,7 @@ export const translations = {
     noReviewsYetRestaurant: "No reviews yet. Be the first to share your experience!",
     beFirstToReview: "Be the first to review",
     viewFullReview: "View full review",
-    review: "review",
+    review: "Review",
   },
   
   es: {
@@ -670,7 +670,7 @@ export const translations = {
     noReviewsYetRestaurant: "No hay reviews todavía. ¡Sé el primero en compartir tu experiencia!",
     beFirstToReview: "Sé el primero en hacer una review",
     viewFullReview: "Ver review completa",
-    review: "review",
+    review: "Review",
   },
 } as const;
 
