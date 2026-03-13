@@ -59,8 +59,11 @@ export function ReviewContent({
     setLikeCount(likedBy.total); // Keep count in sync
   };
 
-  // Check ownership on client side
-  const isOwner = user?.id === review.user_id;
+  // Check if review is anonymized (private user, not authorized)
+  const isAnonymized = review._isAnonymized === true;
+  
+  // Check ownership on client side (can't be owner if anonymized)
+  const isOwner = !isAnonymized && user?.id === review.user_id;
 
   const restaurant = review.restaurant as any;
   const reviewUser = review.user as any;
@@ -216,7 +219,8 @@ export function ReviewContent({
             </div>
           )}
 
-          {/* Likes Section */}
+          {/* Likes Section - hidden for anonymized reviews */}
+          {!isAnonymized && (
           <div className="mt-6 border-t border-border pt-6">
             <div className="flex items-center gap-4">
               {/* Like Button - inline to handle refresh */}
@@ -323,6 +327,7 @@ export function ReviewContent({
               })()}
             </div>
           </div>
+          )}
 
           {/* Restaurant Links */}
           {(restaurant.google_maps_url || restaurant.website) && (
@@ -352,33 +357,49 @@ export function ReviewContent({
             </div>
           )}
 
-          {/* Reviewer - only show if not owner */}
-          {reviewUser?.username && !isOwner && (
+          {/* Reviewer - show anonymous message for private users, link for public */}
+          {!isOwner && (
             <div className="mt-6 border-t border-border pt-6">
-              <Link
-                href={`/u/${reviewUser.username}`}
-                className="flex items-center gap-3 group"
-              >
-                {reviewUser.avatar_url ? (
-                  <img
-                    src={reviewUser.avatar_url}
-                    alt={reviewUser.username}
-                    className="h-10 w-10 rounded-full object-cover"
-                  />
-                ) : (
+              {isAnonymized ? (
+                <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary">
                     <User size={18} className="text-muted-foreground" />
                   </div>
-                )}
-                <div>
-                  <p className="text-sm text-muted-foreground">
-                    {locale === "es" ? "Review de" : "Reviewed by"}
-                  </p>
-                  <p className="font-medium text-foreground group-hover:text-primary transition-colors">
-                    @{reviewUser.username}
-                  </p>
+                  <div>
+                    <p className="text-sm text-muted-foreground">
+                      {locale === "es" ? "Review de" : "Reviewed by"}
+                    </p>
+                    <p className="font-medium text-muted-foreground">
+                      {locale === "es" ? "Usuario privado" : "Private user"}
+                    </p>
+                  </div>
                 </div>
-              </Link>
+              ) : reviewUser?.username && (
+                <Link
+                  href={`/u/${reviewUser.username}`}
+                  className="flex items-center gap-3 group"
+                >
+                  {reviewUser.avatar_url ? (
+                    <img
+                      src={reviewUser.avatar_url}
+                      alt={reviewUser.username}
+                      className="h-10 w-10 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary">
+                      <User size={18} className="text-muted-foreground" />
+                    </div>
+                  )}
+                  <div>
+                    <p className="text-sm text-muted-foreground">
+                      {locale === "es" ? "Review de" : "Reviewed by"}
+                    </p>
+                    <p className="font-medium text-foreground group-hover:text-primary transition-colors">
+                      @{reviewUser.username}
+                    </p>
+                  </div>
+                </Link>
+              )}
             </div>
           )}
 

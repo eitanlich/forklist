@@ -246,8 +246,30 @@ export async function getPublicReview(reviewId: string) {
       }
     }
     
-    // Not authorized to view
-    return null;
+    // Return anonymized review for private users
+    // SECURITY: Strip all PII - only show ratings and restaurant
+    return {
+      id: review.id,
+      user_id: null, // Hide real user_id
+      rating_overall: review.rating_overall,
+      rating_food: review.rating_food,
+      rating_service: review.rating_service,
+      rating_ambiance: review.rating_ambiance,
+      rating_price: review.rating_price,
+      comment: null, // Hide comment
+      occasion: null, // Hide occasion (could be identifying)
+      meal_type: null,
+      visited_at: review.visited_at,
+      created_at: review.created_at,
+      user: {
+        id: null,
+        username: null,
+        avatar_url: null,
+        is_private: true,
+      },
+      restaurant: review.restaurant,
+      _isAnonymized: true, // Flag for frontend
+    };
   }
 
   return review;
