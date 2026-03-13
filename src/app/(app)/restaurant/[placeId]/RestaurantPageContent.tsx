@@ -46,12 +46,13 @@ interface Review {
   comment: string | null;
   visited_at: string;
   user: {
-    id: string;
+    id: string | null;
     username: string | null;
     avatar_url: string | null;
   };
   like_count: number;
   liked_by_me: boolean;
+  _isAnonymized?: boolean;
 }
 
 interface Props {
@@ -134,26 +135,41 @@ function ReviewCard({ review, locale, t }: { review: Review; locale: string; t: 
     { month: "short", day: "numeric" }
   );
 
+  const isAnonymized = review._isAnonymized;
+  const privateUserText = locale === "es" ? "Usuario privado" : "Private user";
+
   return (
     <div className="rounded-xl border border-border bg-card p-4">
       <div className="flex items-start justify-between">
-        <Link href={`/u/${review.user.username}`} className="flex items-center gap-3">
-          {review.user.avatar_url ? (
-            <img
-              src={review.user.avatar_url}
-              alt={review.user.username || "User"}
-              className="h-10 w-10 rounded-full object-cover"
-            />
-          ) : (
+        {isAnonymized ? (
+          <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary text-sm font-medium text-muted-foreground">
-              {(review.user.username || "U")[0].toUpperCase()}
+              ?
             </div>
-          )}
-          <div>
-            <p className="font-medium">@{review.user.username}</p>
-            <p className="text-xs text-muted-foreground">{formattedDate}</p>
+            <div>
+              <p className="font-medium text-muted-foreground">{privateUserText}</p>
+              <p className="text-xs text-muted-foreground">{formattedDate}</p>
+            </div>
           </div>
-        </Link>
+        ) : (
+          <Link href={`/u/${review.user.username}`} className="flex items-center gap-3">
+            {review.user.avatar_url ? (
+              <img
+                src={review.user.avatar_url}
+                alt={review.user.username || "User"}
+                className="h-10 w-10 rounded-full object-cover"
+              />
+            ) : (
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary text-sm font-medium text-muted-foreground">
+                {(review.user.username || "U")[0].toUpperCase()}
+              </div>
+            )}
+            <div>
+              <p className="font-medium">@{review.user.username}</p>
+              <p className="text-xs text-muted-foreground">{formattedDate}</p>
+            </div>
+          </Link>
+        )}
         
         <div className="flex items-center gap-1">
           <Star size={16} className="text-primary" fill="currentColor" />
@@ -161,7 +177,7 @@ function ReviewCard({ review, locale, t }: { review: Review; locale: string; t: 
         </div>
       </div>
       
-      {review.comment && (
+      {review.comment && !isAnonymized && (
         <p className="mt-3 text-sm text-foreground/90 line-clamp-3">{review.comment}</p>
       )}
       
@@ -170,14 +186,16 @@ function ReviewCard({ review, locale, t }: { review: Review; locale: string; t: 
           {t("viewFullReview")}
         </Link>
         
-        <button
-          onClick={handleLike}
-          disabled={isLiking}
-          className="flex items-center gap-1.5 text-muted-foreground transition-colors hover:text-primary disabled:opacity-50"
-        >
-          <Heart size={16} className={liked ? "text-red-500" : ""} fill={liked ? "currentColor" : "none"} />
-          {likeCount > 0 && <span className="text-xs">{likeCount}</span>}
-        </button>
+        {!isAnonymized && (
+          <button
+            onClick={handleLike}
+            disabled={isLiking}
+            className="flex items-center gap-1.5 text-muted-foreground transition-colors hover:text-primary disabled:opacity-50"
+          >
+            <Heart size={16} className={liked ? "text-red-500" : ""} fill={liked ? "currentColor" : "none"} />
+            {likeCount > 0 && <span className="text-xs">{likeCount}</span>}
+          </button>
+        )}
       </div>
     </div>
   );

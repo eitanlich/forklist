@@ -60,21 +60,38 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  // Filter out private users' reviews unless viewer is owner or approved follower
-  const visibleReviews = reviews.filter((r) => {
+  // Process reviews - anonymize private users unless viewer is authorized
+  const processedReviews = reviews.map((r) => {
     const user = Array.isArray(r.user) ? r.user[0] : r.user;
-    if (!user?.is_private) return true; // Public user, always visible
-    if (currentUserId === r.user_id) return true; // Own review
-    if (approvedFollowingIds.has(r.user_id)) return true; // Approved follower
-    return false; // Private user, not authorized
+    const isPrivate = user?.is_private;
+    const isOwner = currentUserId === r.user_id;
+    const isApprovedFollower = approvedFollowingIds.has(r.user_id);
+    
+    // If public user, or owner, or approved follower - show full review
+    if (!isPrivate || isOwner || isApprovedFollower) {
+      return { ...r, _isAnonymized: false };
+    }
+    
+    // Private user, not authorized - anonymize
+    return {
+      ...r,
+      comment: null, // Hide comment
+      user: {
+        id: null,
+        username: null,
+        avatar_url: null,
+        is_private: true,
+      },
+      _isAnonymized: true,
+    };
   });
 
-  if (visibleReviews.length === 0) {
+  if (processedReviews.length === 0) {
     return NextResponse.json({ reviews: [], avgRating: null });
   }
 
   // Get like counts
-  const reviewIds = visibleReviews.map((r) => r.id);
+  const reviewIds = processedReviews.map((r) => r.id);
   const { data: likes } = await supabase
     .from("likes")
     .select("review_id")
@@ -101,15 +118,16 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  // Format reviews (only visible ones)
-  const formattedReviews = visibleReviews.map((r) => ({
+  // Format reviews
+  const formattedReviews = processedReviews.map((r) => ({
     id: r.id,
     rating_overall: r.rating_overall,
     comment: r.comment,
     visited_at: r.visited_at,
     user: Array.isArray(r.user) ? r.user[0] : r.user,
-    like_count: likeCounts[r.id] ?? 0,
-    liked_by_me: userLikes.has(r.id),
+    like_count: r._isAnonymized ? 0 : (likeCounts[r.id] ?? 0), // Hide likes for anonymous
+    liked_by_me: r._isAnonymized ? false : userLikes.has(r.id),
+    _isAnonymized: r._isAnonymized,
   }));
 
   // Calculate average rating
