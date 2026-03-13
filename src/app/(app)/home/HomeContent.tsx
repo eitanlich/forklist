@@ -102,9 +102,32 @@ export default function HomeContent({ firstName, followingCount, checklistData, 
             <Users size={18} />
           </Link>
         </div>
+
+        {/* Category Chips */}
+        <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
+          {[
+            { emoji: "🔥", label: "Trending", type: "trending" },
+            { emoji: "🍕", label: "Pizza", type: "pizza" },
+            { emoji: "🍣", label: "Sushi", type: "sushi" },
+            { emoji: "☕", label: "Café", type: "cafe" },
+            { emoji: "🌮", label: "Tacos", type: "mexican" },
+            { emoji: "🍔", label: "Burgers", type: "burger" },
+            { emoji: "🥗", label: "Healthy", type: "salad" },
+            { emoji: "🍝", label: "Pasta", type: "italian" },
+          ].map((cat) => (
+            <Link
+              key={cat.type}
+              href={`/search?type=${cat.type}`}
+              className="flex items-center gap-1.5 whitespace-nowrap rounded-full border border-border bg-secondary/50 px-3 py-1.5 text-sm transition-all hover:border-primary/30 hover:bg-secondary"
+            >
+              <span>{cat.emoji}</span>
+              <span className="text-muted-foreground">{cat.label}</span>
+            </Link>
+          ))}
+        </div>
       </div>
 
-{/* Onboarding Checklist - shows until dismissed */}
+      {/* Onboarding Checklist - shows until dismissed */}
       {showChecklistInHome && (
         <OnboardingChecklist
           hasReviews={checklistData.hasReviews}

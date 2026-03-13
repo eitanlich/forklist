@@ -27,13 +27,30 @@ interface UserResult {
 
 type Tab = "restaurants" | "people";
 
+const TYPE_LABELS: Record<string, string> = {
+  trending: "Trending restaurants",
+  pizza: "Pizza",
+  sushi: "Sushi",
+  cafe: "Coffee & Café",
+  mexican: "Mexican & Tacos",
+  burger: "Burgers",
+  salad: "Healthy & Salads",
+  italian: "Italian & Pasta",
+};
+
+function getTypeLabel(type: string): string {
+  return TYPE_LABELS[type] || "";
+}
+
 export default function SearchPageContent() {
   const t = useT();
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get("q") || "";
   const initialTab = (searchParams.get("tab") as Tab) || "restaurants";
+  const initialType = searchParams.get("type") || "";
   
-  const [query, setQuery] = useState(initialQuery);
+  const [query, setQuery] = useState(initialQuery || getTypeLabel(initialType));
+  const [selectedType, setSelectedType] = useState(initialType);
   const [activeTab, setActiveTab] = useState<Tab>(initialTab);
   const [location, setLocation] = useState<LocationState>({
     mode: "nearby",
@@ -44,6 +61,10 @@ export default function SearchPageContent() {
   const [restaurants, setRestaurants] = useState<RestaurantResult[]>([]);
   const [loadingRestaurants, setLoadingRestaurants] = useState(false);
   const [nextPageToken, setNextPageToken] = useState<string | null>(null);
+  
+  // Trending restaurants (from our DB)
+  const [trendingRestaurants, setTrendingRestaurants] = useState<any[]>([]);
+  const [loadingTrending, setLoadingTrending] = useState(false);
   
   // People search state
   const [people, setPeople] = useState<UserResult[]>([]);
@@ -113,6 +134,29 @@ export default function SearchPageContent() {
       setPeople([]);
     } finally {
       setLoadingPeople(false);
+    }
+  }
+
+  // Trigger search on type from URL
+  useEffect(() => {
+    if (initialType === "trending") {
+      loadTrendingRestaurants();
+    } else if (initialType && query) {
+      searchRestaurants(query);
+    }
+  }, []);
+
+  // Load trending from our DB
+  async function loadTrendingRestaurants() {
+    setLoadingTrending(true);
+    try {
+      const res = await fetch("/api/restaurants/trending");
+      const data = await res.json();
+      setTrendingRestaurants(data.restaurants ?? []);
+    } catch {
+      setTrendingRestaurants([]);
+    } finally {
+      setLoadingTrending(false);
     }
   }
 
@@ -207,9 +251,77 @@ export default function SearchPageContent() {
         <LocationFilter value={location} onChange={setLocation} />
       )}
 
+      {/* Type indicator */}
+      {selectedType && activeTab === "restaurants" && (
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-muted-foreground">
+            {selectedType === "trending" ? "🔥" : ""} {TYPE_LABELS[selectedType]}
+          </span>
+          <button
+            onClick={() => {
+              setSelectedType("");
+              setQuery("");
+              setRestaurants([]);
+            }}
+            className="text-xs text-muted-foreground hover:text-foreground"
+          >
+            ✕ Clear
+          </button>
+        </div>
+      )}
+
       {/* Results */}
       <div className="space-y-3">
-        {query.trim().length < 2 ? (
+        {/* Trending results (from our DB) */}
+        {selectedType === "trending" && activeTab === "restaurants" ? (
+          loadingTrending ? (
+            <div className="flex justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          ) : trendingRestaurants.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-border bg-card/30 p-8 text-center">
+              <p className="text-muted-foreground">No trending restaurants yet</p>
+              <p className="mt-1 text-sm text-muted-foreground">Be the first to review!</p>
+            </div>
+          ) : (
+            <>
+              {trendingRestaurants.map((result) => (
+                <Link
+                  key={result.id}
+                  href={`/restaurant/${result.placeId}`}
+                  className="flex gap-4 rounded-2xl border border-border bg-card p-4 transition-all hover:border-primary/30 hover:bg-card/80"
+                >
+                  {result.photoReference ? (
+                    <img
+                      src={`/api/places/photo?ref=${encodeURIComponent(result.photoReference)}`}
+                      alt={result.name}
+                      className="h-20 w-20 shrink-0 rounded-xl object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-xl bg-secondary">
+                      <MapPin className="h-6 w-6 text-muted-foreground" />
+                    </div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <h3 className="font-serif text-lg font-semibold tracking-tight">
+                      {result.name}
+                    </h3>
+                    {result.city && (
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {result.city}
+                      </p>
+                    )}
+                    <div className="mt-2 flex items-center gap-2">
+                      <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                        🔥 {result.reviewCount} {result.reviewCount === 1 ? "review" : "reviews"}
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </>
+          )
+        ) : query.trim().length < 2 && !selectedType ? (
           <p className="py-8 text-center text-sm text-muted-foreground">
             {activeTab === "restaurants" ? t("startTypingRestaurants") : t("startTypingPeople")}
           </p>
