@@ -38,6 +38,8 @@ interface GoogleData {
     weekday_text?: string[];
   } | null;
   instagram: string | null;
+  google_rating: number | null;
+  google_rating_count: number | null;
 }
 
 interface Review {
@@ -291,13 +293,28 @@ export default function RestaurantPageContent({ googlePlaceId, googleData }: Pro
           <h1 className="font-serif text-2xl font-bold">{googleData.name}</h1>
           
           <div className="mt-2 flex flex-wrap items-center gap-3 text-sm">
+            {/* ForkList rating (primary) */}
             {avgRating && (
-              <div className="flex items-center gap-1">
-                <Star size={16} className="text-primary" fill="currentColor" />
-                <span className="font-semibold">{avgRating.toFixed(1)}</span>
-                <span className="text-muted-foreground">
-                  ({reviews.length} {reviews.length === 1 ? t("review") : t("reviews")})
+              <div className="flex items-center gap-1.5 bg-primary/10 rounded-full px-2.5 py-1">
+                <span className="text-xs">🍴</span>
+                <Star size={14} className="text-primary" fill="currentColor" />
+                <span className="font-semibold text-primary">{avgRating.toFixed(1)}</span>
+                <span className="text-xs text-primary/70">
+                  ({reviews.length})
                 </span>
+              </div>
+            )}
+            
+            {/* Google rating (secondary) */}
+            {googleData.google_rating && (
+              <div className="flex items-center gap-1.5 text-muted-foreground">
+                <Star size={14} className="text-yellow-500" fill="currentColor" />
+                <span className="text-sm">{googleData.google_rating.toFixed(1)}</span>
+                {googleData.google_rating_count && (
+                  <span className="text-xs">
+                    ({googleData.google_rating_count})
+                  </span>
+                )}
               </div>
             )}
             

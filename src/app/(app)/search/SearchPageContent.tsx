@@ -61,6 +61,7 @@ export default function SearchPageContent() {
   const [restaurants, setRestaurants] = useState<RestaurantResult[]>([]);
   const [loadingRestaurants, setLoadingRestaurants] = useState(false);
   const [nextPageToken, setNextPageToken] = useState<string | null>(null);
+  const [forklistRatings, setForklistRatings] = useState<Record<string, { avg: number; count: number }>>({});
   
   // Trending restaurants (from our DB)
   const [trendingRestaurants, setTrendingRestaurants] = useState<any[]>([]);
@@ -104,16 +105,39 @@ export default function SearchPageContent() {
       const res = await fetch(`/api/places/text-search?${params.toString()}`);
       const data = await res.json();
       
+      const newResults = data.results ?? [];
+      
       if (pageToken) {
-        setRestaurants(prev => [...prev, ...(data.results ?? [])]);
+        setRestaurants(prev => [...prev, ...newResults]);
       } else {
-        setRestaurants(data.results ?? []);
+        setRestaurants(newResults);
       }
       setNextPageToken(data.nextPageToken ?? null);
+      
+      // Fetch ForkList ratings for these results
+      if (newResults.length > 0) {
+        const placeIds = newResults.map((r: RestaurantResult) => r.placeId);
+        fetchForklistRatings(placeIds);
+      }
     } catch {
       setRestaurants([]);
     } finally {
       setLoadingRestaurants(false);
+    }
+  }
+
+  // Fetch ForkList ratings for restaurants
+  async function fetchForklistRatings(placeIds: string[]) {
+    try {
+      const res = await fetch("/api/restaurants/ratings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ placeIds }),
+      });
+      const data = await res.json();
+      setForklistRatings(prev => ({ ...prev, ...data.ratings }));
+    } catch {
+      // Silently fail
     }
   }
 
@@ -361,19 +385,40 @@ export default function SearchPageContent() {
                       <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
                         {result.address}
                       </p>
-                      {result.rating && (
-                        <div className="mt-2 flex items-center gap-2">
-                          <div className="flex items-center gap-1">
-                            <Star size={14} className="text-primary" fill="currentColor" />
-                            <span className="text-sm font-medium">{result.rating.toFixed(1)}</span>
-                          </div>
-                          {result.ratingCount > 0 && (
-                            <span className="text-xs text-muted-foreground">
-                              ({result.ratingCount})
-                            </span>
-                          )}
-                        </div>
-                      )}
+                      {(() => {
+                        const flRating = forklistRatings[result.placeId];
+                        if (flRating) {
+                          // Show ForkList rating
+                          return (
+                            <div className="mt-2 flex items-center gap-2">
+                              <div className="flex items-center gap-1">
+                                <span className="text-xs">🍴</span>
+                                <Star size={14} className="text-primary" fill="currentColor" />
+                                <span className="text-sm font-medium">{flRating.avg.toFixed(1)}</span>
+                              </div>
+                              <span className="text-xs text-muted-foreground">
+                                ({flRating.count})
+                              </span>
+                            </div>
+                          );
+                        } else if (result.rating) {
+                          // Fallback to Google rating
+                          return (
+                            <div className="mt-2 flex items-center gap-2">
+                              <div className="flex items-center gap-1">
+                                <Star size={14} className="text-yellow-500" fill="currentColor" />
+                                <span className="text-sm font-medium">{result.rating.toFixed(1)}</span>
+                              </div>
+                              {result.ratingCount > 0 && (
+                                <span className="text-xs text-muted-foreground">
+                                  ({result.ratingCount})
+                                </span>
+                              )}
+                            </div>
+                          );
+                        }
+                        return null;
+                      })()}
                     </div>
                   </Link>
                 ))}

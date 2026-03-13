@@ -24,6 +24,8 @@ async function getRestaurantData(googlePlaceId: string) {
     "regularOpeningHours",
     "currentOpeningHours",
     "priceLevel",
+    "rating",
+    "userRatingCount",
   ].join(",");
 
   const res = await fetch(
@@ -92,6 +94,8 @@ async function getRestaurantData(googlePlaceId: string) {
     phone: data.internationalPhoneNumber ?? data.nationalPhoneNumber ?? null,
     price_level: priceLevelMap[data.priceLevel] ?? null,
     opening_hours: openingHours,
+    google_rating: data.rating ?? null,
+    google_rating_count: data.userRatingCount ?? null,
   };
 }
 
