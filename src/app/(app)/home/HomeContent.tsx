@@ -107,14 +107,13 @@ export default function HomeContent({ firstName, followingCount, checklistData, 
         <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
           {[
             { emoji: "🔥", label: "Trending", type: "trending" },
+            { emoji: "🍔", label: "Burgers", type: "burger" },
+            { emoji: "🥩", label: "Parrilla", type: "steakhouse" },
             { emoji: "🍕", label: "Pizza", type: "pizza" },
+            { emoji: "🍝", label: "Pasta", type: "italian" },
             { emoji: "🍣", label: "Sushi", type: "sushi" },
             { emoji: "☕", label: "Café", type: "cafe" },
-            { emoji: "🌮", label: "Tacos", type: "mexican" },
-            { emoji: "🍔", label: "Burgers", type: "burger" },
-            { emoji: "🥗", label: "Healthy", type: "salad" },
-            { emoji: "🍝", label: "Pasta", type: "italian" },
-            { emoji: "🥩", label: "Parrilla", type: "steakhouse" },
+            { emoji: "🥗", label: "Salad", type: "salad" },
           ].map((cat) => (
             <Link
               key={cat.type}
