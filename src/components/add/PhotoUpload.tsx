@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import { Camera, Pencil, X, Loader2 } from "lucide-react";
 import { useT } from "@/lib/i18n";
+import imageCompression from "browser-image-compression";
 
 interface PhotoUploadProps {
   value: File | null;
@@ -11,12 +12,22 @@ interface PhotoUploadProps {
   disabled?: boolean;
 }
 
+// Compression options - maintains high quality while reducing file size
+const COMPRESSION_OPTIONS = {
+  maxSizeMB: 1, // Target max 1MB after compression
+  maxWidthOrHeight: 1920, // Full HD - looks great on any screen
+  useWebWorker: true, // Don't block UI
+  fileType: "image/jpeg" as const,
+  initialQuality: 0.85, // 85% quality - visually indistinguishable
+};
+
 export function PhotoUpload({ value, preview, onChange, disabled }: PhotoUploadProps) {
   const t = useT();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isCompressing, setIsCompressing] = useState(false);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -26,19 +37,35 @@ export function PhotoUpload({ value, preview, onChange, disabled }: PhotoUploadP
       return;
     }
 
-    // Validate file size (max 5MB for review photos)
-    if (file.size > 5 * 1024 * 1024) {
-      setError(t("imageTooLargeReview") || "Image must be less than 5MB");
+    // Validate original file size (max 20MB before compression - generous limit)
+    if (file.size > 20 * 1024 * 1024) {
+      setError(t("imageTooLargeReview") || "Image must be less than 20MB");
       return;
     }
 
-    // Create preview
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      onChange(file, e.target?.result as string);
-    };
-    reader.readAsDataURL(file);
     setError(null);
+    setIsCompressing(true);
+
+    try {
+      // Compress the image
+      const compressedFile = await imageCompression(file, COMPRESSION_OPTIONS);
+      
+      // Create preview from compressed file
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        onChange(compressedFile, e.target?.result as string);
+        setIsCompressing(false);
+      };
+      reader.onerror = () => {
+        setError("Failed to process image");
+        setIsCompressing(false);
+      };
+      reader.readAsDataURL(compressedFile);
+    } catch (err) {
+      console.error("Compression error:", err);
+      setError("Failed to process image");
+      setIsCompressing(false);
+    }
   };
 
   const handleRemove = () => {
@@ -88,6 +115,14 @@ export function PhotoUpload({ value, preview, onChange, disabled }: PhotoUploadP
             <Pencil className="h-3 w-3" />
             {t("change") || "Change"}
           </button>
+        </div>
+      ) : isCompressing ? (
+        // Compressing state
+        <div className="flex w-full flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-primary/50 bg-secondary/50 py-8">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">
+            {t("optimizingPhoto") || "Optimizing photo..."}
+          </p>
         </div>
       ) : (
         // Upload button
