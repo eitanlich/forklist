@@ -4,11 +4,12 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Loader2, Star } from "lucide-react";
 import type { PlaceSuggestion, Occasion, MealType } from "@/types";
-import { createReview } from "@/lib/actions/reviews";
+import { createReview, uploadReviewPhoto } from "@/lib/actions/reviews";
 import type { ReviewInput } from "@/lib/validations/review";
 import { DatePicker } from "@/components/ui/date-picker";
 import { format } from "date-fns";
 import { useT } from "@/lib/i18n";
+import { PhotoUpload } from "./PhotoUpload";
 
 // Star rating — 1-5, with hover preview
 function StarRating({
@@ -112,6 +113,8 @@ export default function ReviewForm({ restaurant, onBack }: ReviewFormProps) {
   const [mealType, setMealType] = useState<MealType | undefined>(undefined);
   const [comment, setComment] = useState("");
   const [visitedAt, setVisitedAt] = useState<Date | undefined>(new Date());
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
 
   const allRated = Object.values(ratings).every((r) => r > 0);
 
@@ -123,34 +126,48 @@ export default function ReviewForm({ restaurant, onBack }: ReviewFormProps) {
     if (!allRated) return;
     setError(null);
 
-    const data: ReviewInput = {
-      google_place_id: restaurant.place_id,
-      restaurant_name: restaurant.name,
-      restaurant_address: restaurant.formatted_address,
-      restaurant_city: restaurant.city,
-      restaurant_lat: restaurant.lat,
-      restaurant_lng: restaurant.lng,
-      restaurant_photo_reference: restaurant.photo_reference,
-      restaurant_cuisine_type: restaurant.cuisine_type,
-      restaurant_website: restaurant.website,
-      restaurant_google_maps_url: restaurant.google_maps_url,
-      // New fields
-      restaurant_instagram: restaurant.instagram,
-      restaurant_phone: restaurant.phone,
-      restaurant_price_level: restaurant.price_level,
-      restaurant_opening_hours: restaurant.opening_hours,
-      rating_overall: ratings.overall,
-      rating_food: ratings.food,
-      rating_service: ratings.service,
-      rating_ambiance: ratings.ambiance,
-      rating_price: ratings.price,
-      comment: comment.trim() || undefined,
-      occasion,
-      meal_type: mealType,
-      visited_at: visitedAt ? format(visitedAt, "yyyy-MM-dd") : "",
-    };
-
     startTransition(async () => {
+      // Upload photo first if present
+      let photoUrl: string | undefined;
+      if (photoFile) {
+        const formData = new FormData();
+        formData.append("photo", photoFile);
+        const uploadResult = await uploadReviewPhoto(formData);
+        if (uploadResult.error) {
+          setError(uploadResult.error);
+          return;
+        }
+        photoUrl = uploadResult.url;
+      }
+
+      const data: ReviewInput = {
+        google_place_id: restaurant.place_id,
+        restaurant_name: restaurant.name,
+        restaurant_address: restaurant.formatted_address,
+        restaurant_city: restaurant.city,
+        restaurant_lat: restaurant.lat,
+        restaurant_lng: restaurant.lng,
+        restaurant_photo_reference: restaurant.photo_reference,
+        restaurant_cuisine_type: restaurant.cuisine_type,
+        restaurant_website: restaurant.website,
+        restaurant_google_maps_url: restaurant.google_maps_url,
+        // New fields
+        restaurant_instagram: restaurant.instagram,
+        restaurant_phone: restaurant.phone,
+        restaurant_price_level: restaurant.price_level,
+        restaurant_opening_hours: restaurant.opening_hours,
+        rating_overall: ratings.overall,
+        rating_food: ratings.food,
+        rating_service: ratings.service,
+        rating_ambiance: ratings.ambiance,
+        rating_price: ratings.price,
+        comment: comment.trim() || undefined,
+        occasion,
+        meal_type: mealType,
+        visited_at: visitedAt ? format(visitedAt, "yyyy-MM-dd") : "",
+        photo_url: photoUrl,
+      };
+
       const result = await createReview(data);
       if ("error" in result) {
         setError(result.error);
@@ -275,6 +292,17 @@ export default function ReviewForm({ restaurant, onBack }: ReviewFormProps) {
           ))}
         </div>
       </div>
+
+      {/* Photo Upload */}
+      <PhotoUpload
+        value={photoFile}
+        preview={photoPreview}
+        onChange={(file, preview) => {
+          setPhotoFile(file);
+          setPhotoPreview(preview);
+        }}
+        disabled={isPending}
+      />
 
       {/* Comment */}
       <div className="space-y-2">

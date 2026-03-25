@@ -36,6 +36,8 @@ export const reviewSchema = z.object({
     .enum(["breakfast", "brunch", "lunch", "snack", "dinner", "drinks"])
     .optional(),
   visited_at: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  // Photo URL (uploaded separately, then URL passed here)
+  photo_url: z.string().url().nullish(),
 });
 
 export type ReviewInput = z.infer<typeof reviewSchema>;
@@ -55,6 +57,8 @@ export const updateReviewSchema = z.object({
     .enum(["breakfast", "brunch", "lunch", "snack", "dinner", "drinks"])
     .optional(),
   visited_at: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  // Photo URL (uploaded separately, then URL passed here)
+  photo_url: z.string().url().nullish(),
 });
 
 export type UpdateReviewInput = z.infer<typeof updateReviewSchema>;

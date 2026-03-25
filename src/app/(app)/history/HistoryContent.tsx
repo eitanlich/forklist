@@ -60,8 +60,20 @@ function ReviewCard({ review, onShare }: { review: ReviewWithRestaurant; onShare
 
   return (
     <article className="group overflow-hidden rounded-2xl border border-border bg-card transition-all duration-300 hover:border-primary/20 hover:bg-card/80">
+      {/* User's photo - full width at top if present */}
+      {review.photo_url && (
+        <div className="relative aspect-video w-full overflow-hidden">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={review.photo_url}
+            alt={`Photo of ${restaurant.name}`}
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+          />
+        </div>
+      )}
+      
       <div className="flex gap-5 p-5">
-        {restaurant.photo_reference && (
+        {!review.photo_url && restaurant.photo_reference && (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={`/api/places/photo?ref=${encodeURIComponent(restaurant.photo_reference)}`}

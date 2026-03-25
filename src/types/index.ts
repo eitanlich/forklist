@@ -49,6 +49,7 @@ export interface Review {
   visited_at: string;
   created_at: string;
   updated_at: string;
+  photo_url: string | null;
 }
 
 export interface ReviewWithRestaurant extends Review {

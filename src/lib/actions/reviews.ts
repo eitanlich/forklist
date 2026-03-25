@@ -5,6 +5,88 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { reviewSchema, updateReviewSchema, type ReviewInput, type UpdateReviewInput } from "@/lib/validations/review";
 import { getCurrentUserId } from "./user";
 
+export async function uploadReviewPhoto(
+  formData: FormData
+): Promise<{ error?: string; url?: string }> {
+  const { userId: clerkId } = await auth();
+  if (!clerkId) return { error: "Not authenticated" };
+
+  const file = formData.get("photo") as File | null;
+  if (!file) return { error: "No file provided" };
+
+  // Validate file type
+  if (!file.type.startsWith("image/")) {
+    return { error: "File must be an image" };
+  }
+
+  // Validate file size (max 5MB)
+  if (file.size > 5 * 1024 * 1024) {
+    return { error: "Image must be less than 5MB" };
+  }
+
+  const supabase = createAdminClient();
+
+  // Get user
+  const { data: user } = await supabase
+    .from("users")
+    .select("id")
+    .eq("clerk_id", clerkId)
+    .single();
+
+  if (!user) return { error: "User not found" };
+
+  // Generate unique filename
+  const ext = file.name.split(".").pop() ?? "jpg";
+  const fileName = `${user.id}-${Date.now()}.${ext}`;
+
+  // Upload to Supabase Storage
+  const arrayBuffer = await file.arrayBuffer();
+  const { error: uploadError } = await supabase.storage
+    .from("review-photos")
+    .upload(fileName, arrayBuffer, {
+      contentType: file.type,
+      upsert: false,
+    });
+
+  if (uploadError) {
+    console.error("Upload error:", uploadError);
+    return { error: "Failed to upload image" };
+  }
+
+  // Get public URL
+  const { data: urlData } = supabase.storage
+    .from("review-photos")
+    .getPublicUrl(fileName);
+
+  return { url: urlData.publicUrl };
+}
+
+export async function removeReviewPhoto(
+  photoUrl: string
+): Promise<{ error?: string; success?: boolean }> {
+  const { userId: clerkId } = await auth();
+  if (!clerkId) return { error: "Not authenticated" };
+
+  if (!photoUrl) return { success: true };
+
+  const supabase = createAdminClient();
+
+  // Extract filename from URL
+  const filePath = photoUrl.split("/review-photos/")[1];
+  if (filePath) {
+    const { error } = await supabase.storage
+      .from("review-photos")
+      .remove([filePath]);
+    
+    if (error) {
+      console.error("Remove error:", error);
+      // Don't fail if file doesn't exist
+    }
+  }
+
+  return { success: true };
+}
+
 export async function createReview(
   data: ReviewInput
 ): Promise<{ error: string } | { success: true }> {
@@ -80,6 +162,7 @@ export async function createReview(
     occasion: parsed.data.occasion ?? null,
     meal_type: parsed.data.meal_type ?? null,
     visited_at: parsed.data.visited_at,
+    photo_url: parsed.data.photo_url ?? null,
   });
 
   if (reviewError) return { error: "Failed to save review" };
@@ -134,6 +217,7 @@ export async function updateReview(
       occasion: parsed.data.occasion ?? null,
       meal_type: parsed.data.meal_type ?? null,
       visited_at: parsed.data.visited_at,
+      photo_url: parsed.data.photo_url ?? null,
       updated_at: new Date().toISOString(),
     })
     .eq("id", reviewId);

@@ -4,10 +4,11 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Loader2, Star, MapPin } from "lucide-react";
 import type { ReviewWithRestaurant, Occasion, MealType } from "@/types";
-import { updateReview } from "@/lib/actions/reviews";
+import { updateReview, uploadReviewPhoto, removeReviewPhoto } from "@/lib/actions/reviews";
 import { DatePicker } from "@/components/ui/date-picker";
 import { format } from "date-fns";
 import { useT } from "@/lib/i18n";
+import { PhotoUpload } from "@/components/add/PhotoUpload";
 
 function StarRating({
   label,
@@ -98,6 +99,12 @@ export default function EditReviewForm({ review }: { review: ReviewWithRestauran
   const [visitedAt, setVisitedAt] = useState<Date | undefined>(
     review.visited_at ? new Date(review.visited_at + 'T00:00:00') : undefined
   );
+  
+  // Photo state
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(review.photo_url ?? null);
+  const [existingPhotoUrl, setExistingPhotoUrl] = useState<string | null>(review.photo_url ?? null);
+  const [pendingRemovePhoto, setPendingRemovePhoto] = useState(false);
 
   const allRated = Object.values(ratings).every((r) => r > 0);
 
@@ -114,10 +121,34 @@ export default function EditReviewForm({ review }: { review: ReviewWithRestauran
     setError(null);
 
     const formattedDate = format(visitedAt, "yyyy-MM-dd");
-    console.log("Submitting with date:", formattedDate);
 
     startTransition(async () => {
       try {
+        // Handle photo changes
+        let photoUrl: string | null | undefined = existingPhotoUrl;
+        
+        // If removing photo
+        if (pendingRemovePhoto && existingPhotoUrl) {
+          await removeReviewPhoto(existingPhotoUrl);
+          photoUrl = null;
+        }
+        // If adding/changing photo
+        else if (photoFile) {
+          // Remove old photo first if exists
+          if (existingPhotoUrl) {
+            await removeReviewPhoto(existingPhotoUrl);
+          }
+          // Upload new photo
+          const formData = new FormData();
+          formData.append("photo", photoFile);
+          const uploadResult = await uploadReviewPhoto(formData);
+          if (uploadResult.error) {
+            setError(uploadResult.error);
+            return;
+          }
+          photoUrl = uploadResult.url ?? null;
+        }
+
         const result = await updateReview(review.id, {
           rating_overall: ratings.overall,
           rating_food: ratings.food,
@@ -128,6 +159,7 @@ export default function EditReviewForm({ review }: { review: ReviewWithRestauran
           occasion,
           meal_type: mealType,
           visited_at: formattedDate,
+          photo_url: photoUrl,
         });
 
         if ("error" in result) {
@@ -240,6 +272,43 @@ export default function EditReviewForm({ review }: { review: ReviewWithRestauran
           ))}
         </div>
       </div>
+
+      {/* Photo Upload */}
+      <PhotoUpload
+        value={photoFile}
+        preview={pendingRemovePhoto ? null : photoPreview}
+        onChange={(file, preview) => {
+          setPhotoFile(file);
+          setPhotoPreview(preview);
+          setPendingRemovePhoto(false);
+        }}
+        disabled={isPending}
+      />
+      {/* Button to remove existing photo */}
+      {existingPhotoUrl && !photoFile && !pendingRemovePhoto && (
+        <button
+          type="button"
+          onClick={() => {
+            setPendingRemovePhoto(true);
+            setPhotoPreview(null);
+          }}
+          className="text-sm text-destructive hover:underline"
+        >
+          {t("remove") || "Remove"} {t("photo")}
+        </button>
+      )}
+      {pendingRemovePhoto && (
+        <button
+          type="button"
+          onClick={() => {
+            setPendingRemovePhoto(false);
+            setPhotoPreview(existingPhotoUrl);
+          }}
+          className="text-sm text-primary hover:underline"
+        >
+          {t("cancel")} {t("remove") || "remove"}
+        </button>
+      )}
 
       {/* Comment */}
       <div className="space-y-2">
