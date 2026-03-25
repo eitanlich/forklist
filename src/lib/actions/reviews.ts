@@ -283,6 +283,7 @@ export async function getPublicReview(reviewId: string) {
       meal_type,
       visited_at,
       created_at,
+      photo_url,
       user:users (
         id,
         username,

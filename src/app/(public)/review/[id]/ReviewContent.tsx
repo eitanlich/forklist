@@ -141,8 +141,16 @@ export function ReviewContent({
 
       {/* Restaurant Card */}
       <article className="overflow-hidden rounded-2xl border border-border bg-card">
-        {/* Restaurant Image */}
-        {restaurant.photo_reference && (
+        {/* User's photo takes priority over restaurant photo */}
+        {review.photo_url ? (
+          <div className="aspect-video w-full overflow-hidden">
+            <img
+              src={review.photo_url}
+              alt={`Photo of ${restaurant.name}`}
+              className="h-full w-full object-cover"
+            />
+          </div>
+        ) : restaurant.photo_reference && (
           <div className="aspect-video w-full overflow-hidden">
             <img
               src={`/api/places/photo?ref=${encodeURIComponent(restaurant.photo_reference)}`}

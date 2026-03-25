@@ -164,9 +164,15 @@ export default function HomeContent({ firstName, followingCount, checklistData, 
                 key={review.id}
                 className="flex gap-4 rounded-xl border border-border bg-card p-4 transition-all hover:border-primary/20"
               >
-                {/* Photo */}
+                {/* Photo - user's photo takes priority over restaurant photo */}
                 <Link href={`/review/${review.id}`}>
-                  {review.restaurant.photo_reference ? (
+                  {review.photo_url ? (
+                    <img
+                      src={review.photo_url}
+                      alt={`Photo of ${review.restaurant.name}`}
+                      className="h-16 w-16 shrink-0 rounded-lg object-cover transition-opacity hover:opacity-80"
+                    />
+                  ) : review.restaurant.photo_reference ? (
                     <img
                       src={`/api/places/photo?ref=${encodeURIComponent(review.restaurant.photo_reference)}`}
                       alt={review.restaurant.name}

@@ -214,6 +214,7 @@ export interface FeedReview {
   comment: string | null;
   visited_at: string;
   created_at: string;
+  photo_url: string | null;
   user: {
     id: string;
     username: string | null;
@@ -265,6 +266,7 @@ export async function getFeedReviews(
       comment,
       visited_at,
       created_at,
+      photo_url,
       user:users!reviews_user_id_fkey(id, username),
       restaurant:restaurants!reviews_restaurant_id_fkey(id, google_place_id, name, city, photo_reference)
     `)
@@ -278,6 +280,7 @@ export async function getFeedReviews(
     comment: r.comment,
     visited_at: r.visited_at,
     created_at: r.created_at,
+    photo_url: r.photo_url,
     user: Array.isArray(r.user) ? r.user[0] : r.user,
     restaurant: Array.isArray(r.restaurant) ? r.restaurant[0] : r.restaurant,
   })) as FeedReview[];
