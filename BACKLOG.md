@@ -1,7 +1,8 @@
 # ForkList Backlog
 
-> Última actualización: 2026-03-10
-> Product Owner: Ori 🤖
+> Última actualización: 2026-04-28
+> Product Owner: Eitan 🍴
+> CTO/Dev: Ori 🤖
 
 ## Leyenda
 - 🔥 Valor alto
@@ -90,21 +91,45 @@
 
 ## Pendiente
 
-### 🔴 FASE 6: Retención & Onboarding (ACTUAL)
-*Sin esto, los usuarios nuevos no entienden el valor y se van*
+### ✅ FASE 6: Retención & Onboarding (COMPLETADO)
+*Implementado 2026-03-25*
+
+- [x] **Onboarding flow** - TourSlides → UsernameStep → FirstReviewStep
+- [x] **Fotos en reviews** - PhotoUpload component con compresión client-side
+- [x] **ShareModal básico** - Copy link, WhatsApp, native share
+
+---
+
+### 🔴 FASE 7: Pre-Launch (ACTUAL)
+*Bloqueantes para salir a producción*
 
 | Feature | Valor | Esfuerzo | Test | Benchmark | Estado |
 |---------|-------|----------|------|-----------|--------|
-| Onboarding flow | 🔥🔥🔥 | 3-4 hs | Media | Letterboxd, IG | |
-| Empty states mejorados | 🔥🔥 | 1-2 hs | Baja | Todos | |
-| Sugerencias "a quién seguir" | 🔥🔥🔥 | 2-3 hs | Media | Twitter, IG | |
+| Analytics (Amplitude) | 🔥🔥🔥 | 2-3 hs | Baja | Todos | NEXT |
+| Share card para IG Stories | 🔥🔥🔥 | 4-5 hs | Media | Strava, Spotify | |
 
-**Onboarding flow:**
-- Primera vez: wizard que explique qué es ForkList
-- Paso 1: "Logueá tu primer restaurante" (CTA a /add)
-- Paso 2: "Seguí gente" (usuarios activos/populares)
-- Paso 3: "Completá tu perfil" (username, bio, avatar)
-- Referencia: Letterboxd te muestra películas populares para empezar
+**Analytics (Amplitude):**
+- Sin data estás ciego - necesario antes de launch
+- Eventos clave: signup, first_review, follow, like, share
+- Referencia: cualquier app seria
+
+**Share card para IG Stories:**
+- User toca "compartir review"
+- Se genera imagen linda (foto del lugar + rating + avatar)
+- Abre share sheet nativo → IG stories, whatsapp, etc
+- Técnicamente: html2canvas o server-side con puppeteer/satori
+- Growth loop principal - viral por diseño
+- Referencia: Strava activity cards, Spotify Wrapped
+
+---
+
+### 🟡 FASE 8: Post-Launch Week 1
+*Primera semana después de launch*
+
+| Feature | Valor | Esfuerzo | Test | Benchmark |
+|---------|-------|----------|------|-----------|
+| Empty states mejorados | 🔥🔥 | 1-2 hs | Baja | Todos |
+| Sugerencias "a quién seguir" | 🔥🔥🔥 | 2-3 hs | Media | Twitter, IG |
 
 **Empty states mejorados:**
 - Feed vacío → "Seguí gente para ver sus reviews" + sugerencias
@@ -119,7 +144,7 @@
 
 ---
 
-### 🟡 FASE 7: Engagement & Interacción
+### 🟡 FASE 9: Engagement & Interacción
 *Aumenta tiempo en app y razones para volver*
 
 | Feature | Valor | Esfuerzo | Test | Benchmark |
@@ -145,7 +170,7 @@
 
 ---
 
-### 🟡 FASE 8: Discovery & Contenido
+### 🟡 FASE 10: Discovery & Contenido
 *Ayuda a encontrar contenido relevante*
 
 | Feature | Valor | Esfuerzo | Test | Benchmark |
@@ -171,7 +196,7 @@
 
 ---
 
-### 🟢 FASE 9: Notificaciones Externas
+### 🟢 FASE 11: Notificaciones Externas
 *Trae usuarios de vuelta cuando no están en la app*
 
 | Feature | Valor | Esfuerzo | Test | Benchmark |
@@ -191,19 +216,13 @@
 
 ---
 
-### 🟢 FASE 10: Contenido Rico
+### 🟢 FASE 12: Contenido Rico
 *Hace el producto más visual y atractivo*
 
 | Feature | Valor | Esfuerzo | Test | Benchmark |
 |---------|-------|----------|------|-----------|
-| Fotos en reviews | 🔥🔥🔥 | 5-6 hs | Alta | Instagram, Yelp |
 | Múltiples fotos | 🔥 | 2-3 hs | Media | Instagram |
 | Mapa de restaurantes | 🔥🔥 | 4-5 hs | Media | Yelp, Google Maps |
-
-**Fotos:**
-- Feature más pedido en apps de comida
-- Supabase Storage ya configurado (usado en avatars)
-- Complejidad: upload, compresión, moderación
 
 **Mapa:**
 - Ver todos tus restaurantes visitados en mapa
@@ -211,7 +230,7 @@
 
 ---
 
-### 🟢 FASE 11: Gamification & Stats
+### 🟢 FASE 13: Gamification & Stats
 *Engagement a largo plazo y compartibilidad*
 
 | Feature | Valor | Esfuerzo | Test | Benchmark |
@@ -232,7 +251,7 @@
 
 ---
 
-### 🟢 FASE 12: Monetización (FUTURO)
+### 🟢 FASE 14: Monetización (FUTURO)
 *Para cuando haya tracción real*
 
 | Feature | Valor | Esfuerzo | Test |
@@ -245,20 +264,22 @@
 
 ## Roadmap Sugerido
 
-**Próximas 2 semanas:**
-1. ✅ Auto-approve pending requests (DONE)
-2. ✅ Restaurant pages + Search UX (DONE)
-3. Onboarding flow
-4. Empty states mejorados
-5. Sugerencias "a quién seguir"
+**Pre-Launch (ahora):**
+1. ✅ Onboarding flow (DONE)
+2. ✅ Fotos en reviews (DONE)
+3. 📊 Analytics (Amplitude) ← NEXT
+4. 🎨 Share card para IG Stories
+
+**Post-Launch Week 1:**
+5. Empty states mejorados
+6. Sugerencias "a quién seguir"
 
 **Siguiente iteración:**
-6. Comentarios en reviews
-7. Filtros en historial
-8. Feed mejorado (rediseño)
+7. Comentarios en reviews
+8. Filtros en historial
+9. Feed mejorado (rediseño)
 
-**Q2 2026:**
-9. Fotos en reviews
+**Q3 2026:**
 10. Push notifications
 11. Trending/Popular
 
